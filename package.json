@@ -5,18 +5,17 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "npx vite --port 5173",
-    "build": "npx vite build",
-    "start": "NODE_ENV=production npx tsx server.ts"
+    "dev": "vite --port 5173",
+    "build": "vite build",
+    "start": "NODE_ENV=production tsx server.ts"
   },
   "dependencies": {
     "ws": "^8.16.0"
   },
   "devDependencies": {
-    "@types/node": "^20.11.0",
-    "@types/ws": "^8.5.10",
-    "tsx": "^4.7.0",
-    "typescript": "^5.3.3",
+    "vite": "^5.0.12"
+  },
+  "overrides": {
     "vite": "^5.0.12"
   }
 }

@@ -41,7 +41,7 @@ interface Msg {
 const rooms = new Map<string, Room>();
 
 // Static file path
-const STATIC_DIR = join(process.cwd(), 'client', 'dist');
+const STATIC_DIR = join(process.cwd(), 'dist');
 
 // Create HTTP server
 const server = createServer((req, res) => {
