@@ -15,6 +15,7 @@ export class UIManager {
   private onJoinRoom: (() => void) | null = null;
   private onMute: (() => void) | null = null;
   private onLeave: (() => void) | null = null;
+  private onRaiseHand: (() => void) | null = null;
 
   render(): void {
     this.showLanding();
@@ -25,6 +26,7 @@ export class UIManager {
   setOnJoinRoom(cb: () => void): void { this.onJoinRoom = cb; }
   setOnMute(cb: () => void): void { this.onMute = cb; }
   setOnLeave(cb: () => void): void { this.onLeave = cb; }
+  setOnRaiseHand(cb: () => void): void { this.onRaiseHand = cb; }
   setLocalUserId(id: string): void { this.localUserId = id; }
 
   // ==================== LANDING ====================
@@ -283,6 +285,7 @@ export class UIManager {
       this.isHandRaised = !this.isHandRaised;
       const btn = document.getElementById('hand-btn');
       btn?.classList.toggle('active', this.isHandRaised);
+      this.onRaiseHand?.();
     });
 
     document.getElementById('leave-btn')?.addEventListener('click', () => {

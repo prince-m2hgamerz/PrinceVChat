@@ -1,4 +1,4 @@
--- PrinceVChat Supabase Schema
+-- PrinceVChat Supabase Schema (Simplified)
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS rooms (
     settings JSONB DEFAULT '{}'::JSONB
 );
 
--- Room participants (who is in the room now)
+-- Room participants
 CREATE TABLE IF NOT EXISTS room_participants (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     room_id TEXT REFERENCES rooms(id) ON DELETE CASCADE,
@@ -37,78 +37,21 @@ CREATE TABLE IF NOT EXISTS room_participants (
     is_hand_raised BOOLEAN DEFAULT false
 );
 
--- Room invitations (for tracking invites)
-CREATE TABLE IF NOT EXISTS room_invitations (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    room_id TEXT REFERENCES rooms(id) ON DELETE CASCADE,
-    invited_by UUID REFERENCES users(id),
-    invite_code TEXT UNIQUE NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    expires_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() + INTERVAL '24 hours',
-    used_at TIMESTAMP WITH TIME ZONE
-);
-
--- Security: Add indexes
+-- Security indexes
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
-CREATE INDEX IF NOT EXISTS idx_room_participants_room_id ON room_participants(room_id);
-CREATE INDEX IF NOT EXISTS idx_room_participants_user_id ON room_participants(user_id);
+CREATE INDEX IF NOT EXISTS idx_room_participants_room ON room_participants(room_id);
 
--- Enable Row Level Security
+-- Enable RLS
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE rooms ENABLE ROW LEVEL SECURITY;
 ALTER TABLE room_participants ENABLE ROW LEVEL SECURITY;
-ALTER TABLE room_invitations ENABLE ROW LEVEL SECURITY;
 
--- Policy: Users can read all usernames (for displaying in chat)
-CREATE POLICY "Anyone can read usernames" ON users
-    FOR SELECT USING (true);
+-- Public read policies
+CREATE POLICY "Anyone can read users" ON users FOR SELECT USING (true);
+CREATE POLICY "Anyone can read rooms" ON rooms FOR SELECT USING (true);
 
--- Policy: Users can create their own profile
-CREATE POLICY "Users can insert own profile" ON users
-    FOR INSERT WITH CHECK (auth.uid() = id);
-
--- Policy: Users can update their own profile
-CREATE POLICY "Users can update own profile" ON users
-    FOR UPDATE USING (auth.uid() = id);
-
--- Policy: Anyone can read active rooms
-CREATE POLICY "Anyone can read rooms" ON rooms
-    FOR SELECT USING (is_active = true);
-
--- Policy: Authenticated users can create rooms
-CREATE POLICY "Auth users can create rooms" ON rooms
-    FOR INSERT WITH CHECK (auth.role() = 'authenticated');
-
--- Function: Update last_seen when user活跃
-CREATE OR REPLACE FUNCTION update_user_last_seen()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.last_seen := NOW();
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- Trigger: Auto-update last_seen
-DROP TRIGGER IF EXISTS user_last_seen_trigger ON users;
-CREATE TRIGGER user_last_seen_trigger
-    BEFORE UPDATE ON users
-    FOR EACH ROW
-    EXECUTE FUNCTION update_user_last_seen();
-
--- Function: Get room participant count
-CREATE OR REPLACE FUNCTION get_room_participant_count(room_id TEXT)
-RETURNS INTEGER AS $$
-    SELECT COUNT(*)::INTEGER FROM room_participants 
-    WHERE room_id = $1 AND left_at IS NULL;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- Function: Clean up old room participants (run periodically)
-CREATE OR REPLACE FUNCTION cleanup_stale_participants()
-RETURNS VOID AS $$
-BEGIN
-    UPDATE room_participants 
-    SET left_at = NOW() 
-    WHERE left_at IS NULL 
-    AND joined_at < NOW() - INTERVAL '1 hour';
-END;
-$$ LANGUAGE plpgsql;
+-- Insert policy for service role
+CREATE POLICY "Service can insert users" ON users FOR INSERT WITH CHECK (true);
+CREATE POLICY "Service can insert rooms" ON rooms FOR INSERT WITH CHECK (true);
+CREATE POLICY "Service can insert participants" ON room_participants FOR INSERT WITH CHECK (true);
+CREATE POLICY "Service can update participants" ON room_participants FOR UPDATE USING (true);
