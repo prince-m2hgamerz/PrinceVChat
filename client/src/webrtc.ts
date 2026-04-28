@@ -71,16 +71,19 @@ export class WebRTCManager {
     // New user joined - create connection as initiator
     this.socketManager.on('user-joined', async (msg: SocketMessage) => {
       if (msg.userId && msg.userId !== this.userId) {
+        console.log('[WebRTC] User joined:', msg.userId, msg.username);
         await this.createPeer(msg.userId, true);
       }
     });
 
-    // Existing users when we join
+    // Existing users when we join - payload is array of {id, username}
     this.socketManager.on('room-users', async (msg: SocketMessage) => {
-      const users = msg.payload as string[];
-      for (const peerId of users) {
-        if (peerId !== this.userId) {
-          await this.createPeer(peerId, false);
+      const users = msg.payload as { id: string; username: string }[];
+      console.log('[WebRTC] Got room users:', users);
+      for (const user of users) {
+        if (user.id !== this.userId) {
+          console.log('[WebRTC] Connecting to:', user.id, user.username);
+          await this.createPeer(user.id, false);
         }
       }
     });
@@ -90,6 +93,11 @@ export class WebRTCManager {
       if (msg.userId) {
         this.removePeer(msg.userId);
       }
+    });
+
+    // Raise hand notification
+    this.socketManager.on('raise-hand', (msg: SocketMessage) => {
+      console.log('[WebRTC] Raise hand:', msg.userId, msg.raised);
     });
 
     // Offer received

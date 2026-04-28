@@ -937,13 +937,10 @@ a:hover {
 
 /* ==================== FOOTER ==================== */
 .footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
   background: var(--bg-secondary);
   border-top: 1px solid var(--border-color);
   padding: var(--space-3) var(--space-6);
+  margin-top: auto;
 }
 
 .footer-inner {
@@ -954,11 +951,4 @@ a:hover {
   color: var(--text-tertiary);
   max-width: var(--max-width);
   margin: 0 auto;
-}
-
-/* Room page needs bottom padding for footer */
-.room {
-  min-height: 100vh;
-  padding-top: var(--header-height);
-  padding-bottom: 40px;
 }
