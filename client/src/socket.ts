@@ -86,6 +86,14 @@ export class SocketManager {
     this.socket.send(JSON.stringify(fullMessage));
   }
 
+  // Broadcast message to room
+  broadcast(message: Partial<SocketMessage>): void {
+    this.send({
+      ...message,
+      type: 'broadcast'
+    });
+  }
+
   on(type: string, handler: (message: SocketMessage) => void): void {
     if (!this.handlers.has(type)) {
       this.handlers.set(type, []);

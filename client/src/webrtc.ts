@@ -28,19 +28,26 @@ const AUDIO_CONSTRAINTS: MediaTrackConstraints = {
   sampleRate: 48000,
 };
 
+type PeerCallback = (peerId: string) => void;
+type SpeakingCallback = (peerId: string, speaking: boolean) => void;
+
 export class WebRTCManager {
   private peers = new Map<string, PeerConnection>();
   private localStream: MediaStream | null = null;
   private socketManager: SocketManager;
   private roomId: string;
+  private userId: string;
   private isMuted = false;
-  private onPeerConnected: ((peerId: string) => void) | null = null;
-  private onPeerDisconnected: ((peerId: string) => void) | null = null;
-  private onSpeaking: ((peerId: string, speaking: boolean) => void) | null = null;
+  
+  // Event callbacks
+  private onPeerConnectedCb: PeerCallback | null = null;
+  private onPeerDisconnectedCb: PeerCallback | null = null;
+  private onSpeakingCb: SpeakingCallback | null = null;
 
-  constructor(socketManager: SocketManager, roomId: string) {
+  constructor(socketManager: SocketManager, roomId: string, userId: string) {
     this.socketManager = socketManager;
     this.roomId = roomId;
+    this.userId = userId;
     this.setupSignaling();
   }
 
@@ -48,22 +55,22 @@ export class WebRTCManager {
     this.localStream = stream;
   }
 
-  setOnPeerConnected(callback: (peerId: string) => void): void {
-    this.onPeerConnected = callback;
+  onPeerConnected(cb: PeerCallback): void {
+    this.onPeerConnectedCb = cb;
   }
 
-  setOnPeerDisconnected(callback: (peerId: string) => void): void {
-    this.onPeerDisconnected = callback;
+  onPeerDisconnected(cb: PeerCallback): void {
+    this.onPeerDisconnectedCb = cb;
   }
 
-  setOnSpeaking(callback: (peerId: string, speaking: boolean) => void): void {
-    this.onSpeaking = callback;
+  onSpeaking(cb: SpeakingCallback): void {
+    this.onSpeakingCb = cb;
   }
 
   private setupSignaling(): void {
     // New user joined - create connection as initiator
     this.socketManager.on('user-joined', async (msg: SocketMessage) => {
-      if (msg.userId) {
+      if (msg.userId && msg.userId !== this.userId) {
         await this.createPeer(msg.userId, true);
       }
     });
@@ -72,7 +79,9 @@ export class WebRTCManager {
     this.socketManager.on('room-users', async (msg: SocketMessage) => {
       const users = msg.payload as string[];
       for (const peerId of users) {
-        await this.createPeer(peerId, false);
+        if (peerId !== this.userId) {
+          await this.createPeer(peerId, false);
+        }
       }
     });
 
@@ -85,7 +94,7 @@ export class WebRTCManager {
 
     // Offer received
     this.socketManager.on('offer', async (msg: SocketMessage) => {
-      if (!msg.userId) return;
+      if (!msg.userId || msg.userId === this.userId) return;
       
       const peer = await this.createPeer(msg.userId, false);
       if (!peer) return;
@@ -106,7 +115,7 @@ export class WebRTCManager {
 
     // Answer received
     this.socketManager.on('answer', async (msg: SocketMessage) => {
-      if (!msg.userId) return;
+      if (!msg.userId || msg.userId === this.userId) return;
       
       const peer = this.peers.get(msg.userId);
       if (!peer) return;
@@ -117,7 +126,7 @@ export class WebRTCManager {
 
     // ICE candidate received
     this.socketManager.on('ice-candidate', async (msg: SocketMessage) => {
-      if (!msg.userId) return;
+      if (!msg.userId || msg.userId === this.userId) return;
       
       const peer = this.peers.get(msg.userId);
       if (!peer) return;
@@ -166,13 +175,14 @@ export class WebRTCManager {
       } catch (e) {
         console.log('[WebRTC] Autoplay blocked, waiting for user interaction');
         // Store for later playback
-        peer.pendingAudio = audio;
+        const peer = this.peers.get(peerId);
+        if (peer) peer.pendingAudio = audio;
       }
 
       const peer = this.peers.get(peerId);
       if (peer) peer.audioElement = audio;
 
-      this.onPeerConnected?.(peerId);
+      this.onPeerConnectedCb?.(peerId);
     };
 
     // Send ICE candidates
@@ -232,7 +242,7 @@ export class WebRTCManager {
     peer.connection.close();
     peer.audioElement?.remove();
     this.peers.delete(peerId);
-    this.onPeerDisconnected?.(peerId);
+    this.onPeerDisconnectedCb?.(peerId);
   }
 
   mute(): void {
@@ -241,6 +251,15 @@ export class WebRTCManager {
         track.enabled = false;
       });
       this.isMuted = true;
+    }
+  }
+
+  unmute(): void {
+    if (this.localStream) {
+      this.localStream.getAudioTracks().forEach(track => {
+        track.enabled = true;
+      });
+      this.isMuted = false;
     }
   }
 
@@ -255,15 +274,6 @@ export class WebRTCManager {
           console.log('[WebRTC] Playing pending audio for:', peerId);
         } catch (e) {}
       }
-    }
-  }
-
-  unmute(): void {
-    if (this.localStream) {
-      this.localStream.getAudioTracks().forEach(track => {
-        track.enabled = true;
-      });
-      this.isMuted = false;
     }
   }
 

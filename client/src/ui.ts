@@ -1,691 +1,422 @@
 /**
- * PrinceVChat - Vercel-inspired Modern UI
- * Clean, minimal design with excellent UX
+ * PrinceVChat - UI Manager (Vercel Style)
  */
 
-// Export icons for use in UI
-export const ICONS = {
-  mic: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>`,
-  micOff: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>`,
-  copy: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`,
-  check: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
-  link: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
-  phoneOff: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.31 19.42 19.42 0 0 1-6-6 19.79 19.79 0 0 1-3.31-8.63A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91"/><line x1="23" y1="1" x2="1" y2="23"/></svg>`,
-  users: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
-  volume2: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>`,
-  volumeX: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>`,
-  plus: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
-  loading: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"/></svg>`,
-};
+import { WebRTCManager } from './webrtc';
 
-interface UIState {
-  roomId: string | null;
-  userCount: number;
-  isMuted: boolean;
-  isConnected: boolean;
+interface User {
+  id: string;
+  name: string;
+  isHost: boolean;
+  speaking: boolean;
+  muted: boolean;
+  raisedHand: boolean;
 }
 
+type ToastType = 'info' | 'success' | 'error';
+type ScreenCallback = () => void;
+
 export class UIManager {
-  private state: UIState = {
-    roomId: null,
-    userCount: 1,
-    isMuted: false,
-    isConnected: false,
-  };
-
-  private elements: Record<string, HTMLElement | HTMLInputElement> = {} as Record<string, HTMLElement | HTMLInputElement>;
-  private callbacks: Record<string, (() => void) | null> = {
-    onCreateRoom: null,
-    onCopyLink: null,
-    onToggleMute: null,
-    onLeave: null,
-  };
-
-  constructor() {
-    this.init();
+  private currentScreen: 'landing' | 'username' | 'room' = 'landing';
+  private users = new Map<string, User>();
+  private localUserId: string | null = null;
+  private isMuted = false;
+  
+  // Callbacks
+  private onCreateRoom: ScreenCallback | null = null;
+  private onJoinRoom: ScreenCallback | null = null;
+  private onToggleMute: ScreenCallback | null = null;
+  private onLeave: ScreenCallback | null = null;
+  private onRaiseHand: ScreenCallback | null = null;
+  private onToggleChat: ScreenCallback | null = null;
+  
+  render(): void {
+    this.showLandingPage();
   }
-
-  private init(): void {
+  
+  // Callbacks
+  setOnCreateRoom(cb: ScreenCallback): void { this.onCreateRoom = cb; }
+  setOnJoinRoom(cb: ScreenCallback): void { this.onJoinRoom = cb; }
+  setOnToggleMute(cb: ScreenCallback): void { this.onToggleMute = cb; }
+  setOnLeave(cb: ScreenCallback): void { this.onLeave = cb; }
+  setOnRaiseHand(cb: ScreenCallback): void { this.onRaiseHand = cb; }
+  setOnToggleChat(cb: ScreenCallback): void { this.onToggleChat = cb; }
+  
+  setLocalUserId(id: string): void {
+    this.localUserId = id;
+  }
+  
+  // Landing Page
+  showLandingPage(): void {
+    this.currentScreen = 'landing';
     const app = document.getElementById('app');
     if (!app) return;
-
-    this.injectStyles();
-    this.createLandingPage();
-    this.createRoomPage();
-    this.createToast();
-  }
-
-  private injectStyles(): void {
-    const style = document.createElement('style');
-    style.textContent = `
-      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-      *, *::before, *::after {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
-      :root {
-        --bg: #0c0c0c;
-        --bg-secondary: #171717;
-        --bg-tertiary: #222222;
-        --border: #2e2e2e;
-        --border-hover: #3e3e3e;
-        --text: #e5e5e5;
-        --text-secondary: #a3a3a3;
-        --text-tertiary: #737373;
-        --accent: #fff;
-        --accent-bg: #262626;
-        --success: #10b981;
-        --error: #ef4444;
-        --warning: #f59e0b;
-        --radius: 8px;
-        --radius-lg: 12px;
-      }
-
-      html, body {
-        height: 100%;
-      }
-
-      body {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        background: var(--bg);
-        color: var(--text);
-        line-height: 1.5;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-      }
-
-      #app {
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-      }
-
-      .hidden { display: none !important; }
-      .flex { display: flex; }
-      .flex-col { flex-direction: column; }
-      .items-center { align-items: center; }
-      .justify-center { justify-content: center; }
-      .justify-between { justify-content: space-between; }
-      .gap-2 { gap: 8px; }
-      .gap-3 { gap: 12px; }
-      .gap-4 { gap: 16px; }
-      .gap-6 { gap: 24px; }
-
-      /* Main container */
-      .main-container {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 24px;
-      }
-
-      /* Card */
-      .card {
-        width: 100%;
-        max-width: 420px;
-        background: var(--bg-secondary);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-lg);
-        padding: 32px;
-      }
-
-      .card-header {
-        text-align: center;
-        margin-bottom: 32px;
-      }
-
-      .logo {
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 12px;
-      }
-
-      .logo-icon {
-        width: 40px;
-        height: 40px;
-        background: var(--accent);
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .logo-icon svg {
-        width: 22px;
-        height: 22px;
-        color: var(--bg);
-      }
-
-      .logo-text {
-        font-size: 24px;
-        font-weight: 700;
-        letter-spacing: -0.5px;
-      }
-
-      .tagline {
-        color: var(--text-secondary);
-        font-size: 14px;
-      }
-
-      /* Form elements */
-      .form-group {
-        margin-bottom: 16px;
-      }
-
-      .form-label {
-        display: block;
-        font-size: 13px;
-        font-weight: 500;
-        color: var(--text-secondary);
-        margin-bottom: 6px;
-      }
-
-      .input {
-        width: 100%;
-        padding: 10px 12px;
-        background: var(--bg-tertiary);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        color: var(--text);
-        font-size: 14px;
-        outline: none;
-        transition: border-color 0.2s, box-shadow 0.2s;
-      }
-
-      .input:focus {
-        border-color: var(--text-tertiary);
-        box-shadow: 0 0 0 2px rgba(255,255,255,0.05);
-      }
-
-      .input:read-only {
-        cursor: pointer;
-        background: var(--bg);
-      }
-
-      .link-row {
-        display: flex;
-        gap: 8px;
-      }
-
-      .link-row .input {
-        font-family: 'IBM Plex Mono', monospace;
-        font-size: 13px;
-      }
-
-      /* Buttons */
-      .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        padding: 10px 20px;
-        border-radius: var(--radius);
-        font-size: 14px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.15s ease;
-        border: none;
-        outline: none;
-        text-decoration: none;
-      }
-
-      .btn-primary {
-        width: 100%;
-        background: var(--accent);
-        color: var(--bg);
-      }
-
-      .btn-primary:hover {
-        background: #f5f5f5;
-      }
-
-      .btn-primary:active {
-        transform: scale(0.98);
-      }
-
-      .btn-secondary {
-        background: var(--accent-bg);
-        color: var(--text);
-        border: 1px solid var(--border);
-      }
-
-      .btn-secondary:hover {
-        background: var(--bg-tertiary);
-        border-color: var(--border-hover);
-      }
-
-      .btn-ghost {
-        background: transparent;
-        color: var(--text-secondary);
-      }
-
-      .btn-ghost:hover {
-        color: var(--text);
-        background: var(--accent-bg);
-      }
-
-      .btn-danger {
-        background: rgba(239, 68, 68, 0.1);
-        color: #fca5a5;
-        border: 1px solid rgba(239, 68, 68, 0.2);
-      }
-
-      .btn-danger:hover {
-        background: rgba(239, 68, 68, 0.2);
-      }
-
-      .btn-icon {
-        padding: 0;
-        width: 36px;
-        height: 36px;
-      }
-
-      .btn svg {
-        flex-shrink: 0;
-      }
-
-      /* User list */
-      .user-list {
-        margin: 24px 0;
-      }
-
-      .user-list-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 12px;
-      }
-
-      .user-list-title {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 13px;
-        color: var(--text-secondary);
-      }
-
-      .user-count {
-        background: var(--accent-bg);
-        padding: 2px 8px;
-        border-radius: 999px;
-        font-size: 12px;
-        font-weight: 500;
-      }
-
-      .user-items {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-
-      .user-item {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 10px 12px;
-        background: var(--bg);
-        border-radius: var(--radius);
-        transition: background 0.15s;
-      }
-
-      .user-item:hover {
-        background: var(--bg-tertiary);
-      }
-
-      .user-avatar {
-        width: 32px;
-        height: 32px;
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 12px;
-        font-weight: 600;
-        color: #fff;
-        flex-shrink: 0;
-      }
-
-      .user-info {
-        flex: 1;
-        min-width: 0;
-      }
-
-      .user-name {
-        font-size: 14px;
-        font-weight: 500;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      .user-status {
-        font-size: 12px;
-        color: var(--text-tertiary);
-      }
-
-      .speaking {
-        width: 8px;
-        height: 8px;
-        background: var(--success);
-        border-radius: 50%;
-        animation: pulse 1s ease-in-out infinite;
-        flex-shrink: 0;
-      }
-
-      @keyframes pulse {
-        0%, 100% { opacity: 1; transform: scale(1); }
-        50% { opacity: 0.6; transform: scale(1.3); }
-      }
-
-      /* Controls */
-      .controls {
-        display: flex;
-        gap: 12px;
-        margin-top: 24px;
-      }
-
-      .controls .btn {
-        flex: 1;
-      }
-
-      /* Toast */
-      .toast-container {
-        position: fixed;
-        bottom: 24px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 1000;
-      }
-
-      .toast {
-        padding: 10px 16px;
-        background: var(--bg-tertiary);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        font-size: 13px;
-        color: var(--text);
-        opacity: 0;
-        transform: translateY(10px);
-        transition: all 0.2s ease;
-      }
-
-      .toast.visible {
-        opacity: 1;
-        transform: translateY(0);
-      }
-
-      .toast.success {
-        border-color: var(--success);
-        color: var(--success);
-      }
-
-      .toast.error {
-        border-color: var(--error);
-        color: var(--error);
-      }
-
-      /* Loading */
-      .loading-spinner {
-        width: 16px;
-        height: 16px;
-        border: 2px solid var(--border);
-        border-top-color: var(--text);
-        border-radius: 50%;
-        animation: spin 0.6s linear infinite;
-      }
-
-      @keyframes spin {
-        to { transform: rotate(360deg); }
-      }
-
-      /* Empty state */
-      .empty-state {
-        text-align: center;
-        padding: 24px;
-        color: var(--text-tertiary);
-        font-size: 13px;
-      }
-
-      /* Responsive */
-      @media (max-width: 480px) {
-        .card {
-          padding: 24px;
-        }
-
-        .controls {
-          flex-direction: column;
-        }
-
-        .controls .btn {
-          width: 100%;
-        }
-      }
-    `;
-    document.head.appendChild(style);
-  }
-
-  private createLandingPage(): void {
-    const container = document.createElement('div');
-    container.id = 'landing-page';
-    container.className = 'main-container';
-
-    container.innerHTML = `
-      <div class="card">
-        <div class="card-header">
-          <div class="logo">
-            <div class="logo-icon">${ICONS.mic}</div>
-            <span class="logo-text">PrinceVChat</span>
+    
+    app.innerHTML = `
+      <header class="header">
+        <div class="header-inner">
+          <a href="/" class="logo">
+            <span class="logo-icon">🎙️</span>
+            PrinceVChat
+          </a>
+          <div class="header-right">
+            <button class="btn btn-ghost btn-sm">Sign In</button>
           </div>
-          <p class="tagline">Free group voice chat. No signup. No download.</p>
         </div>
-        <button id="btn-create-room" class="btn btn-primary">
-          ${ICONS.plus}
-          Create Voice Room
-        </button>
+      </header>
+      
+      <main class="main">
+        <div class="main-inner">
+          <div class="landing">
+            <div class="landing-hero">
+              <h1 class="landing-title">Voice chat for teams</h1>
+              <p class="landing-subtitle">Free, instant group voice chat. No downloads, no signups required.</p>
+              <div class="landing-actions">
+                <button class="btn btn-primary btn-lg" id="create-room-btn">
+                  Create Room
+                </button>
+                <button class="btn btn-secondary btn-lg" id="join-room-btn">
+                  Join Room
+                </button>
+              </div>
+            </div>
+            
+            <div class="landing-features">
+              <div class="feature-card">
+                <div class="feature-icon">🚀</div>
+                <h3 class="feature-title">Instant</h3>
+                <p class="feature-desc">Create a room and share the link. Anyone can join immediately.</p>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3 class="feature-title">Private</h3>
+                <p class="feature-desc">Your conversations stay between you and your team.</p>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon">💬</div>
+                <h3 class="feature-title">Real-time</h3>
+                <p class="feature-desc">Low latency voice with WebRTC. Sounds natural.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    `;
+    
+    // Event listeners
+    document.getElementById('create-room-btn')?.addEventListener('click', () => {
+      this.showUsernameModal('create');
+    });
+    
+    document.getElementById('join-room-btn')?.addEventListener('click', () => {
+      this.showUsernameModal('join');
+    });
+  }
+  
+  // Username Modal
+  private modalAction: 'create' | 'join' = 'create';
+  
+  showUsernameModal(action: 'create' | 'join'): void {
+    this.modalAction = action;
+    const app = document.getElementById('app');
+    if (!app) return;
+    
+    // Check for existing room ID if joining
+    let roomIdInput = '';
+    const path = window.location.pathname;
+    if (action === 'join') {
+      const match = path.match(/\/room\/([^/]+)/);
+      roomIdInput = match ? match[1] : '';
+    }
+    
+    app.innerHTML = `
+      <div class="modal-overlay">
+        <div class="modal">
+          <h2 class="modal-title">${action === 'create' ? 'Create a room' : 'Join a room'}</h2>
+          <p class="modal-desc">Enter your name to get started</p>
+          
+          <form class="modal-form" id="username-form">
+            <div>
+              <label class="label" for="username-input">Your Name</label>
+              <input 
+                type="text" 
+                id="username-input" 
+                class="input" 
+                placeholder="Enter your name"
+                autocomplete="off"
+                required
+                maxlength="20"
+              />
+            </div>
+            
+            ${action === 'join' ? `
+              <div>
+                <label class="label" for="room-id-input">Room Code</label>
+                <input 
+                  type="text" 
+                  id="room-id-input" 
+                  class="input" 
+                  placeholder="e.g. abc123"
+                  value="${roomIdInput}"
+                  autocomplete="off"
+                  required
+                />
+              </div>
+            ` : ''}
+            
+            <div class="modal-actions">
+              <button type="button" class="btn btn-ghost" id="modal-cancel-btn">Cancel</button>
+              <button type="submit" class="btn btn-primary">
+                ${action === 'create' ? 'Create Room' : 'Join Room'}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     `;
-
-    document.getElementById('app')?.appendChild(container);
-    (this.elements as any)['btn-create-room'] = container.querySelector('#btn-create-room')!;
+    
+    // Event listeners
+    document.getElementById('modal-cancel-btn')?.addEventListener('click', () => {
+      this.showLandingPage();
+    });
+    
+    document.getElementById('username-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const usernameInput = document.getElementById('username-input') as HTMLInputElement;
+      const roomIdInput = document.getElementById('room-id-input') as HTMLInputElement;
+      
+      const username = usernameInput?.value.trim();
+      const roomId = roomIdInput?.value.trim();
+      
+      if (username) {
+        localStorage.setItem('username', username);
+        if (this.modalAction === 'create') {
+          this.onCreateRoom?.();
+        } else if (roomId) {
+          window.history.replaceState(null, '', `/room/${roomId}`);
+          this.onJoinRoom?.();
+        }
+      }
+    });
+    
+    // Focus input
+    setTimeout(() => {
+      document.getElementById('username-input')?.focus();
+    }, 100);
   }
-
-  private createRoomPage(): void {
-    const container = document.createElement('div');
-    container.id = 'room-page';
-    container.className = 'main-container hidden';
-
-    container.innerHTML = `
-      <div class="card">
-        <div class="card-header">
-          <div class="logo">
-            <div class="logo-icon">${ICONS.mic}</div>
-            <span class="logo-text">PrinceVChat</span>
+  
+  // Room Page
+  showRoomPage(roomId: string, hostName: string = 'You'): void {
+    this.currentScreen = 'room';
+    const app = document.getElementById('app');
+    if (!app) return;
+    
+    // Get saved username
+    const username = localStorage.getItem('username') || hostName;
+    
+    // Add self as first user
+    this.users.clear();
+    this.users.set(this.localUserId!, {
+      id: this.localUserId!,
+      name: username,
+      isHost: true,
+      speaking: false,
+      muted: false,
+      raisedHand: false
+    });
+    
+    app.innerHTML = `
+      <header class="header">
+        <div class="header-inner">
+          <a href="/" class="logo">
+            <span class="logo-icon">🎙️</span>
+            PrinceVChat
+          </a>
+          <div class="header-right">
+            <span class="badge badge-live">● LIVE</span>
+            <span class="text-sm text-secondary" id="user-count">1 participant</span>
           </div>
         </div>
-
-        <div class="form-group">
-          <label class="form-label">INVITE LINK</label>
-          <div class="link-row">
-            <input id="room-link" class="input" type="text" readonly />
-            <button id="btn-copy-link" class="btn btn-secondary btn-icon" title="Copy link">
-              ${ICONS.copy}
+      </header>
+      
+      <div class="room">
+        <div class="room-header">
+          <div class="room-info">
+            <h1 class="room-title">${this.escapeHtml(username)}'s Room</h1>
+            <div class="copy-link">
+              <input type="text" id="room-link" value="${window.location.href}" readonly />
+              <button class="btn btn-sm btn-secondary" id="copy-link-btn">Copy</button>
+            </div>
+          </div>
+          <div class="room-actions">
+            <button class="btn btn-icon btn-ghost" id="chat-btn" title="Chat">💬</button>
+            <button class="btn btn-icon btn-ghost" id="raise-btn" title="Raise Hand">✋</button>
+          </div>
+        </div>
+        
+        <div class="room-content">
+          <div class="room-grid" id="participants-grid">
+            ${this.renderParticipants()}
+          </div>
+        </div>
+        
+        <div class="room-controls">
+          <button class="control-btn" id="mute-btn" title="${this.isMuted ? 'Unmute' : 'Mute'}">
+            ${this.isMuted ? '🔇' : '🎤'}
+          </button>
+          <button class="control-btn danger" id="leave-btn" title="Leave">
+            📴
+          </button>
+        </div>
+      </div>
+      
+      <!-- Toast Container -->
+      <div class="toast-container" id="toast-container"></div>
+    `;
+    
+    // Event listeners
+    document.getElementById('copy-link-btn')?.addEventListener('click', () => {
+      const input = document.getElementById('room-link') as HTMLInputElement;
+      navigator.clipboard.writeText(input.value);
+      this.showToast('Link copied!', 'success');
+    });
+    
+    document.getElementById('mute-btn')?.addEventListener('click', () => {
+      this.isMuted = !this.isMuted;
+      const btn = document.getElementById('mute-btn');
+      if (btn) {
+        btn.innerHTML = this.isMuted ? '🔇' : '🎤';
+        btn.classList.toggle('active', this.isMuted);
+      }
+      this.onToggleMute?.();
+    });
+    
+    document.getElementById('leave-btn')?.addEventListener('click', () => {
+      this.onLeave?.();
+    });
+    
+    document.getElementById('raise-btn')?.addEventListener('click', () => {
+      const btn = document.getElementById('raise-btn');
+      btn?.classList.toggle('active');
+      this.onRaiseHand?.();
+    });
+    
+    document.getElementById('chat-btn')?.addEventListener('click', () => {
+      this.onToggleChat?.();
+    });
+  }
+  
+  private renderParticipants(): string {
+    let html = '';
+    let count = 0;
+    
+    for (const [id, user] of this.users) {
+      const isSelf = id === this.localUserId;
+      html += `
+        <div class="participant-card ${user.isHost ? 'host' : ''} ${user.speaking ? 'speaking' : ''}" data-id="${id}">
+          ${isSelf ? '<span class="participant-you">You</span>' : ''}
+          <div class="participant-avatar">${this.getInitials(user.name)}</div>
+          <div class="participant-name">${this.escapeHtml(user.name)}</div>
+          <div class="participant-status">
+            ${user.muted ? '�� ' : ''}
+            ${user.speaking ? 'Speaking...' : isSelf ? 'You' : 'Connected'}
+          </div>
+          <div class="participant-controls">
+            <button class="btn btn-icon btn-sm btn-ghost" data-action="mute" title="${user.muted ? 'Unmute' : 'Mute'}">
+              ${user.muted ? '🔇' : '🎤'}
             </button>
           </div>
         </div>
-
-        <div class="user-list">
-          <div class="user-list-header">
-            <span class="user-list-title">${ICONS.users} Participants</span>
-            <span id="user-count" class="user-count">1</span>
-          </div>
-          <div id="user-items" class="user-items"></div>
-        </div>
-
-        <div class="controls">
-          <button id="btn-mute" class="btn btn-secondary">
-            <span id="mic-icon">${ICONS.volume2}</span>
-            <span id="mute-text">Mute</span>
-          </button>
-          <button id="btn-leave" class="btn btn-danger">
-            ${ICONS.phoneOff}
-            Leave
-          </button>
-        </div>
-      </div>
-    `;
-
-    document.getElementById('app')?.appendChild(container);
-    (this.elements as any)['room-link'] = container.querySelector('#room-link')!;
-    (this.elements as any)['btn-copy-link'] = container.querySelector('#btn-copy-link')!;
-    (this.elements as any)['user-count'] = container.querySelector('#user-count')!;
-    (this.elements as any)['user-items'] = container.querySelector('#user-items')!;
-    (this.elements as any)['btn-mute'] = container.querySelector('#btn-mute')!;
-    (this.elements as any)['btn-leave'] = container.querySelector('#btn-leave')!;
-    (this.elements as any)['mic-icon'] = container.querySelector('#mic-icon')!;
-    (this.elements as any)['mute-text'] = container.querySelector('#mute-text')!;
-  }
-
-  private createToast(): void {
-    const container = document.createElement('div');
-    container.className = 'toast-container';
-    container.innerHTML = `<div id="toast" class="toast"></div>`;
-    document.getElementById('app')?.appendChild(container);
-    (this.elements as any)['toast'] = container.querySelector('#toast')!;
-  }
-
-  showLandingPage(): void {
-    document.getElementById('landing-page')?.classList.remove('hidden');
-    document.getElementById('room-page')?.classList.add('hidden');
-  }
-
-  showRoomPage(roomId: string): void {
-    document.getElementById('landing-page')?.classList.add('hidden');
-    document.getElementById('room-page')?.classList.remove('hidden');
-
-    const link = `${window.location.origin}/room/${roomId}`;
-    (this.elements['room-link'] as HTMLInputElement).value = link;
-    this.state.roomId = roomId;
-  }
-
-  updateUserCount(count: number): void {
-    const el = document.getElementById('user-count');
-    if (el) el.textContent = count.toString();
-    this.state.userCount = count;
-  }
-
-  addUser(peerId: string, isSelf: boolean = false): void {
-    const userItems = this.elements['user-items'] as HTMLElement;
-    if (!userItems) return;
-
-    const name = isSelf ? 'You' : peerId.substring(0, 8);
-    const initials = name.substring(0, 2).toUpperCase();
-
-    const userItem = document.createElement('div');
-    userItem.className = 'user-item';
-    userItem.id = `user-${peerId}`;
-    userItem.innerHTML = `
-      <div class="user-avatar">${initials}</div>
-      <div class="user-info">
-        <div class="user-name">${name}</div>
-        <div class="user-status">${isSelf ? 'Host' : 'Connected'}</div>
-      </div>
-      <div class="speaking hidden"></div>
-    `;
-
-    userItems.appendChild(userItem);
-    this.updateUserCount(this.state.userCount + 1);
-  }
-
-  removeUser(peerId: string): void {
-    const userItem = document.getElementById(`user-${peerId}`);
-    if (userItem) userItem.remove();
-    this.updateUserCount(Math.max(1, this.state.userCount - 1));
-  }
-
-  setUserSpeaking(peerId: string, speaking: boolean): void {
-    const userItem = document.getElementById(`user-${peerId}`);
-    if (!userItem) return;
-
-    const indicator = userItem.querySelector('.speaking');
-    if (indicator) {
-      indicator.classList.toggle('hidden', !speaking);
+      `;
+      count++;
     }
-
-    const status = userItem.querySelector('.user-status');
-    if (status) {
-      status.textContent = speaking ? 'Speaking...' : 'Connected';
+    
+    // Update count
+    const countEl = document.getElementById('user-count');
+    if (countEl) {
+      countEl.textContent = `${count} participant${count !== 1 ? 's' : ''}`;
+    }
+    
+    return html || '<p class="text-secondary text-center">Waiting for others to join...</p>';
+  }
+  
+  // User Management
+  addUser(userId: string, isHost: boolean): void {
+    this.users.set(userId, {
+      id: userId,
+      name: 'User-' + userId.slice(-4),
+      isHost,
+      speaking: false,
+      muted: false,
+      raisedHand: false
+    });
+    this.updateParticipants();
+  }
+  
+  removeUser(userId: string): void {
+    this.users.delete(userId);
+    this.updateParticipants();
+  }
+  
+  setUserName(userId: string, name: string): void {
+    const user = this.users.get(userId);
+    if (user) {
+      user.name = name;
+      this.updateParticipants();
     }
   }
-
-  setMuted(muted: boolean): void {
-    this.state.isMuted = muted;
-    const micIcon = document.getElementById('mic-icon');
-    const muteText = document.getElementById('mute-text');
-
-    if (micIcon) {
-      micIcon.innerHTML = muted ? ICONS.volumeX : ICONS.volume2;
-    }
-    if (muteText) {
-      muteText.textContent = muted ? 'Unmute' : 'Mute';
+  
+  setUserSpeaking(userId: string, speaking: boolean): void {
+    const user = this.users.get(userId);
+    if (user) {
+      user.speaking = speaking;
+      this.updateParticipants();
     }
   }
-
-  showToast(message: string, type: 'success' | 'error' | 'info' = 'info'): void {
-    const toast = document.getElementById('toast');
-    if (!toast) return;
-
+  
+  setUserMuted(userId: string, muted: boolean): void {
+    const user = this.users.get(userId);
+    if (user) {
+      user.muted = muted;
+      this.updateParticipants();
+    }
+  }
+  
+  private updateParticipants(): void {
+    const grid = document.getElementById('participants-grid');
+    if (grid) {
+      grid.innerHTML = this.renderParticipants();
+    }
+  }
+  
+  // Toast
+  showToast(message: string, type: ToastType = 'info'): void {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+    
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
     toast.textContent = message;
-    toast.className = `toast visible ${type}`;
-
+    container.appendChild(toast);
+    
     setTimeout(() => {
-      toast.classList.remove('visible');
+      toast.remove();
     }, 3000);
   }
-
-  setOnCreateRoom(callback: () => void): void {
-    this.callbacks.onCreateRoom = callback;
-    const btn = document.getElementById('btn-create-room');
-    if (btn) {
-      btn.onclick = () => this.callbacks.onCreateRoom?.();
-    }
+  
+  // Helper methods
+  private getInitials(name: string): string {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   }
-
-  setOnCopyLink(callback: () => void): void {
-    this.callbacks.onCopyLink = callback;
-    const btn = document.getElementById('btn-copy-link');
-    if (btn) {
-      btn.onclick = () => {
-        const input = document.getElementById('room-link') as HTMLInputElement;
-        if (input) {
-          input.select();
-          navigator.clipboard.writeText(input.value);
-          this.showToast('Link copied!', 'success');
-        }
-        this.callbacks.onCopyLink?.();
-      };
-    }
-  }
-
-  setOnToggleMute(callback: () => void): void {
-    this.callbacks.onToggleMute = callback;
-    const btn = document.getElementById('btn-mute');
-    if (btn) {
-      btn.onclick = () => this.callbacks.onToggleMute?.();
-    }
-  }
-
-  setOnLeave(callback: () => void): void {
-    this.callbacks.onLeave = callback;
-    const btn = document.getElementById('btn-leave');
-    if (btn) {
-      btn.onclick = () => this.callbacks.onLeave?.();
-    }
+  
+  private escapeHtml(text: string): string {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   }
 }

@@ -2,6 +2,7 @@
  * PrinceVChat - Main Application
  */
 
+import './styles.css';
 import { SocketManager } from './socket';
 import { WebRTCManager } from './webrtc';
 import { UIManager } from './ui';
@@ -16,21 +17,14 @@ class App {
   private ui: UIManager;
   private roomId: string | null = null;
   private localStream: MediaStream | null = null;
+  private userId: string = '';
 
   constructor() {
+    this.userId = 'user-' + Math.random().toString(36).substring(2, 10);
     this.ui = new UIManager();
+    this.ui.setLocalUserId(this.userId);
     this.setupRouter();
     this.setupCallbacks();
-    this.setupClickToStart();
-  }
-
-  private setupClickToStart(): void {
-    // Any click enables audio context
-    document.addEventListener('click', () => {
-      if (this.webrtcManager) {
-        this.webrtcManager.playPendingAudio();
-      }
-    }, { once: true });
   }
 
   private setupRouter(): void {
@@ -39,10 +33,10 @@ class App {
     if (path.startsWith(ROUTE_PREFIX)) {
       const roomId = path.substring(ROUTE_PREFIX.length);
       if (roomId) {
-        this.joinRoom(roomId);
+        this.ui.showUsernameModal('join');
       }
     } else {
-      this.ui.showLandingPage();
+      this.ui.render();
     }
   }
 
@@ -51,25 +45,27 @@ class App {
       this.createRoom();
     });
 
-    this.ui.setOnCopyLink(() => {});
+    this.ui.setOnJoinRoom(() => {
+      this.joinRoom();
+    });
 
-    this.ui.setOnToggleMute(async () => {
-      // Unmute also plays any pending audio
-      if (this.webrtcManager?.muted) {
-        await this.webrtcManager.playPendingAudio();
-      }
+    this.ui.setOnToggleMute(() => {
       this.toggleMute();
     });
 
     this.ui.setOnLeave(() => {
       this.leaveRoom();
     });
+
+    this.ui.setOnRaiseHand(() => {
+      this.toggleRaiseHand();
+    });
   }
 
   private createRoom(): void {
     const roomId = this.generateRoomId();
     window.history.replaceState(null, '', `${ROUTE_PREFIX}${roomId}`);
-    this.joinRoom(roomId);
+    this.joinRoom();
   }
 
   private generateRoomId(): string {
@@ -81,9 +77,20 @@ class App {
     return result;
   }
 
-  private async joinRoom(roomId: string): Promise<void> {
+  private async joinRoom(): Promise<void> {
+    const path = window.location.pathname;
+    const match = path.match(/\/room\/([^/]+)/);
+    const roomId = match ? match[1] : '';
+    
+    if (!roomId) {
+      this.ui.showToast('Invalid room', 'error');
+      return;
+    }
+
     this.roomId = roomId;
-    console.log('[App] Joining room:', roomId);
+    const username = localStorage.getItem('username') || 'User';
+
+    console.log('[App] Joining room:', roomId, 'as', username);
 
     try {
       this.ui.showToast('Connecting...', 'info');
@@ -101,8 +108,7 @@ class App {
       console.log('[App] Microphone ready');
 
       // Connect to WebSocket
-      const userId = 'user-' + Math.random().toString(36).substring(2, 10);
-      this.socketManager = new SocketManager(WS_URL, userId);
+      this.socketManager = new SocketManager(WS_URL, this.userId);
 
       await this.socketManager.connect();
       console.log('[App] Connected to signaling server');
@@ -111,29 +117,31 @@ class App {
       this.socketManager.send({
         type: 'join',
         roomId,
+        username
       });
 
       // Setup WebRTC
-      this.webrtcManager = new WebRTCManager(this.socketManager, roomId);
+      this.webrtcManager = new WebRTCManager(this.socketManager, roomId, this.userId);
       this.webrtcManager.setLocalStream(this.localStream);
 
-      this.webrtcManager.setOnPeerConnected((peerId: string) => {
+      // Handle peer events
+      this.webrtcManager.onPeerConnected((peerId: string) => {
         console.log('[App] Peer connected:', peerId);
         this.ui.addUser(peerId, false);
+        this.ui.showToast('Someone joined', 'success');
       });
 
-      this.webrtcManager.setOnPeerDisconnected((peerId: string) => {
+      this.webrtcManager.onPeerDisconnected((peerId: string) => {
         console.log('[App] Peer disconnected:', peerId);
         this.ui.removeUser(peerId);
       });
 
-      this.webrtcManager.setOnSpeaking((peerId: string, speaking: boolean) => {
+      this.webrtcManager.onSpeaking((peerId: string, speaking: boolean) => {
         this.ui.setUserSpeaking(peerId, speaking);
       });
 
       // Show room UI
-      this.ui.showRoomPage(roomId);
-      this.ui.addUser(this.socketManager.userIdValue, true);
+      this.ui.showRoomPage(roomId, username);
       this.ui.showToast('Connected!', 'success');
 
     } catch (error) {
@@ -141,28 +149,32 @@ class App {
       this.ui.showToast('Failed. Check microphone permissions.', 'error');
       this.cleanup();
       window.history.replaceState(null, '', '/');
-      this.ui.showLandingPage();
+      this.ui.render();
     }
   }
 
   private toggleMute(): void {
     if (!this.webrtcManager) return;
 
-    if (this.webrtcManager.muted) {
-      this.webrtcManager.unmute();
-      this.ui.setMuted(false);
-    } else {
-      this.webrtcManager.mute();
-      this.ui.setMuted(true);
-    }
+    // Note: Mute is handled in UI state now
+    // This triggers socket event if needed
+    console.log('[App] Toggle mute');
+  }
+
+  private toggleRaiseHand(): void {
+    if (!this.socketManager) return;
+
+    this.socketManager.send({
+      type: 'raise-hand',
+      roomId: this.roomId
+    });
   }
 
   private async leaveRoom(): Promise<void> {
     console.log('[App] Leaving room');
     this.cleanup();
     window.history.replaceState(null, '', '/');
-    this.ui.showLandingPage();
-    this.ui.showToast('Left the room', 'info');
+    this.ui.render();
   }
 
   private cleanup(): void {
