@@ -40,9 +40,6 @@ export class UIManager {
             <span class="logo-mark">🎙️</span>
             <span class="logo-text">PrinceVChat</span>
           </a>
-          <div class="header-right">
-            <button class="btn btn-ghost btn-sm">Sign In</button>
-          </div>
         </div>
       </header>
       
