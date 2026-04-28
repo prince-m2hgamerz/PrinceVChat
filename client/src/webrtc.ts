@@ -8,6 +8,7 @@ interface PeerConnection {
   peerId: string;
   connection: RTCPeerConnection;
   audioElement: HTMLAudioElement | null;
+  pendingAudio: HTMLAudioElement | null;
 }
 
 // Use multiple STUN servers for better connectivity
@@ -147,39 +148,25 @@ export class WebRTCManager {
     }
 
     // Handle incoming tracks
-    connection.ontrack = (event) => {
+    connection.ontrack = async (event) => {
       const [stream] = event.streams;
       console.log('[WebRTC] Track received from:', peerId);
 
+      // Create audio element and play immediately
       const audio = new Audio();
       audio.srcObject = stream;
       audio.autoplay = true;
-      // @ts-ignore - playsInline is not in TypeScript DOM types
       audio.playsInline = true;
-      audio.volume = 1;
-
-      // Create audio analyzer for speaking detection
+      audio.volume = 1.0;
+      
+      // Explicitly play - required in modern browsers
       try {
-        const ctx = new AudioContext();
-        const analyser = ctx.createAnalyser();
-        const source = ctx.createMediaStreamSource(stream);
-        source.connect(analyser);
-        analyser.fftSize = 256;
-
-        const data = new Uint8Array(analyser.frequencyBinCount);
-        const check = () => {
-          if (!this.peers.has(peerId)) {
-            ctx.close();
-            return;
-          }
-          analyser.getByteFrequencyData(data);
-          const avg = data.reduce((a, b) => a + b) / data.length;
-          this.onSpeaking?.(peerId, avg > 25);
-          requestAnimationFrame(check);
-        };
-        check();
+        await audio.play();
+        console.log('[WebRTC] Playing audio from:', peerId);
       } catch (e) {
-        // AudioContext may be blocked
+        console.log('[WebRTC] Autoplay blocked, waiting for user interaction');
+        // Store for later playback
+        peer.pendingAudio = audio;
       }
 
       const peer = this.peers.get(peerId);
@@ -212,6 +199,7 @@ export class WebRTCManager {
       peerId,
       connection,
       audioElement: null,
+      pendingAudio: null,
     };
 
     this.peers.set(peerId, peer);
@@ -253,6 +241,20 @@ export class WebRTCManager {
         track.enabled = false;
       });
       this.isMuted = true;
+    }
+  }
+
+  // Call this on user interaction to play blocked audio
+  async playPendingAudio(): Promise<void> {
+    for (const [peerId, peer] of this.peers) {
+      if (peer.pendingAudio) {
+        try {
+          await peer.pendingAudio.play();
+          peer.audioElement = peer.pendingAudio;
+          peer.pendingAudio = null;
+          console.log('[WebRTC] Playing pending audio for:', peerId);
+        } catch (e) {}
+      }
     }
   }
 

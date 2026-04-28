@@ -21,6 +21,16 @@ class App {
     this.ui = new UIManager();
     this.setupRouter();
     this.setupCallbacks();
+    this.setupClickToStart();
+  }
+
+  private setupClickToStart(): void {
+    // Any click enables audio context
+    document.addEventListener('click', () => {
+      if (this.webrtcManager) {
+        this.webrtcManager.playPendingAudio();
+      }
+    }, { once: true });
   }
 
   private setupRouter(): void {
@@ -43,7 +53,11 @@ class App {
 
     this.ui.setOnCopyLink(() => {});
 
-    this.ui.setOnToggleMute(() => {
+    this.ui.setOnToggleMute(async () => {
+      // Unmute also plays any pending audio
+      if (this.webrtcManager?.muted) {
+        await this.webrtcManager.playPendingAudio();
+      }
       this.toggleMute();
     });
 
