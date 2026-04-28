@@ -1,29 +1,34 @@
 /**
  * PrinceVChat - Unified Server (WebSocket + Static Files)
- * Deploy to Railway - single instance serves both UI and WebSocket
  */
 
 import { WebSocketServer, WebSocket } from 'ws';
 import { createServer } from 'http';
-import { readFileSync, existsSync, statSync } from 'fs';
+import { readFileSync, existsSync, statSync, readdirSync } from 'fs';
 import { join, extname } from 'path';
 
-const PORT = parseInt(process.env.PORT || process.env.HTTP_PORT || '3000', 10);
-const isProduction = process.env.NODE_ENV === 'production' || process.env.RAILWAY_DEPLOYMENT === 'true' || process.env.RAILWAY_ENVIRONMENT === 'production' || existsSync(join(process.cwd(), 'dist'));
+const PORT = parseInt(process.env.PORT || '3000', 10);
 
-// MIME types
+// MIME types - complete list
 const MIME_TYPES: Record<string, string> = {
   '.html': 'text/html',
+  '.htm': 'text/html',
   '.js': 'application/javascript',
   '.mjs': 'application/javascript',
-  '.css': 'text/css',
   '.json': 'application/json',
+  '.css': 'text/css',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.gif': 'image/gif',
   '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon',
   '.woff': 'font/woff',
   '.woff2': 'font/woff2',
+  '.ttf': 'font/ttf',
+  '.eot': 'application/vnd.ms-fontobject',
   '.wasm': 'application/wasm',
+  '.webmanifest': 'application/manifest+json',
 };
 
 // Room storage
@@ -42,12 +47,13 @@ interface Msg {
 
 const rooms = new Map<string, Room>();
 
-// Static file path
+// Detect production
+const isProduction = process.env.NODE_ENV === 'production' || existsSync(join(process.cwd(), 'dist'));
 const STATIC_DIR = join(process.cwd(), 'dist');
 
 // Create HTTP server
 const server = createServer((req, res) => {
-  // CORS headers
+  // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -60,14 +66,14 @@ const server = createServer((req, res) => {
 
   let url = req.url || '/';
   
-  // API endpoints
+  // Health
   if (url === '/health' || url === '/api/health') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ status: 'ok', rooms: rooms.size }));
     return;
   }
 
-  // WebSocket upgrade endpoint
+  // WS endpoint
   if (url === '/ws') {
     res.writeHead(400);
     res.end('Use WebSocket connection');
@@ -77,12 +83,10 @@ const server = createServer((req, res) => {
   // Serve static files in production
   if (isProduction) {
     let filePath = url === '/' ? '/index.html' : url;
-    
-    // Remove query string
     filePath = filePath.split('?')[0];
     
-    // Security: prevent directory traversal
-    if (filePath.includes('..')) {
+    // Security - prevent directory traversal
+    if (filePath.includes('..') || filePath.includes('%2e')) {
       res.writeHead(403);
       res.end('Forbidden');
       return;
@@ -90,24 +94,29 @@ const server = createServer((req, res) => {
 
     const fullPath = join(STATIC_DIR, filePath);
     
+    // Check if file exists and is a file
     if (existsSync(fullPath) && statSync(fullPath).isFile()) {
-      const ext = extname(fullPath);
+      const ext = extname(fullPath).toLowerCase();
       const mime = MIME_TYPES[ext] || 'application/octet-stream';
+      
+      console.log('[Server] Serving:', filePath, '->', mime);
       
       res.writeHead(200, { 'Content-Type': mime });
       res.end(readFileSync(fullPath));
       return;
     }
 
-    // SPA fallback
+    // SPA fallback for routes like /room/xxx
     const indexPath = join(STATIC_DIR, 'index.html');
     if (existsSync(indexPath)) {
+      console.log('[Server] SPA fallback for:', url);
       res.writeHead(200, { 'Content-Type': 'text/html' });
       res.end(readFileSync(indexPath));
       return;
     }
   }
 
+  console.log('[Server] 404:', url);
   res.writeHead(404);
   res.end('Not Found');
 });
@@ -117,6 +126,7 @@ const wss = new WebSocketServer({ server, path: '/ws' });
 
 console.log('[Server] PrinceVChat starting on port', PORT);
 console.log('[Server] Mode:', isProduction ? 'production' : 'development');
+console.log('[Server] Static dir:', isProduction ? STATIC_DIR : 'disabled');
 
 function send(ws: WebSocket, msg: Msg): void {
   if (ws.readyState === WebSocket.OPEN) {
@@ -156,7 +166,7 @@ wss.on('connection', (ws: WebSocket) => {
           const room = rooms.get(roomId)!;
           room.clients.set(clientId, ws);
 
-          console.log('[Server] User', clientId, 'joined', roomId);
+          console.log('[Server] User', clientId, 'joined', roomId, '| Total:', room.clients.size);
 
           // Send existing users
           const users = Array.from(room.clients.keys()).filter(id => id !== clientId);
@@ -200,18 +210,16 @@ wss.on('connection', (ws: WebSocket) => {
 
         if (room.clients.size === 0) {
           rooms.delete(roomId);
+          console.log('[Server] Room deleted:', roomId);
         }
+        console.log('[Server] User', clientId, 'left', roomId);
       }
     }
   });
 });
 
-// Start server
 server.listen(PORT, () => {
   console.log('[Server] Running on http://localhost:' + PORT);
-  if (isProduction) {
-    console.log('[Server] Serving static files from:', STATIC_DIR);
-  }
 });
 
 process.on('SIGINT', () => {
