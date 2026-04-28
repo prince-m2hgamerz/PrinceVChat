@@ -6,8 +6,8 @@ import { SocketManager } from './socket';
 import { WebRTCManager } from './webrtc';
 import { UIManager } from './ui';
 
-// Use relative WebSocket (works in production too)
-const WS_URL = `ws://${window.location.host}/ws`;
+// Use secure WebSocket (wss://) for HTTPS
+const WS_URL = `wss://${window.location.host}/ws`;
 const ROUTE_PREFIX = '/room/';
 
 class App {
