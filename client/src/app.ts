@@ -1,5 +1,5 @@
 /**
- * PrinceVChat - Main Application
+ * PrinceVChat - Main Application (Optimized for speed)
  */
 
 import './styles.css';
@@ -7,7 +7,6 @@ import { SocketManager } from './socket';
 import { WebRTCManager } from './webrtc';
 import { UIManager } from './ui';
 
-// Use secure WebSocket (wss://) for HTTPS
 const WS_URL = `wss://${window.location.host}/ws`;
 const ROUTE_PREFIX = '/room/';
 
@@ -15,51 +14,36 @@ class App {
   private socketManager: SocketManager | null = null;
   private webrtcManager: WebRTCManager | null = null;
   private ui: UIManager;
-  private roomId: string | null = null;
+  private roomId: string = '';
   private localStream: MediaStream | null = null;
   private userId: string = '';
+  private username: string = '';
 
   constructor() {
-    this.userId = 'user-' + Math.random().toString(36).substring(2, 10);
+    // Generate ID immediately
+    this.userId = 'u-' + Math.random().toString(36).substring(2, 10);
     this.ui = new UIManager();
     this.ui.setLocalUserId(this.userId);
     this.setupRouter();
-    this.setupCallbacks();
   }
 
   private setupRouter(): void {
     const path = window.location.pathname;
-
     if (path.startsWith(ROUTE_PREFIX)) {
-      const roomId = path.substring(ROUTE_PREFIX.length);
-      if (roomId) {
+      const match = path.match(/\/room\/([^/]+)/);
+      if (match && match[1]) {
         this.ui.showUsernameModal('join');
+        return;
       }
-    } else {
-      this.ui.render();
     }
+    this.ui.render();
   }
 
   private setupCallbacks(): void {
-    this.ui.setOnCreateRoom(() => {
-      this.createRoom();
-    });
-
-    this.ui.setOnJoinRoom(() => {
-      this.joinRoom();
-    });
-
-    this.ui.setOnToggleMute(() => {
-      this.toggleMute();
-    });
-
-    this.ui.setOnLeave(() => {
-      this.leaveRoom();
-    });
-
-    this.ui.setOnRaiseHand(() => {
-      this.toggleRaiseHand();
-    });
+    this.ui.setOnCreateRoom(() => this.createRoom());
+    this.ui.setOnJoinRoom(() => this.joinRoom());
+    this.ui.setOnMute(() => this.toggleMute());
+    this.ui.setOnLeave(() => this.leaveRoom());
   }
 
   private createRoom(): void {
@@ -69,7 +53,7 @@ class App {
   }
 
   private generateRoomId(): string {
-    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    const chars = 'abcdefghijkmnpqrstuvwxyz23456789';
     let result = '';
     for (let i = 0; i < 6; i++) {
       result += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -80,22 +64,22 @@ class App {
   private async joinRoom(): Promise<void> {
     const path = window.location.pathname;
     const match = path.match(/\/room\/([^/]+)/);
-    const roomId = match ? match[1] : '';
+    this.roomId = match ? match[1] : '';
     
-    if (!roomId) {
+    if (!this.roomId) {
       this.ui.showToast('Invalid room', 'error');
       return;
     }
 
-    this.roomId = roomId;
-    const username = localStorage.getItem('username') || 'User';
+    this.username = localStorage.getItem('username') || 'User';
+    this.setupCallbacks();
 
-    console.log('[App] Joining room:', roomId, 'as', username);
+    console.log('[App] Joining:', this.roomId, this.username);
 
     try {
-      this.ui.showToast('Connecting...', 'info');
+      this.ui.showToast('Connecting...', 'success');
 
-      // Get microphone
+      // Get mic immediately
       this.localStream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
@@ -105,34 +89,28 @@ class App {
         video: false,
       });
 
-      console.log('[App] Microphone ready');
-
-      // Connect to WebSocket
+      // Connect WS immediately
       this.socketManager = new SocketManager(WS_URL, this.userId);
-
       await this.socketManager.connect();
-      console.log('[App] Connected to signaling server');
 
       // Join room
       this.socketManager.send({
         type: 'join',
-        roomId,
-        username
+        roomId: this.roomId,
+        username: this.username
       });
 
       // Setup WebRTC
-      this.webrtcManager = new WebRTCManager(this.socketManager, roomId, this.userId);
+      this.webrtcManager = new WebRTCManager(this.socketManager, this.roomId, this.userId);
       this.webrtcManager.setLocalStream(this.localStream);
 
-      // Handle peer events
+      // Handle peers
       this.webrtcManager.onPeerConnected((peerId: string) => {
-        console.log('[App] Peer connected:', peerId);
         this.ui.addUser(peerId, false);
         this.ui.showToast('Someone joined', 'success');
       });
 
       this.webrtcManager.onPeerDisconnected((peerId: string) => {
-        console.log('[App] Peer disconnected:', peerId);
         this.ui.removeUser(peerId);
       });
 
@@ -140,38 +118,28 @@ class App {
         this.ui.setUserSpeaking(peerId, speaking);
       });
 
-      // Show room UI
-      this.ui.showRoomPage(roomId, username);
+      // Show room
+      this.ui.showRoom(this.roomId, this.username);
       this.ui.showToast('Connected!', 'success');
 
     } catch (error) {
-      console.error('[App] Failed:', error);
-      this.ui.showToast('Failed. Check microphone permissions.', 'error');
+      console.error('[App] Error:', error);
+      this.ui.showToast('Failed to connect', 'error');
       this.cleanup();
-      window.history.replaceState(null, '', '/');
-      this.ui.render();
     }
   }
 
   private toggleMute(): void {
     if (!this.webrtcManager) return;
-
-    // Note: Mute is handled in UI state now
-    // This triggers socket event if needed
-    console.log('[App] Toggle mute');
+    
+    if (this.webrtcManager.muted) {
+      this.webrtcManager.unmute();
+    } else {
+      this.webrtcManager.mute();
+    }
   }
 
-  private toggleRaiseHand(): void {
-    if (!this.socketManager) return;
-
-    this.socketManager.send({
-      type: 'raise-hand',
-      roomId: this.roomId
-    });
-  }
-
-  private async leaveRoom(): Promise<void> {
-    console.log('[App] Leaving room');
+  private leaveRoom(): void {
     this.cleanup();
     window.history.replaceState(null, '', '/');
     this.ui.render();
@@ -193,11 +161,10 @@ class App {
       this.socketManager = null;
     }
 
-    this.roomId = null;
+    this.roomId = '';
   }
 }
 
-// Initialize
 document.addEventListener('DOMContentLoaded', () => {
   new App();
 });

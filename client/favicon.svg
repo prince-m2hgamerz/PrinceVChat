@@ -1,4 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <rect fill="#0c0c0c" width="100" height="100" rx="20"/>
-  <text y="70" x="50" text-anchor="middle" fill="#fff" font-size="50" font-family="Inter, sans-serif" font-weight="700">VC</text>
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2294e9"/>
+      <stop offset="100%" style="stop-color:#6366f1"/>
+    </linearGradient>
+  </defs>
+  <rect fill="url(#grad)" width="100" height="100" rx="20"/>
+  <g fill="#fff">
+    <circle cx="35" cy="50" r="15"/>
+    <circle cx="65" cy="50" r="15"/>
+    <path d="M35 35 Q35 30 45 30 L55 30 Q65 30 65 35 L65 65 Q65 70 55 70 L45 70 Q35 70 35 65 Z" opacity="0.3"/>
+    <circle cx="65" cy="50" r="12" fill="url(#grad)"/>
+  </g>
 </svg>

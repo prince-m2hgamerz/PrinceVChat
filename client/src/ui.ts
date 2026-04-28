@@ -1,63 +1,44 @@
 /**
- * PrinceVChat - UI Manager (Vercel Style)
+ * PrinceVChat - UI Manager (Vercel Style Enhanced)
  */
-
-import { WebRTCManager } from './webrtc';
-
-interface User {
-  id: string;
-  name: string;
-  isHost: boolean;
-  speaking: boolean;
-  muted: boolean;
-  raisedHand: boolean;
-}
-
-type ToastType = 'info' | 'success' | 'error';
-type ScreenCallback = () => void;
 
 export class UIManager {
   private currentScreen: 'landing' | 'username' | 'room' = 'landing';
-  private users = new Map<string, User>();
+  private users = new Map<string, { id: string; name: string; isHost: boolean; speaking: boolean }>();
   private localUserId: string | null = null;
+  private roomId: string = '';
   private isMuted = false;
+  private isHandRaised = false;
   
   // Callbacks
-  private onCreateRoom: ScreenCallback | null = null;
-  private onJoinRoom: ScreenCallback | null = null;
-  private onToggleMute: ScreenCallback | null = null;
-  private onLeave: ScreenCallback | null = null;
-  private onRaiseHand: ScreenCallback | null = null;
-  private onToggleChat: ScreenCallback | null = null;
-  
+  private onCreateRoom: (() => void) | null = null;
+  private onJoinRoom: (() => void) | null = null;
+  private onMute: (() => void) | null = null;
+  private onLeave: (() => void) | null = null;
+
   render(): void {
-    this.showLandingPage();
+    this.showLanding();
   }
-  
-  // Callbacks
-  setOnCreateRoom(cb: ScreenCallback): void { this.onCreateRoom = cb; }
-  setOnJoinRoom(cb: ScreenCallback): void { this.onJoinRoom = cb; }
-  setOnToggleMute(cb: ScreenCallback): void { this.onToggleMute = cb; }
-  setOnLeave(cb: ScreenCallback): void { this.onLeave = cb; }
-  setOnRaiseHand(cb: ScreenCallback): void { this.onRaiseHand = cb; }
-  setOnToggleChat(cb: ScreenCallback): void { this.onToggleChat = cb; }
-  
-  setLocalUserId(id: string): void {
-    this.localUserId = id;
-  }
-  
-  // Landing Page
-  showLandingPage(): void {
+
+  // Setters
+  setOnCreateRoom(cb: () => void): void { this.onCreateRoom = cb; }
+  setOnJoinRoom(cb: () => void): void { this.onJoinRoom = cb; }
+  setOnMute(cb: () => void): void { this.onMute = cb; }
+  setOnLeave(cb: () => void): void { this.onLeave = cb; }
+  setLocalUserId(id: string): void { this.localUserId = id; }
+
+  // ==================== LANDING ====================
+  showLanding(): void {
     this.currentScreen = 'landing';
     const app = document.getElementById('app');
     if (!app) return;
-    
+
     app.innerHTML = `
       <header class="header">
         <div class="header-inner">
           <a href="/" class="logo">
-            <span class="logo-icon">🎙️</span>
-            PrinceVChat
+            <span class="logo-mark">🎙️</span>
+            <span class="logo-text">PrinceVChat</span>
           </a>
           <div class="header-right">
             <button class="btn btn-ghost btn-sm">Sign In</button>
@@ -70,7 +51,9 @@ export class UIManager {
           <div class="landing">
             <div class="landing-hero">
               <h1 class="landing-title">Voice chat for teams</h1>
-              <p class="landing-subtitle">Free, instant group voice chat. No downloads, no signups required.</p>
+              <p class="landing-subtitle">
+                Free, instant group voice chat with anyone. No downloads, no signups required.
+              </p>
               <div class="landing-actions">
                 <button class="btn btn-primary btn-lg" id="create-room-btn">
                   Create Room
@@ -81,7 +64,7 @@ export class UIManager {
               </div>
             </div>
             
-            <div class="landing-features">
+            <div class="features">
               <div class="feature-card">
                 <div class="feature-icon">🚀</div>
                 <h3 class="feature-title">Instant</h3>
@@ -93,148 +76,158 @@ export class UIManager {
                 <p class="feature-desc">Your conversations stay between you and your team.</p>
               </div>
               <div class="feature-card">
-                <div class="feature-icon">💬</div>
-                <h3 class="feature-title">Real-time</h3>
-                <p class="feature-desc">Low latency voice with WebRTC. Sounds natural.</p>
+                <div class="feature-icon">⚡</div>
+                <h3 class="feature-title">Low Latency</h3>
+                <p class="feature-desc">Crystal clear voice with WebRTC. Sounds natural.</p>
               </div>
             </div>
           </div>
         </div>
       </main>
     `;
-    
-    // Event listeners
-    document.getElementById('create-room-btn')?.addEventListener('click', () => {
-      this.showUsernameModal('create');
-    });
-    
-    document.getElementById('join-room-btn')?.addEventListener('click', () => {
-      this.showUsernameModal('join');
-    });
+
+    // Events
+    document.getElementById('create-room-btn')?.addEventListener('click', () => this.showUsernameModal('create'));
+    document.getElementById('join-room-btn')?.addEventListener('click', () => this.showUsernameModal('join'));
   }
-  
-  // Username Modal
+
+  // ==================== USERNAME MODAL ====================
   private modalAction: 'create' | 'join' = 'create';
-  
+
   showUsernameModal(action: 'create' | 'join'): void {
     this.modalAction = action;
     const app = document.getElementById('app');
     if (!app) return;
-    
-    // Check for existing room ID if joining
-    let roomIdInput = '';
-    const path = window.location.pathname;
+
+    // Check for existing room if joining
+    let roomId = '';
     if (action === 'join') {
-      const match = path.match(/\/room\/([^/]+)/);
-      roomIdInput = match ? match[1] : '';
+      const match = window.location.pathname.match(/\/room\/([^/]+)/);
+      roomId = match ? match[1] : '';
     }
-    
+
     app.innerHTML = `
-      <div class="modal-overlay">
-        <div class="modal">
-          <h2 class="modal-title">${action === 'create' ? 'Create a room' : 'Join a room'}</h2>
-          <p class="modal-desc">Enter your name to get started</p>
-          
-          <form class="modal-form" id="username-form">
-            <div>
-              <label class="label" for="username-input">Your Name</label>
-              <input 
-                type="text" 
-                id="username-input" 
-                class="input" 
-                placeholder="Enter your name"
-                autocomplete="off"
-                required
-                maxlength="20"
-              />
+      <header class="header">
+        <div class="header-inner">
+          <a href="/" class="logo">
+            <span class="logo-mark">🎙️</span>
+            <span class="logo-text">PrinceVChat</span>
+          </a>
+        </div>
+      </header>
+      
+      <main class="main">
+        <div class="modal-overlay" id="modal-overlay">
+          <div class="modal">
+            <div class="modal-header">
+              <h2 class="modal-title">${action === 'create' ? 'Create a room' : 'Join a room'}</h2>
+              <p class="modal-subtitle">Enter your name to get started</p>
             </div>
             
-            ${action === 'join' ? `
-              <div>
-                <label class="label" for="room-id-input">Room Code</label>
+            <form id="username-form">
+              <div class="form-group">
+                <label class="form-label" for="username-input">Your Name</label>
                 <input 
                   type="text" 
-                  id="room-id-input" 
-                  class="input" 
-                  placeholder="e.g. abc123"
-                  value="${roomIdInput}"
+                  id="username-input" 
+                  class="form-input" 
+                  placeholder="Enter your name"
                   autocomplete="off"
                   required
+                  maxlength="20"
+                  autofocus
                 />
               </div>
-            ` : ''}
-            
-            <div class="modal-actions">
-              <button type="button" class="btn btn-ghost" id="modal-cancel-btn">Cancel</button>
-              <button type="submit" class="btn btn-primary">
-                ${action === 'create' ? 'Create Room' : 'Join Room'}
-              </button>
-            </div>
-          </form>
+              
+              ${action === 'join' ? `
+                <div class="form-group">
+                  <label class="form-label" for="room-input">Room Code</label>
+                  <input 
+                    type="text" 
+                    id="room-input" 
+                    class="form-input" 
+                    placeholder="e.g. abc123"
+                    value="${roomId}"
+                    autocomplete="off"
+                    required
+                  />
+                </div>
+              ` : ''}
+              
+              <div class="form-actions">
+                <button type="button" class="btn btn-ghost" id="cancel-btn">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                  ${action === 'create' ? 'Create Room' : 'Join Room'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
+      </main>
     `;
-    
-    // Event listeners
-    document.getElementById('modal-cancel-btn')?.addEventListener('click', () => {
-      this.showLandingPage();
+
+    // Events
+    document.getElementById('modal-overlay')?.addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) this.showLanding();
     });
-    
+
+    document.getElementById('cancel-btn')?.addEventListener('click', () => {
+      this.showLanding();
+    });
+
     document.getElementById('username-form')?.addEventListener('submit', (e) => {
       e.preventDefault();
       const usernameInput = document.getElementById('username-input') as HTMLInputElement;
-      const roomIdInput = document.getElementById('room-id-input') as HTMLInputElement;
+      const roomInput = document.getElementById('room-input') as HTMLInputElement;
       
-      const username = usernameInput?.value.trim();
-      const roomId = roomIdInput?.value.trim();
-      
-      if (username) {
-        localStorage.setItem('username', username);
+      const name = usernameInput?.value.trim();
+      const room = roomInput?.value.trim();
+
+      if (name) {
+        localStorage.setItem('username', name);
+        
         if (this.modalAction === 'create') {
           this.onCreateRoom?.();
-        } else if (roomId) {
-          window.history.replaceState(null, '', `/room/${roomId}`);
+        } else if (room) {
+          window.history.replaceState(null, '', `/room/${room}`);
           this.onJoinRoom?.();
         }
       }
     });
-    
-    // Focus input
-    setTimeout(() => {
-      document.getElementById('username-input')?.focus();
-    }, 100);
+
+    // Focus
+    setTimeout(() => document.getElementById('username-input')?.focus(), 100);
   }
-  
-  // Room Page
-  showRoomPage(roomId: string, hostName: string = 'You'): void {
+
+  // ==================== ROOM ====================
+  showRoom(roomId: string, hostName: string = 'You'): void {
     this.currentScreen = 'room';
+    this.roomId = roomId;
     const app = document.getElementById('app');
     if (!app) return;
-    
-    // Get saved username
+
+    // Get saved name
     const username = localStorage.getItem('username') || hostName;
-    
-    // Add self as first user
+
+    // Add self
     this.users.clear();
     this.users.set(this.localUserId!, {
       id: this.localUserId!,
       name: username,
       isHost: true,
-      speaking: false,
-      muted: false,
-      raisedHand: false
+      speaking: false
     });
-    
+
     app.innerHTML = `
       <header class="header">
         <div class="header-inner">
           <a href="/" class="logo">
-            <span class="logo-icon">🎙️</span>
-            PrinceVChat
+            <span class="logo-mark">🎙️</span>
+            <span class="logo-text">PrinceVChat</span>
           </a>
           <div class="header-right">
-            <span class="badge badge-live">● LIVE</span>
-            <span class="text-sm text-secondary" id="user-count">1 participant</span>
+            <span class="live-badge">● LIVE</span>
+            <span class="user-count" id="user-count">1 participant</span>
           </div>
         </div>
       </header>
@@ -243,129 +236,108 @@ export class UIManager {
         <div class="room-header">
           <div class="room-info">
             <h1 class="room-title">${this.escapeHtml(username)}'s Room</h1>
-            <div class="copy-link">
-              <input type="text" id="room-link" value="${window.location.href}" readonly />
-              <button class="btn btn-sm btn-secondary" id="copy-link-btn">Copy</button>
+            <div class="room-code">
+              <input type="text" id="room-link" value="${window.location.origin}/room/${roomId}" readonly />
+              <button class="btn btn-sm btn-secondary" id="copy-btn">Copy</button>
             </div>
-          </div>
-          <div class="room-actions">
-            <button class="btn btn-icon btn-ghost" id="chat-btn" title="Chat">💬</button>
-            <button class="btn btn-icon btn-ghost" id="raise-btn" title="Raise Hand">✋</button>
           </div>
         </div>
         
         <div class="room-content">
-          <div class="room-grid" id="participants-grid">
+          <div class="participants" id="participants">
             ${this.renderParticipants()}
           </div>
         </div>
         
         <div class="room-controls">
-          <button class="control-btn" id="mute-btn" title="${this.isMuted ? 'Unmute' : 'Mute'}">
+          <button class="control-btn ${this.isMuted ? 'muted' : ''}" id="mute-btn" title="${this.isMuted ? 'Unmute' : 'Mute'}">
             ${this.isMuted ? '🔇' : '🎤'}
           </button>
-          <button class="control-btn danger" id="leave-btn" title="Leave">
+          <button class="control-btn ${this.isHandRaised ? 'active' : ''}" id="hand-btn" title="Raise Hand">
+            ✋
+          </button>
+          <button class="control-btn leave" id="leave-btn" title="Leave Room">
             📴
           </button>
         </div>
       </div>
       
-      <!-- Toast Container -->
       <div class="toast-container" id="toast-container"></div>
     `;
-    
-    // Event listeners
-    document.getElementById('copy-link-btn')?.addEventListener('click', () => {
+
+    // Events
+    document.getElementById('copy-btn')?.addEventListener('click', () => {
       const input = document.getElementById('room-link') as HTMLInputElement;
       navigator.clipboard.writeText(input.value);
       this.showToast('Link copied!', 'success');
     });
-    
+
     document.getElementById('mute-btn')?.addEventListener('click', () => {
       this.isMuted = !this.isMuted;
       const btn = document.getElementById('mute-btn');
       if (btn) {
+        btn.classList.toggle('muted', this.isMuted);
         btn.innerHTML = this.isMuted ? '🔇' : '🎤';
-        btn.classList.toggle('active', this.isMuted);
       }
-      this.onToggleMute?.();
+      this.onMute?.();
     });
-    
+
+    document.getElementById('hand-btn')?.addEventListener('click', () => {
+      this.isHandRaised = !this.isHandRaised;
+      const btn = document.getElementById('hand-btn');
+      btn?.classList.toggle('active', this.isHandRaised);
+    });
+
     document.getElementById('leave-btn')?.addEventListener('click', () => {
       this.onLeave?.();
     });
-    
-    document.getElementById('raise-btn')?.addEventListener('click', () => {
-      const btn = document.getElementById('raise-btn');
-      btn?.classList.toggle('active');
-      this.onRaiseHand?.();
-    });
-    
-    document.getElementById('chat-btn')?.addEventListener('click', () => {
-      this.onToggleChat?.();
-    });
   }
-  
+
   private renderParticipants(): string {
-    let html = '';
-    let count = 0;
+    const users = Array.from(this.users.values());
     
-    for (const [id, user] of this.users) {
-      const isSelf = id === this.localUserId;
-      html += `
-        <div class="participant-card ${user.isHost ? 'host' : ''} ${user.speaking ? 'speaking' : ''}" data-id="${id}">
+    if (users.length === 0) {
+      return `
+        <div class="empty-state">
+          <div class="empty-state-icon">👥</div>
+          <h3 class="empty-state-title">Waiting for others...</h3>
+          <p class="empty-state-desc">Share the link to invite people</p>
+        </div>
+      `;
+    }
+
+    return users.map(user => {
+      const isSelf = user.id === this.localUserId;
+      return `
+        <div class="participant ${user.isHost ? 'host' : ''} ${user.speaking ? 'speaking' : ''}">
           ${isSelf ? '<span class="participant-you">You</span>' : ''}
+          ${user.isHost && !isSelf ? '<span class="participant-host-badge">Host</span>' : ''}
           <div class="participant-avatar">${this.getInitials(user.name)}</div>
           <div class="participant-name">${this.escapeHtml(user.name)}</div>
           <div class="participant-status">
-            ${user.muted ? '�� ' : ''}
             ${user.speaking ? 'Speaking...' : isSelf ? 'You' : 'Connected'}
-          </div>
-          <div class="participant-controls">
-            <button class="btn btn-icon btn-sm btn-ghost" data-action="mute" title="${user.muted ? 'Unmute' : 'Mute'}">
-              ${user.muted ? '🔇' : '🎤'}
-            </button>
           </div>
         </div>
       `;
-      count++;
-    }
-    
-    // Update count
-    const countEl = document.getElementById('user-count');
-    if (countEl) {
-      countEl.textContent = `${count} participant${count !== 1 ? 's' : ''}`;
-    }
-    
-    return html || '<p class="text-secondary text-center">Waiting for others to join...</p>';
+    }).join('');
   }
-  
-  // User Management
-  addUser(userId: string, isHost: boolean): void {
+
+  // ==================== USER MANAGEMENT ====================
+  addUser(userId: string, isHost: boolean, name?: string): void {
     this.users.set(userId, {
       id: userId,
-      name: 'User-' + userId.slice(-4),
+      name: name || 'User-' + userId.slice(-4),
       isHost,
-      speaking: false,
-      muted: false,
-      raisedHand: false
+      speaking: false
     });
     this.updateParticipants();
   }
-  
+
   removeUser(userId: string): void {
     this.users.delete(userId);
     this.updateParticipants();
   }
-  
-  setUserName(userId: string, name: string): void {
-    const user = this.users.get(userId);
-    if (user) {
-      user.name = name;
-      this.updateParticipants();
-    }
-  }
-  
+
   setUserSpeaking(userId: string, speaking: boolean): void {
     const user = this.users.get(userId);
     if (user) {
@@ -373,38 +345,37 @@ export class UIManager {
       this.updateParticipants();
     }
   }
-  
-  setUserMuted(userId: string, muted: boolean): void {
-    const user = this.users.get(userId);
-    if (user) {
-      user.muted = muted;
-      this.updateParticipants();
-    }
-  }
-  
+
   private updateParticipants(): void {
-    const grid = document.getElementById('participants-grid');
-    if (grid) {
-      grid.innerHTML = this.renderParticipants();
+    const container = document.getElementById('participants');
+    if (container && this.currentScreen === 'room') {
+      container.innerHTML = this.renderParticipants();
+      this.updateUserCount();
     }
   }
-  
-  // Toast
-  showToast(message: string, type: ToastType = 'info'): void {
+
+  private updateUserCount(): void {
+    const count = this.users.size;
+    const el = document.getElementById('user-count');
+    if (el) {
+      el.textContent = `${count} participant${count !== 1 ? 's' : ''}`;
+    }
+  }
+
+  // ==================== TOAST ====================
+  showToast(message: string, type: 'success' | 'error' = 'success'): void {
     const container = document.getElementById('toast-container');
     if (!container) return;
-    
+
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     toast.textContent = message;
     container.appendChild(toast);
-    
-    setTimeout(() => {
-      toast.remove();
-    }, 3000);
+
+    setTimeout(() => toast.remove(), 3000);
   }
-  
-  // Helper methods
+
+  // ==================== HELPERS ====================
   private getInitials(name: string): string {
     return name
       .split(' ')
@@ -413,7 +384,7 @@ export class UIManager {
       .toUpperCase()
       .slice(0, 2);
   }
-  
+
   private escapeHtml(text: string): string {
     const div = document.createElement('div');
     div.textContent = text;

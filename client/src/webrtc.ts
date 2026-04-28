@@ -161,22 +161,21 @@ export class WebRTCManager {
       const [stream] = event.streams;
       console.log('[WebRTC] Track received from:', peerId);
 
-      // Create audio element and play immediately
+      // Create audio element - play immediately without waiting
       const audio = new Audio();
       audio.srcObject = stream;
       audio.autoplay = true;
       audio.playsInline = true;
       audio.volume = 1.0;
-      
-      // Explicitly play - required in modern browsers
+
+      // Try to play, but don't block
       try {
-        await audio.play();
-        console.log('[WebRTC] Playing audio from:', peerId);
+        audio.play().catch(() => {
+          // Autoplay blocked - queue for later
+          peer.pendingAudio = audio;
+        });
       } catch (e) {
-        console.log('[WebRTC] Autoplay blocked, waiting for user interaction');
-        // Store for later playback
-        const peer = this.peers.get(peerId);
-        if (peer) peer.pendingAudio = audio;
+        peer.pendingAudio = audio;
       }
 
       const peer = this.peers.get(peerId);
