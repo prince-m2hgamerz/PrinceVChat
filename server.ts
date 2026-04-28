@@ -8,13 +8,14 @@ import { createServer } from 'http';
 import { readFileSync, existsSync, statSync } from 'fs';
 import { join, extname } from 'path';
 
-const PORT = parseInt(process.env.PORT || '3000', 10);
-const isProduction = process.env.NODE_ENV === 'production';
+const PORT = parseInt(process.env.PORT || process.env.HTTP_PORT || '3000', 10);
+const isProduction = process.env.NODE_ENV === 'production' || process.env.RAILWAY_DEPLOYMENT === 'true' || process.env.RAILWAY_ENVIRONMENT === 'production' || existsSync(join(process.cwd(), 'dist'));
 
 // MIME types
 const MIME_TYPES: Record<string, string> = {
   '.html': 'text/html',
   '.js': 'application/javascript',
+  '.mjs': 'application/javascript',
   '.css': 'text/css',
   '.json': 'application/json',
   '.png': 'image/png',
@@ -22,6 +23,7 @@ const MIME_TYPES: Record<string, string> = {
   '.svg': 'image/svg+xml',
   '.woff': 'font/woff',
   '.woff2': 'font/woff2',
+  '.wasm': 'application/wasm',
 };
 
 // Room storage
