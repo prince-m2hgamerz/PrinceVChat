@@ -24,6 +24,8 @@ class App {
     this.userId = 'u-' + Math.random().toString(36).substring(2, 10);
     this.ui = new UIManager();
     this.ui.setLocalUserId(this.userId);
+    // Set up callbacks BEFORE router runs
+    this.setupCallbacks();
     this.setupRouter();
   }
 
