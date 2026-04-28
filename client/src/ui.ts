@@ -39,7 +39,6 @@ export class UIManager {
       <header class="header">
         <div class="header-inner">
           <a href="/" class="logo">
-            <span class="logo-mark">🎙️</span>
             <span class="logo-text">PrinceVChat</span>
           </a>
         </div>
@@ -83,6 +82,13 @@ export class UIManager {
           </div>
         </div>
       </main>
+      
+      <footer class="footer">
+        <div class="footer-inner">
+          <span>PrinceVChat v<span id="app-version">1.0.0</span></span>
+          <span>Free group voice chat</span>
+        </div>
+      </footer>
     `;
 
     // Events
@@ -221,7 +227,6 @@ export class UIManager {
       <header class="header">
         <div class="header-inner">
           <a href="/" class="logo">
-            <span class="logo-mark">🎙️</span>
             <span class="logo-text">PrinceVChat</span>
           </a>
           <div class="header-right">
@@ -260,6 +265,13 @@ export class UIManager {
           </button>
         </div>
       </div>
+      
+      <footer class="footer">
+        <div class="footer-inner">
+          <span>PrinceVChat v<span id="app-version">1.0.0</span></span>
+          <span>Free voice chat</span>
+        </div>
+      </footer>
       
       <div class="toast-container" id="toast-container"></div>
     `;

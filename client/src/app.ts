@@ -20,8 +20,14 @@ class App {
   private username: string = '';
 
   constructor() {
-    // Generate ID immediately
-    this.userId = 'u-' + Math.random().toString(36).substring(2, 10);
+    // Generate ID or get from storage (persist across refreshes)
+    let storedId = localStorage.getItem('userId');
+    if (!storedId) {
+      storedId = 'u-' + Math.random().toString(36).substring(2, 10);
+      localStorage.setItem('userId', storedId);
+    }
+    this.userId = storedId;
+    
     this.ui = new UIManager();
     this.ui.setLocalUserId(this.userId);
     // Set up callbacks BEFORE router runs
@@ -176,6 +182,13 @@ class App {
     this.roomId = '';
   }
 }
+
+// Set version in footer
+const version = '1.0.2';
+document.addEventListener('DOMContentLoaded', () => {
+  const versionEl = document.getElementById('app-version');
+  if (versionEl) versionEl.textContent = version;
+});
 
 document.addEventListener('DOMContentLoaded', () => {
   new App();
