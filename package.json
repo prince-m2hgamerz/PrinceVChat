@@ -7,8 +7,7 @@
   "scripts": {
     "dev": "vite --port 5173",
     "build": "vite build",
-    "start": "NODE_ENV=production tsx server.ts",
-    "railway-start": "vite build && NODE_ENV=production tsx server.ts"
+    "start": "vite build && NODE_ENV=production tsx server.ts"
   },
   "dependencies": {
     "tsx": "^4.7.0",

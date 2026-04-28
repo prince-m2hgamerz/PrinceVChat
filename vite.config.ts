@@ -16,5 +16,6 @@ export default defineConfig({
     minify: 'esbuild',
     sourcemap: false,
   },
-  base: './',
+  // FIXED: Use absolute paths for production - no ambiguity
+  base: '/',
 });
