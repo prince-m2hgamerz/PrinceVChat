@@ -1,20 +1,22 @@
 {
   "name": "princevchat",
   "version": "1.0.0",
-  "description": "Free group voice chat web app",
+  "description": "Free group voice chat - No signup, no download",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
-    "dev:server": "cd server && npm run dev",
-    "dev:client": "cd client && npm run dev",
-    "build": "npm run build:client && npm run build:server",
-    "build:client": "cd client && npm run build",
-    "build:server": "cd server && npm run build",
-    "start": "npm run start:server",
-    "start:server": "cd server && npm run start",
-    "install:all": "npm install && cd client && npm install && cd ../server && npm install"
+    "dev": "npx vite --port 5173",
+    "build": "npx vite build",
+    "start": "NODE_ENV=production npx tsx server.ts"
+  },
+  "dependencies": {
+    "ws": "^8.16.0"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "@types/node": "^20.11.0",
+    "@types/ws": "^8.5.10",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.12"
   }
 }

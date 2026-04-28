@@ -6,9 +6,8 @@ import { SocketManager } from './socket';
 import { WebRTCManager } from './webrtc';
 import { UIManager } from './ui';
 
-// Configuration
-const isLocalhost = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-const WS_URL = isLocalhost ? 'ws://localhost:3000' : 'wss://your-server.com';
+// Use relative WebSocket (works in production too)
+const WS_URL = `ws://${window.location.host}/ws`;
 const ROUTE_PREFIX = '/room/';
 
 class App {

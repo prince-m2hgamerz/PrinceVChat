@@ -1,70 +1,118 @@
 # PrinceVChat
 
-A modern, minimal group voice chat web app.
+A modern, free group voice chat web app.
+
+## Features
+
+- 🎤 Real-time group voice chat (WebRTC)
+- 🔗 Shareable invite links (`/room/xyz123`)
+- 👤 No signup required
+- 📱 Works on all modern browsers
+- 🌍 No database (in-memory rooms)
+
+---
 
 ## Quick Start
-
-### Prerequisites
-- Node.js 18+
 
 ### Local Development
 
 ```bash
 # Install dependencies
-npm run install:all
+npm install
 
-# Start both client & server
+# Start dev server (Vite)
 npm run dev
+
+# Open http://localhost:5173
 ```
 
-- Client: http://localhost:5173
-- Server: ws://localhost:3001
+### Build & Run Production
 
-### Production
+```bash
+# Build client
+npm run build
 
-1. **Deploy WebSocket server separately** (Railway, Render, Fly.io, or AWS):
-   ```bash
-   cd server
-   npm run build
-   npm start
-   ```
+# Start production server
+npm start
+```
 
-2. **Deploy client to Vercel**:
-   ```bash
-   cd client
-   npm run build
-   ```
+---
 
-3. Set `VITE_WS_URL` to your WebSocket server URL
+## Railway Deployment
 
-## Usage
+### 1. Push to GitHub
 
-1. Open http://localhost:5173
-2. Click "Create Voice Room"
-3. Share the invite link
-4. Others join and talk via WebRTC
+```bash
+git init
+git add .
+git commit -m "PrinceVChat"
+git branch -M main
+git remote add origin https://github.com/YOUR_USERNAME/PrinceVChat.git
+git push -u origin main
+```
+
+### 2. Deploy to Railway
+
+1. Go to [railway.app](https://railway.app)
+2. Login with GitHub
+3. Click "New Project" → "Deploy from GitHub repo"
+4. Select PrinceVChat repo
+5. Click "Deploy"
+
+### 3. Done!
+
+- Get your URL: `https://your-app.railway.app`
+- Share the link with friends!
+
+---
+
+## Architecture
+
+Single Railway instance runs:
+- **Static Files** → Built client `/dist`
+- **WebSocket** → Signaling at `/ws`
+
+```
+┌─────────────────────────────────────┐
+│         Railway Instance             │
+│  ┌─────────────────────────────┐  │
+│  │  Static UI (HTML/JS/CSS)   │  │
+│  └─────────────────────────────┘  │
+│  ┌─────────────────────────────┐  │
+│  │  WebSocket (/ws)             │  │
+│  └─────────────────────────────┘  │
+└─────────────────────────────────────┘
+```
+
+---
+
+## Project Structure
+
+```
+PrinceVChat/
+├── server.ts          # Unified server (static + WebSocket)
+├── vite.config.ts    # Vite build config
+├── package.json    # Dependencies & scripts
+├── tsconfig.json   # TypeScript config
+├── client/
+│   ├── index.html  # Entry point
+│   ├── favicon.svg # Icon
+│   └── src/
+│       ├── main.ts    # Entry
+│       ├── app.ts    # Main app
+│       ├── socket.ts  # WebSocket client
+│       ├── webrtc.ts # WebRTC (audio)
+│       └── ui.ts    # UI (Vercel-style)
+└── DEPLOY.md       # Deploy guide
+```
+
+---
 
 ## Tech Stack
 
-- **Client**: TypeScript, Vite
-- **Server**: Node.js, WebSocket (ws)
-- **Audio**: WebRTC peer-to-peer
-
-## Features
-
-- Real-time voice chat (mesh network)
-- No signup/login required
-- No database (in-memory rooms)
-- Speaking indicators
-- Mute/unmute
-- Copy invite link
-
-## Package Scripts
-
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start dev servers |
-| `npm run dev:client` | Start Vite dev server |
-| `npm run dev:server` | Start WebSocket server |
-| `npm run build` | Build client |
-| `npm run install:all` | Install all dependencies |
+| Layer | Technology |
+|-------|-----------|
+| UI | Vite + TypeScript |
+| Server | Node.js (ws) |
+| Voice | WebRTC (peer-to-peer) |
+| Deploy | Railway |
