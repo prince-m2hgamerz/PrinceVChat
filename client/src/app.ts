@@ -46,6 +46,7 @@ class App {
     this.ui.setOnJoinRoom(() => this.joinRoom());
     this.ui.setOnMute(() => this.toggleMute());
     this.ui.setOnLeave(() => this.leaveRoom());
+    this.ui.setOnRaiseHand(() => this.toggleRaiseHand());
   }
 
   private createRoom(): void {
@@ -139,6 +140,15 @@ class App {
     } else {
       this.webrtcManager.mute();
     }
+  }
+
+  private toggleRaiseHand(): void {
+    if (!this.socketManager) return;
+    this.socketManager.send({
+      type: 'raise-hand',
+      roomId: this.roomId,
+      raised: true
+    });
   }
 
   private leaveRoom(): void {
