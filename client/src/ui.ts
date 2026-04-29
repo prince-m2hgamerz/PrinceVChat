@@ -29,133 +29,121 @@ export class UIManager {
   setOnRaiseHand(cb: () => void): void { this.onRaiseHand = cb; }
   setLocalUserId(id: string): void { this.localUserId = id; }
 
-  // ==================== LANDING ====================
+  // ==================== LANDING - VERCEL STYLE ====================
   showLanding(): void {
     this.currentScreen = 'landing';
     const app = document.getElementById('app');
     if (!app) return;
 
-    const icons = {
-      plus: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
-      arrow: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`,
-      bolt: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`,
-      shield: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`,
-      wave: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>`,
-    };
-
     app.innerHTML = `
-      <div class="pro-page">
+      <div class="vercel-page">
+        <!-- Animated Background -->
+        <div class="bg-gradient"></div>
+        <div class="bg-grid"></div>
+        
         <!-- Navigation -->
-        <nav class="pro-nav">
-          <div class="nav-container">
-            <a href="/" class="nav-logo">
-              <span class="logo-mark">🎙</span>
-              <span class="logo-text">PrinceVChat</span>
-            </a>
-          </div>
+        <nav class="vercel-nav">
+          <a href="/" class="nav-logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2L2 7l10 5 10-5-10-5z" fill="#fff"/>
+              <path d="M2 17l10 5 10-5" stroke="#fff" stroke-width="2"/>
+              <path d="M2 12l10 5 10-5" stroke="#fff" stroke-width="2"/>
+            </svg>
+            <span>PrinceVChat</span>
+          </a>
         </nav>
 
-        <!-- Hero Section -->
-        <section class="pro-hero">
-          <div class="hero-container">
-            <div class="hero-badge">Free • No Signup • Instant</div>
-            <h1 class="hero-heading">
-              <span class="text-gradient">Voice chat</span>
-              <br />for modern teams
-            </h1>
-            <p class="hero-text">
-              Crystal clear group voice calls directly in your browser. 
-              No downloads, no accounts, just press and talk.
-            </p>
-            <div class="hero-actions">
-              <button class="btn-create" id="create-room-btn">
-                ${icons.plus}
-                <span>Create Room</span>
-              </button>
-              <button class="btn-join" id="join-room-btn">
-                ${icons.arrow}
-                <span>Join Room</span>
-              </button>
+        <!-- Hero -->
+        <main class="vercel-main">
+          <section class="hero-section">
+            <div class="hero-content">
+              <div class="hero-badge">Zero-config voice chat</div>
+              <h1 class="hero-title">
+                <span class="title-gradient">Group voice chat</span>
+                <br />for every team
+              </h1>
+              <p class="hero-description">
+                Start instant voice conversations with your team. 
+                No downloads, no sign-up, no friction.
+              </p>
+              <div class="hero-cta">
+                <button class="cta-primary" id="create-room-btn">
+                  <span>Create Room</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+                <button class="cta-secondary" id="join-room-btn">
+                  <span>Join Room</span>
+                </button>
+              </div>
             </div>
-          </div>
-        </section>
+            
+            <!-- Feature Cards Grid -->
+            <div class="features-grid">
+              <div class="feature-card">
+                <div class="feature-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                </div>
+                <h3>Instant</h3>
+                <p>Create a room in seconds. Share the link and anyone can join immediately.</p>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                <h3>Private</h3>
+                <p>Your conversations are yours. No tracking, no recording, no storage.</p>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+                </div>
+                <h3>Crystal Clear</h3>
+                <p>WebRTC-powered audio with echo cancellation and noise suppression.</p>
+              </div>
+            </div>
+          </section>
+          
+          <!-- Code Section -->
+          <section class="code-section">
+            <div class="code-block">
+              <div class="code-header">
+                <div class="code-dots">
+                  <span></span><span></span><span></span>
+                </div>
+                <span class="code-title">How it works</span>
+              </div>
+              <pre class="code-content"><code><span class="code-comment">// 1. Create a room</span>
+<span class="code-purple">const</span> room = <span class="code-keyword">await</span> createRoom(<span class="code-string">'team-standup'</span>);
 
-        <!-- Features -->
-        <section class="pro-features">
-          <div class="features-container">
-            <div class="feature-card">
-              <div class="feature-visual">
-                <div class="icon-box gradient-1">${icons.bolt}</div>
-              </div>
-              <h3>Instant Setup</h3>
-              <p>Create a room in seconds. Share the link and anyone can join immediately.</p>
-            </div>
-            <div class="feature-card">
-              <div class="feature-visual">
-                <div class="icon-box gradient-2">${icons.shield}</div>
-              </div>
-              <h3>Private & Secure</h3>
-              <p>Your conversations stay private. No data stored, no tracking.</p>
-            </div>
-            <div class="feature-card">
-              <div class="feature-visual">
-                <div class="icon-box gradient-3">${icons.wave}</div>
-              </div>
-              <h3>High Quality Audio</h3>
-              <p>WebRTC powered voice with echo cancellation and noise suppression.</p>
-            </div>
-          </div>
-        </section>
+<span class="code-comment">// 2. Share the invite</span>
+<span class="code-keyword">await</span> shareLink(room.url);
 
-        <!-- How It Works -->
-        <section class="pro-how">
-          <h2 class="section-title">How it works</h2>
-          <div class="steps">
-            <div class="step">
-              <div class="step-num">01</div>
-              <div class="step-content">
-                <h4>Create a room</h4>
-                <p>Click create room and pick a name</p>
-              </div>
+<span class="code-comment">// 3. Start talking!</span>
+<span class="code-purple">const</span> audio = <span class="code-keyword">await</span> getUserAudio();</code></pre>
             </div>
-            <div class="step-arrow">→</div>
-            <div class="step">
-              <div class="step-num">02</div>
-              <div class="step-content">
-                <h4>Share the link</h4>
-                <p>Copy the invite link and send it</p>
-              </div>
-            </div>
-            <div class="step-arrow">→</div>
-            <div class="step">
-              <div class="step-num">03</div>
-              <div class="step-content">
-                <h4>Start talking</h4>
-                <p>Anyone joins and you can talk instantly</p>
-              </div>
-            </div>
-          </div>
-        </section>
+          </section>
+        </main>
 
         <!-- Footer -->
-        <footer class="pro-footer">
-          <div class="footer-container">
-            <div class="footer-brand">
-              <span class="logo-mark">🎙</span>
+        <footer class="vercel-footer">
+          <div class="footer-content">
+            <a href="/" class="footer-logo">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L2 7l10 5 10-5-10-5z" fill="#fff"/>
+                <path d="M2 17l10 5 10-5" stroke="#fff" stroke-width="2"/>
+                <path d="M2 12l10 5 10-5" stroke="#fff" stroke-width="2"/>
+              </svg>
               <span>PrinceVChat</span>
-            </div>
-            <p class="footer-tagline">Free group voice chat for everyone</p>
+            </a>
             <div class="footer-links">
               <a href="#">About</a>
-              <span class="divider">•</span>
+              <a href="#">Careers</a>
+              <a href="#">Blog</a>
+              <a href="#">Legal</a>
               <a href="#">Privacy</a>
-              <span class="divider">•</span>
-              <a href="#">Terms</a>
             </div>
-            <div class="footer-copy">
-              <span>v<span class="version">1.0.22</span></span>
-              <span class="divider">•</span>
-              <span>© 2026</span>
+            <div class="footer-copyright">
+              <span>© 2026 PrinceVChat</span>
             </div>
           </div>
         </footer>
@@ -308,74 +296,61 @@ export class UIManager {
       handRaised: false
     });
 
-    const backIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>`;
-    const copyIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+    const backIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>`;
+    const copyIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
 
     app.innerHTML = `
-      <div class="pro-page room-page">
+      <div class="vercel-page room-page">
         <!-- Room Header -->
-        <header class="room-header">
-          <a href="/" class="header-back">${backIcon}</a>
-          <div class="header-center">
-            <h1 class="header-title">${this.escapeHtml(username)}</h1>
-            <div class="header-meta">
-              <span class="status-pill">
-                <span class="status-dot"></span>
+        <header class="room-header-bar">
+          <a href="/" class="back-button">${backIcon}</a>
+          <div class="room-info-bar">
+            <h1 class="room-title-text">${this.escapeHtml(username)}</h1>
+            <div class="room-meta-bar">
+              <span class="live-indicator">
+                <span class="live-dot"></span>
                 LIVE
               </span>
-              <span class="participant-count" id="user-count">1 participant</span>
+              <span class="participant-total" id="user-count">1</span>
             </div>
           </div>
-          <button class="header-action" id="copy-btn" title="Copy invite link">
-            ${copyIcon}
-          </button>
+          <button class="copy-button" id="copy-btn" title="Copy link">${copyIcon}</button>
         </header>
 
-        <!-- Room Content -->
-        <main class="room-main">
-          <div class="invite-section">
-            <label class="invite-label">Invite Link</label>
-            <div class="invite-box">
-              <input type="text" id="room-link" class="invite-input" value="${window.location.origin}/room/${roomId}" readonly />
-              <button class="invite-copy" id="copy-btn-2">Copy</button>
+        <!-- Room Main -->
+        <main class="room-content-area">
+          <div class="invite-card">
+            <label class="invite-label-text">Room Link</label>
+            <div class="invite-row">
+              <input type="text" id="room-link" class="invite-input-text" value="${window.location.origin}/room/${roomId}" readonly />
+              <button class="invite-button" id="copy-btn-2">Copy</button>
             </div>
           </div>
 
-          <div class="participants-section">
-            <h2 class="section-label">Participants</h2>
-            <div class="participants-grid" id="participants">
+          <div class="participants-area">
+            <h2 class="participants-label">Participants</h2>
+            <div class="participants-box" id="participants">
               ${this.renderParticipants()}
             </div>
           </div>
         </main>
 
-        <!-- Room Controls -->
-        <div class="room-controls">
-          <button class="control-button ${this.isMuted ? 'muted' : ''}" id="mute-btn">
-            <span class="control-icon">${this.isMuted ? icons.micOff : icons.mic}</span>
-            <span class="control-text">${this.isMuted ? 'Unmute' : 'Mute'}</span>
+        <!-- Controls -->
+        <div class="room-controls-bar">
+          <button class="control-btn-item ${this.isMuted ? 'control-off' : ''}" id="mute-btn">
+            ${this.isMuted ? icons.micOff : icons.mic}
           </button>
-          <button class="control-button ${this.isHandRaised ? 'raised' : ''}" id="hand-btn">
-            <span class="control-icon">${icons.hand}</span>
-            <span class="control-text">${this.isHandRaised ? 'Lower' : 'Raise'}</span>
+          <button class="control-btn-item ${this.isHandRaised ? 'control-active' : ''}" id="hand-btn">
+            ${icons.hand}
           </button>
-          <button class="control-button leave" id="leave-btn">
-            <span class="control-icon">${icons.leave}</span>
-            <span class="control-text">Leave</span>
+          <button class="control-btn-item control-leave" id="leave-btn">
+            ${icons.leave}
           </button>
         </div>
+
+        <!-- Toast -->
+        <div class="toast-container" id="toast-container"></div>
       </div>
-
-      <!-- Footer -->
-      <footer class="pro-footer room-footer">
-        <div class="footer-simple">
-          <span>🎙️ PrinceVChat</span>
-          <span class="dot">•</span>
-          <span>v<span class="version">1.0.22</span></span>
-        </div>
-      </footer>
-
-      <div class="toast-container" id="toast-container"></div>
     `;
 
     // Events
