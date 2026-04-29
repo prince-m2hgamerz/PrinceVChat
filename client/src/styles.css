@@ -1988,30 +1988,56 @@ a:hover {
   }
 
   .participants-flex {
-    gap: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
   }
 
   .participants-flex .participant {
-    flex: 1 1 calc(50% - 6px);
-    min-width: 120px;
-    max-width: none;
-    padding: 16px 12px;
+    flex: 0 1 calc(50% - 5px);
+    min-width: 100px;
+    max-width: 140px;
+    padding: 12px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
 
   .participants-flex .participant-avatar {
-    width: 48px;
-    height: 48px;
-    font-size: 18px;
-    margin-bottom: 10px;
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+    margin-bottom: 6px;
   }
 
   .participants-flex .participant-name {
-    font-size: 13px;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
   }
 
   .participants-flex .participant-status {
-    font-size: 11px;
-    padding: 4px 10px;
+    font-size: 9px;
+    padding: 2px 6px;
+    margin-top: 4px;
+  }
+
+  .participants-flex .participant-you,
+  .participants-flex .participant-host-badge {
+    font-size: 8px;
+    padding: 1px 4px;
+  }
+
+  .participants-flex .hand-icon {
+    font-size: 10px;
+    top: -4px;
+    right: -4px;
   }
 
   .controls-glass {
@@ -2040,8 +2066,25 @@ a:hover {
 }
 
 @media (max-width: 400px) {
+  .participants-flex {
+    gap: 8px;
+  }
+
   .participants-flex .participant {
-    flex: 1 1 100%;
+    flex: 0 1 calc(50% - 4px);
+    min-width: 90px;
+    max-width: none;
+    padding: 10px 6px;
+  }
+
+  .participants-flex .participant-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+
+  .participants-flex .participant-name {
+    font-size: 10px;
   }
 
   .controls-glass {
