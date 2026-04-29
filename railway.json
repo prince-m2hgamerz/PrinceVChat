@@ -9,6 +9,13 @@
     "numReplicas": 1,
     "startCommand": "npm run start",
     "restartPolicyType": "ON_FAILURE",
-    "restartPolicyMaxRetries": 10
+    "restartPolicyMaxRetries": 10,
+    "env": {
+      "SUPABASE_URL": "https://nyixcwollfqiojulsznw.supabase.co",
+      "SUPABASE_SERVICE_ROLE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55aXhjd29sbGZxaW9qdWxzem53Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NzM5MjAwMCwiZXhwIjoyMDkyOTY4MDAwfQ.3g--tSFcX3Y4Et9a386pO2DZJmlGFD7JmDXogGbe0wk",
+      "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55aXhjd29sbGZxaW9qdWxzem53Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczOTIwMDAsImV4cCI6MjA5Mjk2ODAwMH0.vUSFRWF0FJFiXVCKfYDCRI2IRWh2EcpqtZcSrAsntmE",
+      "PORT": "3000",
+      "NODE_ENV": "production"
+    }
   }
 }
