@@ -48,6 +48,7 @@ interface Room {
   hostName: string;
   clients: Map<string, Client>;
   chatHistory: { userId: string; username: string; message: string; timestamp: number }[];
+  isLocked: boolean;
 }
 
 const rooms = new Map<string, Room>();
@@ -273,11 +274,18 @@ wss.on('connection', (ws: WebSocket) => {
             hostId: clientId, 
             hostName: username, 
             clients: new Map(),
-            chatHistory: []
+            chatHistory: [],
+            isLocked: false
           });
         }
         const room = rooms.get(roomId!)!;
+
+        // Security: Check if room is locked
         const isHost = isNewRoom || room.clients.size === 0;
+        if (room.isLocked && !isHost) {
+          send(ws, { type: 'error', message: 'Room is locked by host' });
+          return;
+        }
         
         if (isHost) {
           room.hostId = clientId;
@@ -424,6 +432,20 @@ wss.on('connection', (ws: WebSocket) => {
               userId: clientId,
               enabled: client.videoOn
             }, clientId);
+          }
+        }
+      }
+      else if (msg.type === 'toggle-lock') {
+        if (roomId && clientId) {
+          const room = rooms.get(roomId);
+          const client = room?.clients.get(clientId);
+          if (room && client && client.isHost) {
+            room.isLocked = !!msg.locked;
+            broadcastToAll(room, {
+              type: 'room-locked',
+              roomId,
+              locked: room.isLocked
+            });
           }
         }
       }

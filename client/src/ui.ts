@@ -8,6 +8,8 @@ export class UIManager {
   private isHandRaised = false;
   private isDeafened = false;
   private isDarkMode = false;
+  private isRoomLocked = false;
+  private isScreenSharing = false;
   
   // Callbacks
   private onCreateRoom: (() => void) | null = null;
@@ -20,6 +22,8 @@ export class UIManager {
   private onChat: ((message: string) => void) | null = null;
   private onDeafen: (() => void) | null = null;
   private onReaction: ((emoji: string) => void) | null = null;
+  private onScreenShare: (() => void) | null = null;
+  private onToggleLock: ((locked: boolean) => void) | null = null;
 
   render(): void {
     this.showLanding();
@@ -36,6 +40,8 @@ export class UIManager {
   setOnChat(cb: (message: string) => void): void { this.onChat = cb; }
   setOnDeafen(cb: () => void): void { this.onDeafen = cb; }
   setOnReaction(cb: (emoji: string) => void): void { this.onReaction = cb; }
+  setOnScreenShare(cb: () => void): void { this.onScreenShare = cb; }
+  setOnToggleLock(cb: (locked: boolean) => void): void { this.onToggleLock = cb; }
   setLocalUserId(id: string): void { this.localUserId = id; }
 
   // ==================== LANDING - PREMIUM DESIGN ====================
@@ -202,6 +208,7 @@ export class UIManager {
       videoOff: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2m5.66 0H14a2 2 0 0 1 2 2v3.34"></path><line x1="1" y1="1" x2="23" y2="23"></line><path d="M23 7l-7 5 7 5V7z"></path></svg>`,
       switchCamera: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>`,
       hand: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"></path><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"></path><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"></path><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"></path></svg>`,
+      screenShare: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>`,
       leave: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-4h7"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>`,
       copy: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`,
       chat: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`,
@@ -210,7 +217,9 @@ export class UIManager {
       speakerOff: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>`,
       emoji: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>`,
       moon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`,
-      sun: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`
+      sun: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`,
+      lock: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`,
+      unlock: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>`
     };
   }
 
@@ -275,6 +284,9 @@ export class UIManager {
           </button>
           <button class="btn btn-icon" id="switch-camera-btn" aria-label="Switch Camera" title="Switch Camera" style="display: ${/Android|iPhone|iPad/i.test(navigator.userAgent) ? 'flex' : 'none'};">
             ${icons.switchCamera}
+          </button>
+          <button class="btn btn-icon ${this.isScreenSharing ? 'active' : ''}" id="screen-share-btn" aria-label="Toggle Screen Share" title="Share Screen">
+            ${icons.screenShare}
           </button>
           <button class="btn btn-icon ${this.isDeafened ? 'danger' : ''}" id="deafen-btn" aria-label="Toggle Speaker" title="Speaker">
             ${this.isDeafened ? icons.speakerOff : icons.speaker}
@@ -355,6 +367,10 @@ export class UIManager {
       this.onSwitchCamera?.();
     });
 
+    document.getElementById('screen-share-btn')?.addEventListener('click', () => {
+      this.onScreenShare?.();
+    });
+
     document.getElementById('hand-btn')?.addEventListener('click', () => {
       this.onRaiseHand?.();
     });
@@ -369,6 +385,16 @@ export class UIManager {
       }
       this.onDeafen?.();
       this.showToast(this.isDeafened ? 'Speaker off' : 'Speaker on');
+    });
+
+    document.getElementById('lock-btn')?.addEventListener('click', () => {
+      this.isRoomLocked = !this.isRoomLocked;
+      const btn = document.getElementById('lock-btn');
+      if (btn) {
+        btn.classList.toggle('danger', this.isRoomLocked);
+        btn.innerHTML = this.isRoomLocked ? icons.lock : icons.unlock;
+      }
+      this.onToggleLock?.(this.isRoomLocked);
     });
 
     // Emoji reactions

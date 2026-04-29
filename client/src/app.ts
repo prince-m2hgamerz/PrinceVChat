@@ -56,6 +56,8 @@ class App {
     this.ui.setOnChat((msg) => this.sendChatMessage(msg));
     this.ui.setOnDeafen(() => this.toggleDeafen());
     this.ui.setOnReaction((emoji) => this.sendReaction(emoji));
+    this.ui.setOnScreenShare(() => this.toggleScreenShare());
+    this.ui.setOnToggleLock((locked) => this.toggleRoomLock(locked));
   }
 
   private createRoom(): void {
@@ -260,6 +262,55 @@ class App {
     });
     this.ui.setVideoStatus(this.userId, !isOff);
     this.ui.showToast(isOff ? 'Camera off' : 'Camera on', 'success');
+  }
+
+  private isScreenSharing = false;
+  private async toggleScreenShare(): Promise<void> {
+    if (!this.webrtcManager) return;
+    
+    if (this.isScreenSharing) {
+      // Revert to camera
+      this.isScreenSharing = false;
+      await this.startCamera();
+    } else {
+      const stream = await this.webrtcManager.startScreenShare();
+      if (stream) {
+        this.isScreenSharing = true;
+        this.localStream = stream;
+        this.ui.setRemoteStream(this.userId, stream);
+        this.ui.showToast('Sharing screen', 'success');
+        
+        // Handle when user stops sharing via browser bar
+        stream.getVideoTracks()[0].onended = () => {
+          if (this.isScreenSharing) this.toggleScreenShare();
+        };
+      }
+    }
+  }
+
+  private async startCamera(): Promise<void> {
+    if (!this.webrtcManager) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' },
+        audio: true
+      });
+      this.localStream = stream;
+      this.webrtcManager.setLocalStream(stream);
+      this.ui.setRemoteStream(this.userId, stream);
+      this.ui.showToast('Reverted to camera', 'success');
+    } catch (e) {
+      console.error('Failed to restart camera', e);
+    }
+  }
+
+  private toggleRoomLock(locked: boolean): void {
+    if (!this.socketManager) return;
+    this.socketManager.send({
+      type: 'toggle-lock',
+      roomId: this.roomId,
+      locked: locked
+    });
   }
 
   private toggleRaiseHand(): void {
