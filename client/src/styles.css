@@ -277,13 +277,6 @@ body {
 .cl-security { background: #fce7f3; color: #9d174d; }
 .cl-improved { background: #d1fae5; color: #065f46; }
 
-@media (max-width: 768px) {
-  .hero-cta .btn { width: 100%; }
-  .hero-stats { gap: 24px; justify-content: center; }
-  .features-grid { grid-template-columns: 1fr; gap: 16px; }
-  .section-features { padding: 48px 0; }
-  .footer-inner { flex-direction: column; text-align: center; }
-}
 
 /* Typography Scale */
 h1, h2, h3, h4, h5, h6 { font-weight: 600; color: var(--ds-gray-900); }
@@ -484,25 +477,8 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; color: var(--ds-gray-900); }
   font-size: 16px;
 }
 
-/* Landing Page */
-.section-hero {
-  padding: 120px 0;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
 
-.hero-actions {
-  display: flex;
-  gap: 16px;
-  margin-top: 40px;
-}
 
-.section-features {
-  padding: 80px 0;
-  border-top: 1px solid var(--ds-gray-100);
-}
 
 .grid-3 {
   display: grid;
@@ -825,61 +801,116 @@ html.dark .chat-overlay { background: rgba(0,0,0,0.5); }
 html.dark .form-input { background: var(--ds-gray-50); color: var(--ds-fg); }
 html.dark .participant-card.host .participant-avatar { background: var(--ds-fg); color: var(--ds-bg); }
 
+/* ==================== RESPONSIVE - TABLET (<=768px) ==================== */
 @media (max-width: 768px) {
-  .grid-3 { grid-template-columns: 1fr; gap: 16px; }
-  .display-hero { font-size: 32px; letter-spacing: -1.28px; }
-  .heading-section { font-size: 28px; }
-  .heading-large { font-size: 24px; letter-spacing: -0.96px; }
-  .section-hero { padding: 48px 0; }
-  .section-features { padding: 48px 0; }
+  /* Layout */
   .layout-container { padding: 0 16px; }
-  .card { padding: 24px; }
   .nav { padding: 12px 0; }
   .nav-inner { gap: 8px; }
-  
-  /* Video grid - 2 columns on tablet */
+
+  /* Landing Hero */
+  .landing-main { padding: 40px 0; }
+  .section-hero { padding: 48px 0; }
+  .hero-content { padding: 0 8px; }
+  .hero-title { font-size: 36px; }
+  .hero-subtitle { font-size: 16px; margin-bottom: 32px; }
+  .hero-cta { flex-direction: column; align-items: stretch; }
+  .hero-cta .btn { width: 100%; justify-content: center; }
+  .hero-stats { gap: 24px; justify-content: center; padding-top: 32px; }
+  .stat-value { font-size: 20px; }
+
+  /* Features */
+  .section-features { padding: 48px 0; }
+  .features-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .feature-card { padding: 20px; }
+
+  /* Typography */
+  .heading-section { font-size: 28px; letter-spacing: -1.28px; }
+  .heading-large { font-size: 24px; letter-spacing: -0.96px; }
+  .heading-card { font-size: 20px; }
+  .body-large { font-size: 17px; }
+  .grid-3 { grid-template-columns: 1fr; gap: 16px; }
+  .card { padding: 24px; }
+
+  /* Footer */
+  .footer-inner { flex-direction: column; text-align: center; gap: 12px; }
+  .footer-left { flex-direction: column; gap: 8px; }
+
+  /* Participants Grid */
   .participants-grid {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 10px;
     padding: 16px 0;
   }
-  
-  /* Chat drawer fullscreen on mobile */
-  .chat-drawer { width: 100%; right: -100%; }
-  
-  /* Control bar - touch friendly */
-  .room-controls .btn-icon { 
-    width: 44px; 
-    height: 44px; 
+
+  /* Room Controls - touch friendly */
+  .room-controls .btn-icon {
+    width: 44px;
+    height: 44px;
     min-width: 44px;
     border-radius: 12px;
   }
-  
-  /* Room header */
-  .room-header { padding: 16px 0; }
+
+  /* Room Header */
+  .room-header { padding: 16px 0; flex-wrap: wrap; gap: 8px; }
   .room-info { gap: 8px; flex-wrap: wrap; }
-  
+
+  /* Chat Drawer fullscreen */
+  .chat-drawer { width: 100%; right: -100%; }
+
   /* Modal */
-  .modal { margin: 16px; max-width: calc(100% - 32px); }
-  
-  /* Copy button compact */
-  #copy-btn { font-size: 0; padding: 8px; }
+  .modal { margin: 16px; max-width: calc(100% - 32px); padding: 24px; }
+
+  /* Copy button - icon only */
+  #copy-btn { font-size: 0; padding: 8px; min-width: 36px; }
   #copy-btn svg { font-size: initial; }
-  
+
   /* Toast above controls */
   .toast-container { bottom: 90px; }
+
+  /* Emoji picker */
+  .emoji-picker { bottom: 80px; }
+
+  /* Changelog */
+  .changelog-items li { font-size: 14px; }
+  .changelog-entry { padding-bottom: 32px; }
+  .changelog-list { gap: 32px; }
 }
 
+/* ==================== RESPONSIVE - SMALL PHONE (<=480px) ==================== */
 @media (max-width: 480px) {
-  .hero-cta { flex-direction: column; width: 100%; }
-  .hero-cta .btn { width: 100%; }
-  .room-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+  /* Hero */
+  .hero-title { font-size: 28px; letter-spacing: -1px; }
+  .hero-subtitle { font-size: 15px; }
+  .hero-stats { gap: 16px; flex-wrap: wrap; }
+  .stat-item { min-width: 80px; }
+  .badge-new { font-size: 11px; padding: 4px 10px; }
+
+  /* Typography */
+  .heading-section { font-size: 24px; }
   .heading-large { font-size: 20px; }
-  .display-hero { font-size: 28px; }
-  .body-large { font-size: 16px; }
-  
+  .heading-card { font-size: 18px; }
+  .body-large { font-size: 15px; }
+  .body-regular { font-size: 14px; }
+
+  /* Features - single column */
+  .features-grid { grid-template-columns: 1fr; }
+
+  /* Room */
+  .room-header { flex-direction: column; align-items: flex-start; }
   .participants-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-  .participant-info-overlay { padding: 4px 8px; bottom: 6px; left: 6px; right: 6px; }
+  .participant-info-overlay { padding: 4px 8px; bottom: 6px; left: 6px; right: 6px; border-radius: 8px; }
   .participant-name { font-size: 11px; }
   .participant-avatar { width: 48px; height: 48px; font-size: 18px; }
+  .participant-card { aspect-ratio: 4/3; }
+
+  /* Controls smaller gap */
+  .room-controls .layout-container { gap: 6px !important; }
+  .room-controls .btn-icon { width: 40px; height: 40px; min-width: 40px; border-radius: 10px; }
+
+  /* Nav links compact */
+  .nav-inner > div:last-child { gap: 12px !important; }
+
+  /* Changelog */
+  .changelog-items li { flex-wrap: wrap; }
 }
