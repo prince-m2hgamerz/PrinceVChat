@@ -85,7 +85,7 @@ export class UIManager {
       
       <footer class="footer">
         <div class="footer-inner">
-          <span>PrinceVChat v<span class="version">1.0.9</span></span>
+          <span>PrinceVChat v<span class="version">1.0.10</span></span>
           <span>Free group voice chat</span>
         </div>
       </footer>
@@ -268,7 +268,7 @@ export class UIManager {
       
       <footer class="footer">
         <div class="footer-inner">
-          <span>PrinceVChat v<span class="version">1.0.9</span></span>
+          <span>PrinceVChat v<span class="version">1.0.10</span></span>
           <span>Free voice chat</span>
         </div>
       </footer>

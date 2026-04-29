@@ -85,6 +85,7 @@ export class SocketManager {
       userId: this.userId,
       targetUserId: message.targetUserId,
       payload: message.payload,
+      username: message.username,
     };
 
     this.socket.send(JSON.stringify(fullMessage));

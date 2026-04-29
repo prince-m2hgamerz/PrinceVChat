@@ -82,7 +82,7 @@ class App {
     this.username = localStorage.getItem('username') || 'User';
     this.setupCallbacks();
 
-    console.log('[App] Joining:', this.roomId, this.username, 'session:', this.userId);
+    console.log('[App] Joining:', this.roomId, this.username);
 
     try {
       this.ui.showToast('Connecting...', 'success');
