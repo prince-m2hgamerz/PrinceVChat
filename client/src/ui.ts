@@ -93,7 +93,7 @@ export class UIManager {
       
       <footer class="footer">
         <div class="footer-inner">
-          <span>PrinceVChat v<span class="version">1.0.17</span></span>
+          <span>PrinceVChat v<span class="version">1.0.19</span></span>
           <span>Free group voice chat</span>
         </div>
       </footer>
@@ -246,54 +246,53 @@ export class UIManager {
     });
 
     app.innerHTML = `
-      <header class="header">
-        <div class="header-inner">
-          <a href="/" class="logo">
-            <span class="logo-icon">🎙️</span>
-            <span class="logo-text">PrinceVChat</span>
-          </a>
-          <div class="header-right">
-            <span class="live-badge">
-              <span class="live-dot"></span> LIVE
+      <div class="room-screen">
+        <!-- Room Header -->
+        <div class="room-hero">
+          <div class="room-status">
+            <span class="live-indicator">
+              <span class="pulse-dot"></span>
+              LIVE
             </span>
-            <span class="user-count" id="user-count">1 participant</span>
+            <span class="participant-count" id="user-count">1 participant</span>
+          </div>
+          <h1 class="room-title">${this.escapeHtml(username)}'s Room</h1>
+          <div class="invite-section">
+            <input type="text" id="room-link" class="invite-input" value="${window.location.origin}/room/${roomId}" readonly />
+            <button class="btn btn-primary invite-btn" id="copy-btn">
+              ${icons.copy}
+              <span>Copy Link</span>
+            </button>
           </div>
         </div>
-      </header>
-      
-      <div class="room">
-        <div class="room-header">
-          <div class="room-info">
-            <h1 class="room-title">${this.escapeHtml(username)}'s Room</h1>
-            <div class="room-code">
-              <input type="text" id="room-link" value="${window.location.origin}/room/${roomId}" readonly />
-              <button class="btn btn-sm btn-secondary" id="copy-btn">${icons.copy} Copy</button>
-            </div>
-          </div>
-        </div>
-        
-        <div class="room-content">
-          <div class="participants" id="participants">
+
+        <!-- Participants Grid -->
+        <div class="participants-section">
+          <div class="participants-grid" id="participants">
             ${this.renderParticipants()}
           </div>
         </div>
-        
-        <div class="room-controls">
-          <button class="control-btn ${this.isMuted ? 'muted' : ''}" id="mute-btn" title="${this.isMuted ? 'Unmute' : 'Mute'}">
-            ${this.isMuted ? icons.micOff : icons.mic}
+
+        <!-- Control Bar -->
+        <div class="control-bar">
+          <button class="control-button ${this.isMuted ? 'muted' : ''}" id="mute-btn">
+            <span class="control-icon">${this.isMuted ? icons.micOff : icons.mic}</span>
+            <span class="control-label">${this.isMuted ? 'Unmute' : 'Mute'}</span>
           </button>
-          <button class="control-btn ${this.isHandRaised ? 'active' : ''}" id="hand-btn" title="Raise Hand">
-            ${icons.hand}
+          <button class="control-button ${this.isHandRaised ? 'active' : ''}" id="hand-btn">
+            <span class="control-icon">${icons.hand}</span>
+            <span class="control-label">${this.isHandRaised ? 'Lower Hand' : 'Raise Hand'}</span>
           </button>
-          <button class="control-btn leave" id="leave-btn" title="Leave Room">
-            ${icons.leave}
+          <button class="control-button leave" id="leave-btn">
+            <span class="control-icon">${icons.leave}</span>
+            <span class="control-label">Leave</span>
           </button>
         </div>
       </div>
       
       <footer class="footer">
         <div class="footer-inner">
-          <span>PrinceVChat v<span class="version">1.0.17</span></span>
+          <span>PrinceVChat v<span class="version">1.0.19</span></span>
           <span>Free voice chat</span>
         </div>
       </footer>
