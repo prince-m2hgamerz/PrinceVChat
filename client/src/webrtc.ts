@@ -1,29 +1,20 @@
 /**
- * PrinceVChat - WebRTC (Audio only, no user tracking)
+ * PrinceVChat - WebRTC (Audio & Video)
  */
 
-import { SocketManager, SocketMessage } from './socket';
+import { SocketManager } from './socket';
 
 interface PeerConnection {
   peerId: string;
   connection: RTCPeerConnection;
-  audioElement: HTMLAudioElement | null;
+  stream: MediaStream | null;
 }
 
 const ICE_SERVERS: RTCIceServer[] = [
   { urls: 'stun:stun.l.google.com:19302' },
   { urls: 'stun:stun1.l.google.com:19302' },
+  { urls: 'stun:stun2.l.google.com:19302' },
 ];
-
-const AUDIO_CONSTRAINTS: MediaTrackConstraints = {
-  echoCancellation: true,
-  noiseSuppression: true,
-  autoGainControl: true,
-  channelCount: 1,
-};
-
-type PeerCallback = (peerId: string) => void;
-type SpeakingCallback = (peerId: string, speaking: boolean) => void;
 
 export class WebRTCManager {
   private peers = new Map<string, PeerConnection>();
@@ -32,40 +23,50 @@ export class WebRTCManager {
   private roomId: string;
   private userId: string;
   private isMuted = false;
+  private isVideoOff = false;
   
-  private onPeerConnectedCb: PeerCallback | null = null;
-  private onPeerDisconnectedCb: PeerCallback | null = null;
-  private onSpeakingCb: SpeakingCallback | null = null;
+  private onPeerConnectedCb: ((peerId: string, stream: MediaStream) => void) | null = null;
+  private onPeerDisconnectedCb: ((peerId: string) => void) | null = null;
+  private onSpeakingCb: ((peerId: string, speaking: boolean) => void) | null = null;
 
   constructor(socketManager: SocketManager, roomId: string, userId: string) {
     this.socketManager = socketManager;
     this.roomId = roomId;
     this.userId = userId;
-    // Don't setup signaling here - app handles user events
   }
 
   setLocalStream(stream: MediaStream): void {
+    const oldStream = this.localStream;
     this.localStream = stream;
-    // Add tracks to existing peers
-    for (const [, peer] of this.peers) {
-      if (this.localStream) {
-        this.localStream.getTracks().forEach(track => {
+
+    // Replace tracks for all existing peers
+    this.peers.forEach(peer => {
+      const senders = peer.connection.getSenders();
+      this.localStream?.getTracks().forEach(track => {
+        const sender = senders.find(s => s.track?.kind === track.kind);
+        if (sender) {
+          sender.replaceTrack(track);
+        } else {
           peer.connection.addTrack(track, this.localStream!);
-        });
-      }
+        }
+      });
+    });
+
+    if (oldStream && oldStream !== stream) {
+      oldStream.getTracks().forEach(t => t.stop());
     }
   }
 
-  onPeerConnected(cb: PeerCallback): void { this.onPeerConnectedCb = cb; }
-  onPeerDisconnected(cb: PeerCallback): void { this.onPeerDisconnectedCb = cb; }
-  onSpeaking(cb: SpeakingCallback): void { this.onSpeakingCb = cb; }
+  onPeerConnected(cb: (peerId: string, stream: MediaStream) => void): void { this.onPeerConnectedCb = cb; }
+  onPeerDisconnected(cb: (peerId: string) => void): void { this.onPeerDisconnectedCb = cb; }
+  onSpeaking(cb: (peerId: string, speaking: boolean) => void): void { this.onSpeakingCb = cb; }
 
   async createPeer(peerId: string, initiator: boolean): Promise<PeerConnection | null> {
     if (this.peers.has(peerId)) return this.peers.get(peerId)!;
 
+    console.log(`[WebRTC] Creating peer for ${peerId}, initiator: ${initiator}`);
     const connection = new RTCPeerConnection({
       iceServers: ICE_SERVERS,
-      iceCandidatePoolSize: 10,
     });
 
     if (this.localStream) {
@@ -74,25 +75,14 @@ export class WebRTCManager {
       });
     }
 
-    connection.ontrack = async (event) => {
+    connection.ontrack = (event) => {
+      console.log(`[WebRTC] Received remote track from ${peerId}`);
       const [stream] = event.streams;
-      console.log('[WebRTC] 🎵 Received remote audio stream');
-      const audio = new Audio();
-      audio.srcObject = stream;
-      audio.autoplay = true;
-      audio.playsInline = true;
-      audio.volume = 1.0;
-      
-      // Try to play, but don't fail on error
-      audio.play().then(() => {
-        console.log('[WebRTC] ▶️ Audio playing');
-      }).catch(e => {
-        console.log('[WebRTC] ⚠️ Audio autoplay blocked - user needs to interact');
-      });
-      
       const peer = this.peers.get(peerId);
-      if (peer) peer.audioElement = audio;
-      this.onPeerConnectedCb?.(peerId);
+      if (peer) {
+        peer.stream = stream;
+        this.onPeerConnectedCb?.(peerId, stream);
+      }
     };
 
     connection.onicecandidate = (event) => {
@@ -101,39 +91,34 @@ export class WebRTCManager {
           type: 'ice-candidate',
           roomId: this.roomId,
           targetUserId: peerId,
-          payload: event.candidate.toJSON(),
+          payload: event.candidate,
         });
       }
     };
 
     connection.onconnectionstatechange = () => {
-      console.log('[WebRTC] Connection state:', connection.connectionState);
-      // Only remove peer on closed or failed (not on checking/connected)
-      if (connection.connectionState === 'closed') {
+      if (connection.connectionState === 'disconnected' || connection.connectionState === 'failed' || connection.connectionState === 'closed') {
         this.removePeer(peerId);
       }
     };
 
-    const peer: PeerConnection = { peerId, connection, audioElement: null };
+    const peer: PeerConnection = { peerId, connection, stream: null };
     this.peers.set(peerId, peer);
 
     if (initiator) {
-      try {
-        const offer = await connection.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: false });
-        await connection.setLocalDescription(offer);
-        console.log('[WebRTC] 📤 Sending offer to:', peerId);
-        this.socketManager.send({ type: 'offer', roomId: this.roomId, targetUserId: peerId, payload: offer });
-      } catch (e) {
-        console.log('[WebRTC] Failed to create offer for', peerId);
-      }
+      const offer = await connection.createOffer({
+        offerToReceiveAudio: true,
+        offerToReceiveVideo: true
+      });
+      await connection.setLocalDescription(offer);
+      this.socketManager.send({ type: 'offer', roomId: this.roomId, targetUserId: peerId, payload: offer });
     }
 
     return peer;
   }
 
-  // Handle incoming offer from peer
   async handleOffer(peerId: string, offer: RTCSessionDescriptionInit): Promise<void> {
-    const peer = await this.createPeer(peerId, false); // Not initiator for offer
+    const peer = await this.createPeer(peerId, false);
     if (peer) {
       await peer.connection.setRemoteDescription(new RTCSessionDescription(offer));
       const answer = await peer.connection.createAnswer();
@@ -147,7 +132,6 @@ export class WebRTCManager {
     }
   }
 
-  // Handle incoming answer from peer
   async handleAnswer(peerId: string, answer: RTCSessionDescriptionInit): Promise<void> {
     const peer = this.peers.get(peerId);
     if (peer) {
@@ -155,11 +139,14 @@ export class WebRTCManager {
     }
   }
 
-  // Handle incoming ICE candidate from peer
   async handleIceCandidate(peerId: string, candidate: RTCIceCandidateInit): Promise<void> {
     const peer = this.peers.get(peerId);
     if (peer) {
-      await peer.connection.addIceCandidate(new RTCIceCandidate(candidate));
+      try {
+        await peer.connection.addIceCandidate(new RTCIceCandidate(candidate));
+      } catch (e) {
+        console.error('[WebRTC] Error adding ICE candidate', e);
+      }
     }
   }
 
@@ -167,40 +154,72 @@ export class WebRTCManager {
     const peer = this.peers.get(peerId);
     if (peer) {
       peer.connection.close();
-      peer.audioElement?.remove();
       this.peers.delete(peerId);
       this.onPeerDisconnectedCb?.(peerId);
     }
   }
 
-  mute(): void {
+  toggleAudio(): boolean {
     if (this.localStream) {
-      this.localStream.getAudioTracks().forEach(track => track.enabled = false);
-      this.isMuted = true;
+      const audioTrack = this.localStream.getAudioTracks()[0];
+      if (audioTrack) {
+        audioTrack.enabled = !audioTrack.enabled;
+        this.isMuted = !audioTrack.enabled;
+        return this.isMuted;
+      }
     }
+    return false;
   }
 
-  unmute(): void {
+  toggleVideo(): boolean {
     if (this.localStream) {
-      this.localStream.getAudioTracks().forEach(track => track.enabled = true);
-      this.isMuted = false;
+      const videoTrack = this.localStream.getVideoTracks()[0];
+      if (videoTrack) {
+        videoTrack.enabled = !videoTrack.enabled;
+        this.isVideoOff = !videoTrack.enabled;
+        return this.isVideoOff;
+      }
     }
+    return false;
   }
 
   get muted(): boolean { return this.isMuted; }
-  get peerCount(): number { return this.peers.size; }
+  get videoOff(): boolean { return this.isVideoOff; }
+
+  async switchCamera(facingMode: 'user' | 'environment'): Promise<MediaStream | null> {
+    if (!this.localStream) return null;
+
+    const currentAudioTrack = this.localStream.getAudioTracks()[0];
+    
+    // Stop current video tracks
+    this.localStream.getVideoTracks().forEach(t => t.stop());
+
+    const newStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode },
+      audio: false
+    });
+
+    const newVideoTrack = newStream.getVideoTracks()[0];
+    
+    if (this.localStream) {
+      // Re-enable if it was enabled before
+      newVideoTrack.enabled = !this.isVideoOff;
+      
+      // If we have an existing stream, we just want to replace the video track
+      const stream = new MediaStream([currentAudioTrack, newVideoTrack]);
+      this.setLocalStream(stream);
+      return stream;
+    }
+    
+    return null;
+  }
 
   async cleanup(): Promise<void> {
-    for (const peerId of this.peers.keys()) {
-      this.removePeer(peerId);
-    }
+    this.peers.forEach(peer => peer.connection.close());
+    this.peers.clear();
     if (this.localStream) {
       this.localStream.getTracks().forEach(track => track.stop());
       this.localStream = null;
     }
-  }
-
-  static getAudioConstraints(): MediaTrackConstraints {
-    return AUDIO_CONSTRAINTS;
   }
 }

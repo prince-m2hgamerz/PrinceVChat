@@ -39,6 +39,7 @@ interface Client {
   username: string;
   isHost: boolean;
   handRaised: boolean;
+  videoOn: boolean;
 }
 
 interface Room {
@@ -153,7 +154,7 @@ const server = createServer((req, res) => {
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  res.setHeader('Permissions-Policy', 'microphone=(self)');
+  res.setHeader('Permissions-Policy', 'microphone=(self), camera=(self)');
   res.removeHeader('X-Powered-By');
 
   if (req.method === 'OPTIONS') {
@@ -229,15 +230,40 @@ function broadcastToOthers(room: Room, msg: any, excludeId: string) {
 wss.on('connection', (ws: WebSocket) => {
   let clientId: string | null = null;
   let roomId: string | null = null;
+  let lastMessageTime = 0;
+  const MESSAGE_RATE_LIMIT_MS = 100; // 10 messages per second max
+  const MAX_PAYLOAD_SIZE = 16384; // 16KB max per message
 
   ws.on('message', async (data) => {
     try {
+      // Security: Payload size check
+      if (data.toString().length > MAX_PAYLOAD_SIZE) {
+        console.log('[Security] Payload too large');
+        ws.close();
+        return;
+      }
+
+      // Security: Rate limiting
+      const now = Date.now();
+      if (now - lastMessageTime < MESSAGE_RATE_LIMIT_MS) {
+        return; // Silently drop spam
+      }
+      lastMessageTime = now;
+
       const msg = JSON.parse(data.toString());
       
       if (msg.type === 'join') {
+        // Security: Validate Room ID
+        if (!msg.roomId || typeof msg.roomId !== 'string' || !/^[a-zA-Z0-9_-]{1,32}$/.test(msg.roomId)) {
+          console.log('[Security] Invalid Room ID:', msg.roomId);
+          return;
+        }
+
         roomId = msg.roomId;
         clientId = msg.userId || 'u-' + Math.random().toString(36).substring(2, 10);
-        const username = msg.username || 'User-' + clientId.slice(-4);
+        
+        // Security: Sanitize username
+        let username = (msg.username || 'User-' + clientId.slice(-4)).substring(0, 20).replace(/[<>]/g, '');
         
         // Create/get room
         const isNewRoom = !rooms.has(roomId!);
@@ -261,7 +287,8 @@ wss.on('connection', (ws: WebSocket) => {
         room.clients.set(clientId, { 
           id: clientId, ws, username, 
           isHost, 
-          handRaised: false 
+          handRaised: false,
+          videoOn: false
         });
         
         console.log('[Server] Join:', username, clientId, roomId, isHost ? '(HOST)' : '');
@@ -278,6 +305,7 @@ wss.on('connection', (ws: WebSocket) => {
           username: c.username,
           isHost: c.isHost,
           handRaised: c.handRaised,
+          videoOn: c.videoOn
         }));
         
         send(ws, { 
@@ -380,6 +408,21 @@ wss.on('connection', (ws: WebSocket) => {
               roomId,
               userId: clientId,
               emoji: msg.emoji
+            }, clientId);
+          }
+        }
+      }
+      else if (msg.type === 'video-toggle') {
+        if (roomId && clientId) {
+          const room = rooms.get(roomId);
+          const client = room?.clients.get(clientId);
+          if (room && client) {
+            client.videoOn = !!msg.enabled;
+            broadcastToOthers(room, {
+              type: 'video-toggle',
+              roomId,
+              userId: clientId,
+              enabled: client.videoOn
             }, clientId);
           }
         }

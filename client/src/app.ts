@@ -46,6 +46,8 @@ class App {
     this.ui.setOnCreateRoom(() => this.createRoom());
     this.ui.setOnJoinRoom(() => this.joinRoom());
     this.ui.setOnMute(() => this.toggleMute());
+    this.ui.setOnToggleVideo(() => this.toggleVideo());
+    this.ui.setOnSwitchCamera(() => this.switchCamera());
     this.ui.setOnLeave(() => this.leaveRoom());
     this.ui.setOnRaiseHand(() => this.toggleRaiseHand());
     this.ui.setOnChat((msg) => this.sendChatMessage(msg));
@@ -90,14 +92,18 @@ class App {
     try {
       this.ui.showToast('Connecting...', 'success');
 
-      // Get mic
+      // Get mic and camera
       this.localStream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
           autoGainControl: true,
         },
-        video: false,
+        video: {
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          facingMode: 'user'
+        },
       });
 
       // Connect WebSocket
@@ -109,10 +115,9 @@ class App {
       // When we join, we get list of existing users (exclude self)
       // We are the NEW user - we DON'T create offers, we wait for existing users to offer us
       this.socketManager.on('room-users', (msg: any) => {
-        const users = msg.payload as { id: string; username: string; isHost: boolean; handRaised: boolean }[];
+        const users = msg.payload as { id: string; username: string; isHost: boolean; handRaised: boolean; videoOn?: boolean }[];
         const hostName = msg.hostName;
         
-        // Update room title with host name
         if (hostName) {
           this.ui.setRoomTitle(hostName);
         }
@@ -120,9 +125,8 @@ class App {
         for (const user of users) {
           if (user.id !== this.userId) {
             this.ui.addUser(user.id, user.isHost, user.username);
-            if (user.handRaised) {
-              this.ui.setUserHandRaised(user.id, true);
-            }
+            if (user.handRaised) this.ui.setUserHandRaised(user.id, true);
+            if (user.videoOn) this.ui.setVideoStatus(user.id, true);
           }
         }
       });
@@ -193,16 +197,28 @@ class App {
         username: this.username
       });
 
+      // When someone toggles video
+      this.socketManager.on('video-toggle', (msg: any) => {
+        this.ui.setVideoStatus(msg.userId, !!msg.enabled);
+      });
+
       // Show room UI first so DOM elements exist for handlers
       this.ui.showRoom(this.roomId, this.username);
+      
+      // Update local UI state
+      if (this.localStream) {
+        this.ui.setRemoteStream(this.userId, this.localStream);
+        this.ui.setVideoStatus(this.userId, true);
+      }
 
       // Setup WebRTC (for audio only)
       this.webrtcManager = new WebRTCManager(this.socketManager, this.roomId, this.userId);
       this.webrtcManager.setLocalStream(this.localStream);
 
       // Handle WebRTC events
-      this.webrtcManager.onPeerConnected((peerId: string) => {
+      this.webrtcManager.onPeerConnected((peerId: string, stream: MediaStream) => {
         console.log('[App] WebRTC peer connected:', peerId);
+        this.ui.setRemoteStream(peerId, stream);
       });
 
       this.webrtcManager.onPeerDisconnected((peerId: string) => {
@@ -242,10 +258,35 @@ class App {
 
   private toggleMute(): void {
     if (!this.webrtcManager) return;
-    if (this.webrtcManager.muted) {
-      this.webrtcManager.unmute();
-    } else {
-      this.webrtcManager.mute();
+    const isMuted = this.webrtcManager.toggleAudio();
+    this.ui.showToast(isMuted ? 'Muted' : 'Unmuted', 'success');
+  }
+
+  private toggleVideo(): void {
+    if (!this.webrtcManager) return;
+    const isOff = this.webrtcManager.toggleVideo();
+    this.socketManager?.send({
+      type: 'video-toggle',
+      roomId: this.roomId,
+      enabled: !isOff
+    });
+    this.ui.setVideoStatus(this.userId, !isOff);
+    this.ui.showToast(isOff ? 'Camera off' : 'Camera on', 'success');
+  }
+
+  private currentFacingMode: 'user' | 'environment' = 'user';
+  private async switchCamera(): Promise<void> {
+    if (!this.webrtcManager) return;
+    this.currentFacingMode = this.currentFacingMode === 'user' ? 'environment' : 'user';
+    try {
+      const stream = await this.webrtcManager.switchCamera(this.currentFacingMode);
+      if (stream) {
+        this.localStream = stream;
+        this.ui.setRemoteStream(this.userId, stream);
+        this.ui.showToast('Switched camera', 'success');
+      }
+    } catch (e) {
+      this.ui.showToast('Failed to switch camera', 'error');
     }
   }
 

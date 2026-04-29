@@ -1,9 +1,10 @@
 export class UIManager {
   private currentScreen: 'landing' | 'username' | 'room' = 'landing';
-  private users = new Map<string, { id: string; name: string; isHost: boolean; speaking: boolean; handRaised: boolean }>();
+  private users = new Map<string, { id: string; name: string; isHost: boolean; speaking: boolean; handRaised: boolean; stream?: MediaStream; videoOn?: boolean }>();
   private localUserId: string | null = null;
   private roomId: string = '';
   private isMuted = false;
+  private isVideoOn = false;
   private isHandRaised = false;
   private isDeafened = false;
   private isDarkMode = false;
@@ -12,6 +13,8 @@ export class UIManager {
   private onCreateRoom: (() => void) | null = null;
   private onJoinRoom: (() => void) | null = null;
   private onMute: (() => void) | null = null;
+  private onToggleVideo: (() => void) | null = null;
+  private onSwitchCamera: (() => void) | null = null;
   private onLeave: (() => void) | null = null;
   private onRaiseHand: (() => void) | null = null;
   private onChat: ((message: string) => void) | null = null;
@@ -26,6 +29,8 @@ export class UIManager {
   setOnCreateRoom(cb: () => void): void { this.onCreateRoom = cb; }
   setOnJoinRoom(cb: () => void): void { this.onJoinRoom = cb; }
   setOnMute(cb: () => void): void { this.onMute = cb; }
+  setOnToggleVideo(cb: () => void): void { this.onToggleVideo = cb; }
+  setOnSwitchCamera(cb: () => void): void { this.onSwitchCamera = cb; }
   setOnLeave(cb: () => void): void { this.onLeave = cb; }
   setOnRaiseHand(cb: () => void): void { this.onRaiseHand = cb; }
   setOnChat(cb: (message: string) => void): void { this.onChat = cb; }
@@ -180,6 +185,9 @@ export class UIManager {
     return {
       mic: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>`,
       micOff: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"></line><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>`,
+      video: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"></path><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>`,
+      videoOff: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2m5.66 0H14a2 2 0 0 1 2 2v3.34"></path><line x1="1" y1="1" x2="23" y2="23"></line><path d="M23 7l-7 5 7 5V7z"></path></svg>`,
+      switchCamera: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>`,
       hand: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"></path><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"></path><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"></path><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"></path></svg>`,
       leave: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-4h7"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>`,
       copy: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`,
@@ -249,6 +257,12 @@ export class UIManager {
           <button class="btn btn-icon ${this.isMuted ? 'danger' : ''}" id="mute-btn" aria-label="Toggle Mute" title="Mute">
             ${this.isMuted ? icons.micOff : icons.mic}
           </button>
+          <button class="btn btn-icon ${this.isVideoOn ? '' : 'danger'}" id="video-btn" aria-label="Toggle Video" title="Video">
+            ${this.isVideoOn ? icons.video : icons.videoOff}
+          </button>
+          <button class="btn btn-icon" id="switch-camera-btn" aria-label="Switch Camera" title="Switch Camera" style="display: ${/Android|iPhone|iPad/i.test(navigator.userAgent) ? 'flex' : 'none'};">
+            ${icons.switchCamera}
+          </button>
           <button class="btn btn-icon ${this.isDeafened ? 'danger' : ''}" id="deafen-btn" aria-label="Toggle Speaker" title="Speaker">
             ${this.isDeafened ? icons.speakerOff : icons.speaker}
           </button>
@@ -312,6 +326,20 @@ export class UIManager {
         btn.innerHTML = this.isMuted ? roomIcons.micOff : roomIcons.mic;
       }
       this.onMute?.();
+    });
+
+    document.getElementById('video-btn')?.addEventListener('click', () => {
+      this.isVideoOn = !this.isVideoOn;
+      const btn = document.getElementById('video-btn');
+      if (btn) {
+        btn.classList.toggle('danger', !this.isVideoOn);
+        btn.innerHTML = this.isVideoOn ? roomIcons.video : roomIcons.videoOff;
+      }
+      this.onToggleVideo?.();
+    });
+
+    document.getElementById('switch-camera-btn')?.addEventListener('click', () => {
+      this.onSwitchCamera?.();
     });
 
     document.getElementById('hand-btn')?.addEventListener('click', () => {
@@ -387,22 +415,25 @@ export class UIManager {
 
     return users.map(user => {
       const isSelf = user.id === this.localUserId;
-      const status = user.handRaised ? '✋ Hand raised' : (user.speaking ? 'Speaking...' : (isSelf ? 'You' : 'Connected'));
+      const status = user.handRaised ? '✋ Hand raised' : (user.speaking ? 'Speaking...' : (isSelf ? 'You' : ''));
       
       const classes = ['participant-card'];
       if (user.speaking) classes.push('speaking');
       if (user.handRaised) classes.push('hand-up');
       if (user.isHost) classes.push('host');
+      if (user.videoOn) classes.push('video-on');
 
       return `
-        <div class="${classes.join(' ')}">
-          <div class="participant-badge-container">
-            ${isSelf ? '<span class="badge" style="background: var(--ds-gray-100); color: var(--ds-fg);">You</span>' : '<div></div>'}
-            ${user.isHost && !isSelf ? '<span class="badge" style="background: var(--ds-gray-100); color: var(--ds-fg);">Host</span>' : ''}
+        <div class="${classes.join(' ')}" id="p-${user.id}">
+          <div class="participant-avatar-overlay" id="avatar-${user.id}">
+            <div class="participant-avatar">${this.getInitials(user.name)}</div>
           </div>
-          <div class="participant-avatar">${this.getInitials(user.name)}</div>
-          <div class="participant-name">${this.escapeHtml(user.name)}</div>
-          <div class="participant-status">${status}</div>
+          <video id="video-${user.id}" class="participant-video ${isSelf ? '' : 'remote'}" autoplay playsinline ${isSelf ? 'muted' : ''}></video>
+          
+          <div class="participant-info-overlay">
+            <div class="participant-name">${this.escapeHtml(user.name)} ${user.isHost ? '(Host)' : ''}</div>
+            <div class="participant-status-badge">${status}</div>
+          </div>
         </div>
       `;
     }).join('');
@@ -415,15 +446,47 @@ export class UIManager {
       name: name || 'User-' + userId.slice(-4),
       isHost,
       speaking: false,
-      handRaised: false
+      handRaised: false,
+      videoOn: false
     });
     
     if (isHost) {
-      const titleEl = document.getElementById('room-title');
-      if (titleEl) titleEl.textContent = `${name || 'User'}'s Room`;
+      this.setRoomTitle(name || 'User');
     }
 
     this.updateParticipants();
+  }
+
+  setRemoteStream(userId: string, stream: MediaStream): void {
+    const user = this.users.get(userId);
+    if (user) {
+      user.stream = stream;
+      user.videoOn = stream.getVideoTracks().length > 0;
+      
+      const videoEl = document.getElementById(`video-${userId}`) as HTMLVideoElement;
+      if (videoEl) {
+        videoEl.srcObject = stream;
+        videoEl.onloadedmetadata = () => videoEl.play().catch(e => console.error('Video play error', e));
+      }
+      
+      this.updateVideoUI(userId);
+    }
+  }
+
+  setVideoStatus(userId: string, videoOn: boolean): void {
+    const user = this.users.get(userId);
+    if (user) {
+      user.videoOn = videoOn;
+      this.updateVideoUI(userId);
+    }
+  }
+
+  private updateVideoUI(userId: string): void {
+    const user = this.users.get(userId);
+    const card = document.getElementById(`p-${userId}`);
+    if (card && user) {
+      card.classList.toggle('video-on', user.videoOn);
+    }
   }
 
   removeUser(userId: string): void {
