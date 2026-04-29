@@ -204,7 +204,7 @@ const server = createServer((req, res) => {
     }
 
     // SPA fallback for routes
-    if (filePath.startsWith('/room')) {
+    if (filePath.startsWith('/room') || filePath.startsWith('/changelog')) {
       const indexPath = join(STATIC_DIR, 'index.html');
       if (existsSync(indexPath)) {
         res.writeHead(200, { 'Content-Type': 'text/html' });

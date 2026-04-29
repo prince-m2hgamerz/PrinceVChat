@@ -51,6 +51,10 @@ class App {
         return;
       }
     }
+    if (path === '/changelog') {
+      this.ui.showChangelog();
+      return;
+    }
     this.ui.render();
   }
 

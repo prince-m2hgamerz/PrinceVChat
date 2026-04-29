@@ -44,7 +44,7 @@ export class UIManager {
   setOnToggleLock(cb: (locked: boolean) => void): void { this.onToggleLock = cb; }
   setLocalUserId(id: string): void { this.localUserId = id; }
 
-  // ==================== LANDING - PREMIUM DESIGN ====================
+  // ==================== LANDING - VERCEL-INSPIRED DESIGN ====================
   showLanding(): void {
     this.currentScreen = 'landing';
     const app = document.getElementById('app');
@@ -55,13 +55,17 @@ export class UIManager {
         <nav class="nav">
           <div class="layout-container nav-inner">
             <a href="/" class="logo">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path d="M12 2L2 7l10 5 10-5-10-5z" fill="currentColor"/>
                 <path d="M2 17l10 5 10-5" stroke="currentColor" stroke-width="2"/>
                 <path d="M2 12l10 5 10-5" stroke="currentColor" stroke-width="2"/>
               </svg>
               <span>PrinceVChat</span>
             </a>
+            <div style="display:flex;gap:24px;align-items:center;">
+              <a href="#features" class="nav-link" style="font-size:14px;font-weight:500;color:var(--ds-gray-500);text-decoration:none;">Features</a>
+              <a href="/changelog" class="nav-link" id="nav-changelog" style="font-size:14px;font-weight:500;color:var(--ds-gray-500);text-decoration:none;">Changelog</a>
+            </div>
           </div>
         </nav>
 
@@ -69,39 +73,75 @@ export class UIManager {
           <div class="hero-glow"></div>
           <section class="layout-container section-hero">
             <div class="hero-content">
-              <div class="badge-new">Version 2.0 is here</div>
-              <h1 class="hero-title">Experience the Next Level of <span>Real-time</span> Communication</h1>
-              <p class="hero-subtitle">High-quality voice and video calls, instant messaging, and seamless collaboration. No accounts, no hassle.</p>
-              
+              <div class="badge-new"><span class="badge-dot"></span>Version 3.0 — HD Video & Screen Share</div>
+              <h1 class="hero-title">Group voice chat<br>for <span>every team</span></h1>
+              <p class="hero-subtitle">Crystal-clear HD voice and video calls, real-time messaging, screen sharing, and emoji reactions. No accounts required — just share a link.</p>
               <div class="hero-cta">
                 <button class="btn btn-primary btn-large" id="create-room-btn">
-                  <span>Start a Room</span>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                  Start a Room
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                 </button>
                 <button class="btn btn-secondary btn-large" id="join-room-btn">Join with Code</button>
               </div>
-
               <div class="hero-stats">
-                <div class="stat-item">
-                  <span class="stat-value">HD</span>
-                  <span class="stat-label">Video Calls</span>
-                </div>
-                <div class="stat-item">
-                  <span class="stat-value">End-to-End</span>
-                  <span class="stat-label">Signaling</span>
-                </div>
-                <div class="stat-item">
-                  <span class="stat-value">0ms</span>
-                  <span class="stat-label">Latency</span>
-                </div>
+                <div class="stat-item"><span class="stat-value">HD</span><span class="stat-label">Video Calls</span></div>
+                <div class="stat-item"><span class="stat-value">P2P</span><span class="stat-label">Encrypted</span></div>
+                <div class="stat-item"><span class="stat-value">&lt;50ms</span><span class="stat-label">Latency</span></div>
+                <div class="stat-item"><span class="stat-value">0</span><span class="stat-label">Sign Up Required</span></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="layout-container section-features" id="features">
+            <div style="text-align:center;margin-bottom:48px;">
+              <span class="mono-label" style="color:var(--ds-blue);margin-bottom:16px;display:block;">FEATURES</span>
+              <h2 class="heading-section">Everything you need to communicate</h2>
+              <p class="body-large" style="max-width:600px;margin:16px auto 0;">No downloads, no plugins. Built on WebRTC for direct peer-to-peer connections.</p>
+            </div>
+            <div class="features-grid">
+              <div class="feature-card">
+                <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--ds-blue)" stroke-width="1.5"><path d="M23 7l-7 5 7 5V7z"></path><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg></div>
+                <h3 class="heading-card">HD Video Calls</h3>
+                <p class="body-regular">1280×720 video with front and back camera switching on mobile devices.</p>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--ds-blue)" stroke-width="1.5"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line></svg></div>
+                <h3 class="heading-card">Crystal Clear Audio</h3>
+                <p class="body-regular">Echo cancellation, noise suppression, and real-time speaker detection.</p>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--ds-blue)" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg></div>
+                <h3 class="heading-card">Screen Sharing</h3>
+                <p class="body-regular">Share your entire screen, a window, or a browser tab with everyone.</p>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--ds-blue)" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></div>
+                <h3 class="heading-card">Private & Secure</h3>
+                <p class="body-regular">Room locking, CSP headers, rate limiting, and zero server-side recording.</p>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--ds-blue)" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></div>
+                <h3 class="heading-card">Live Chat</h3>
+                <p class="body-regular">Real-time text messaging with chat history and emoji reactions.</p>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--ds-blue)" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg></div>
+                <h3 class="heading-card">Reactions & Hand Raise</h3>
+                <p class="body-regular">Express yourself with emoji reactions and raise your hand for attention.</p>
               </div>
             </div>
           </section>
         </main>
 
         <footer class="landing-footer">
-          <div class="layout-container">
-            <p>© 2026 PrinceVChat. Crafted by m2hgamerz.</p>
+          <div class="layout-container footer-inner">
+            <div class="footer-left">
+              <p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p>
+            </div>
+            <div class="footer-right">
+              <a href="/changelog" class="footer-link" id="footer-changelog">Changelog</a>
+              <span class="footer-version">v3.0.0</span>
+            </div>
           </div>
         </footer>
       </div>
@@ -109,6 +149,73 @@ export class UIManager {
 
     document.getElementById('create-room-btn')?.addEventListener('click', () => this.showUsernameModal('create'));
     document.getElementById('join-room-btn')?.addEventListener('click', () => this.showUsernameModal('join'));
+    document.getElementById('nav-changelog')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/changelog'); this.showChangelog(); });
+    document.getElementById('footer-changelog')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/changelog'); this.showChangelog(); });
+    document.querySelector('a[href="#features"]')?.addEventListener('click', (e) => { e.preventDefault(); document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }); });
+  }
+
+  // ==================== CHANGELOG PAGE ====================
+  showChangelog(): void {
+    this.currentScreen = 'landing';
+    const app = document.getElementById('app');
+    if (!app) return;
+    app.innerHTML = `
+      <div class="landing-page">
+        <nav class="nav"><div class="layout-container nav-inner"><a href="/" class="logo" id="logo-home"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5z" fill="currentColor"/><path d="M2 17l10 5 10-5" stroke="currentColor" stroke-width="2"/><path d="M2 12l10 5 10-5" stroke="currentColor" stroke-width="2"/></svg><span>PrinceVChat</span></a></div></nav>
+        <main class="landing-main" style="align-items:flex-start;padding-top:40px;">
+          <div class="layout-container" style="width:100%;max-width:720px;">
+            <a href="/" class="back-link" id="back-home" style="font-size:14px;color:var(--ds-blue);text-decoration:none;font-weight:500;">&larr; Back to Home</a>
+            <h1 class="heading-section" style="margin-top:16px;margin-bottom:8px;">Changelog</h1>
+            <p class="body-large" style="margin-bottom:48px;">All notable changes to PrinceVChat.</p>
+            <div class="changelog-list">
+              <div class="changelog-entry">
+                <div class="changelog-version"><span class="badge">v3.0.0</span><span class="changelog-date">April 29, 2026</span></div>
+                <h3 class="heading-card">Major Release — Video, Screen Share & Security</h3>
+                <ul class="changelog-items">
+                  <li><span class="cl-tag cl-new">New</span> HD video calls (1280×720) with front/back camera switching</li>
+                  <li><span class="cl-tag cl-new">New</span> Screen sharing — share your screen, a window, or a tab</li>
+                  <li><span class="cl-tag cl-new">New</span> Room locking — hosts can lock rooms</li>
+                  <li><span class="cl-tag cl-new">New</span> Real-time audio level detection with speaker highlighting</li>
+                  <li><span class="cl-tag cl-new">New</span> Dark mode toggle</li>
+                  <li><span class="cl-tag cl-new">New</span> Changelog page</li>
+                  <li><span class="cl-tag cl-fix">Fix</span> Critical audio bug — streams persist after UI rebuilds</li>
+                  <li><span class="cl-tag cl-fix">Fix</span> Camera defaults to OFF on join for privacy</li>
+                  <li><span class="cl-tag cl-security">Security</span> Content-Security-Policy header</li>
+                  <li><span class="cl-tag cl-security">Security</span> HSTS, XSS protection, frame-ancestors: none</li>
+                  <li><span class="cl-tag cl-security">Security</span> Server-side chat message sanitization</li>
+                  <li><span class="cl-tag cl-security">Security</span> WebSocket rate limiting & payload size limits</li>
+                  <li><span class="cl-tag cl-improved">Improved</span> Premium Vercel-inspired design system</li>
+                  <li><span class="cl-tag cl-improved">Improved</span> Mobile-first responsive layout</li>
+                </ul>
+              </div>
+              <div class="changelog-entry">
+                <div class="changelog-version"><span class="badge">v2.0.0</span><span class="changelog-date">April 2026</span></div>
+                <h3 class="heading-card">Voice Chat & Real-time Features</h3>
+                <ul class="changelog-items">
+                  <li><span class="cl-tag cl-new">New</span> WebRTC-based voice chat</li>
+                  <li><span class="cl-tag cl-new">New</span> Real-time text chat with history</li>
+                  <li><span class="cl-tag cl-new">New</span> Emoji reactions with floating animations</li>
+                  <li><span class="cl-tag cl-new">New</span> Hand raising feature</li>
+                  <li><span class="cl-tag cl-new">New</span> Supabase integration for room persistence</li>
+                </ul>
+              </div>
+              <div class="changelog-entry">
+                <div class="changelog-version"><span class="badge">v1.0.0</span><span class="changelog-date">March 2026</span></div>
+                <h3 class="heading-card">Initial Release</h3>
+                <ul class="changelog-items">
+                  <li><span class="cl-tag cl-new">New</span> Room creation with unique codes</li>
+                  <li><span class="cl-tag cl-new">New</span> Username entry modal</li>
+                  <li><span class="cl-tag cl-new">New</span> WebSocket-based signaling server</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </main>
+        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.0.0</span></div></div></footer>
+      </div>
+    `;
+    document.getElementById('logo-home')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/'); this.showLanding(); });
+    document.getElementById('back-home')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/'); this.showLanding(); });
   }
 
   // ==================== USERNAME MODAL ====================
