@@ -115,6 +115,7 @@ export class WebRTCManager {
       try {
         const offer = await connection.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: false });
         await connection.setLocalDescription(offer);
+        console.log('[WebRTC] 📤 Sending offer to:', peerId);
         this.socketManager.send({ type: 'offer', roomId: this.roomId, targetUserId: peerId, payload: offer });
       } catch (e) {
         console.log('[WebRTC] Failed to create offer for', peerId);

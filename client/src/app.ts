@@ -158,17 +158,17 @@ class App {
 
       // Handle WebRTC signaling
       this.socketManager.on('offer', async (msg: any) => {
-        console.log('[App] Received offer from:', msg.userId);
+        console.log('[App] 📞 Received offer from:', msg.userId);
         await this.webrtcManager?.handleOffer(msg.userId, msg.payload);
       });
 
       this.socketManager.on('answer', async (msg: any) => {
-        console.log('[App] Received answer from:', msg.userId);
+        console.log('[App] 📞 Received answer from:', msg.userId);
         await this.webrtcManager?.handleAnswer(msg.userId, msg.payload);
       });
 
       this.socketManager.on('ice-candidate', async (msg: any) => {
-        console.log('[App] Received ICE from:', msg.userId);
+        console.log('[App] 🧊 Received ICE from:', msg.userId);
         await this.webrtcManager?.handleIceCandidate(msg.userId, msg.payload);
       });
 
