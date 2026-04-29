@@ -208,14 +208,7 @@ class App {
   }
 }
 
-// Version - hardcoded for now
-const APP_VERSION = '1.0.6';
-
+// Version is now hardcoded in UI
 document.addEventListener('DOMContentLoaded', () => {
-  // Update version in footer
-  const versionEl = document.getElementById('app-version');
-  if (versionEl) versionEl.textContent = APP_VERSION;
-  
-  // Initialize app
   new App();
 });
