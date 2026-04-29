@@ -856,8 +856,18 @@ html.dark .participant-card.host .participant-avatar { background: var(--ds-fg);
   .room-header { padding: 16px 0; flex-wrap: wrap; gap: 8px; }
   .room-info { gap: 8px; flex-wrap: wrap; }
 
-  /* Chat Drawer fullscreen */
-  .chat-drawer { width: 100%; right: -100%; }
+  /* Chat Drawer fullscreen on mobile */
+  .chat-drawer {
+    width: 100%;
+    right: -100%;
+    height: 100vh;
+    height: 100dvh; /* dynamic viewport height for mobile browsers */
+    border-radius: 0;
+  }
+  .chat-drawer.open { right: 0; }
+  .chat-input-container {
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  }
 
   /* Modal */
   .modal { margin: 16px; max-width: calc(100% - 32px); padding: 24px; }

@@ -247,20 +247,25 @@ wss.on('connection', (ws: WebSocket) => {
   ws.on('message', async (data) => {
     try {
       // Security: Payload size check
-      if (data.toString().length > MAX_PAYLOAD_SIZE) {
+      const rawData = data.toString();
+      if (rawData.length > MAX_PAYLOAD_SIZE) {
         console.log('[Security] Payload too large');
         ws.close();
         return;
       }
 
-      // Security: Rate limiting
-      const now = Date.now();
-      if (now - lastMessageTime < MESSAGE_RATE_LIMIT_MS) {
-        return; // Silently drop spam
-      }
-      lastMessageTime = now;
+      const msg = JSON.parse(rawData);
 
-      const msg = JSON.parse(data.toString());
+      // Security: Rate limiting — EXEMPT signaling messages (offer/answer/ice-candidate)
+      // These fire in rapid bursts and MUST NOT be dropped or audio/video won't work
+      const isSignaling = msg.type === 'offer' || msg.type === 'answer' || msg.type === 'ice-candidate';
+      if (!isSignaling) {
+        const now = Date.now();
+        if (now - lastMessageTime < MESSAGE_RATE_LIMIT_MS) {
+          return; // Silently drop spam (chat/reaction only)
+        }
+        lastMessageTime = now;
+      }
       
       if (msg.type === 'join') {
         // Security: Validate Room ID
