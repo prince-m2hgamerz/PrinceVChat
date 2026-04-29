@@ -35,10 +35,16 @@ export class UIManager {
     const app = document.getElementById('app');
     if (!app) return;
 
+    // SVG Icons for landing
+    const lightningIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`;
+    const shieldIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`;
+    const zapIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`;
+
     app.innerHTML = `
       <header class="header">
         <div class="header-inner">
           <a href="/" class="logo">
+            <span class="logo-icon">🎙️</span>
             <span class="logo-text">PrinceVChat</span>
           </a>
         </div>
@@ -54,9 +60,11 @@ export class UIManager {
               </p>
               <div class="landing-actions">
                 <button class="btn btn-primary btn-lg" id="create-room-btn">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
                   Create Room
                 </button>
                 <button class="btn btn-secondary btn-lg" id="join-room-btn">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
                   Join Room
                 </button>
               </div>
@@ -64,17 +72,17 @@ export class UIManager {
             
             <div class="features">
               <div class="feature-card">
-                <div class="feature-icon">🚀</div>
+                <div class="feature-icon">${zapIcon}</div>
                 <h3 class="feature-title">Instant</h3>
                 <p class="feature-desc">Create a room and share the link. Anyone can join immediately.</p>
               </div>
               <div class="feature-card">
-                <div class="feature-icon">🔒</div>
+                <div class="feature-icon">${shieldIcon}</div>
                 <h3 class="feature-title">Private</h3>
                 <p class="feature-desc">Your conversations stay between you and your team.</p>
               </div>
               <div class="feature-card">
-                <div class="feature-icon">⚡</div>
+                <div class="feature-icon">${lightningIcon}</div>
                 <h3 class="feature-title">Low Latency</h3>
                 <p class="feature-desc">Crystal clear voice with WebRTC. Sounds natural.</p>
               </div>
@@ -85,7 +93,7 @@ export class UIManager {
       
       <footer class="footer">
         <div class="footer-inner">
-          <span>PrinceVChat v<span class="version">1.0.16</span></span>
+          <span>PrinceVChat v<span class="version">1.0.17</span></span>
           <span>Free group voice chat</span>
         </div>
       </footer>
@@ -204,6 +212,18 @@ export class UIManager {
     setTimeout(() => document.getElementById('username-input')?.focus(), 100);
   }
 
+  // ==================== SVG ICONS ====================
+  private getIcons() {
+    return {
+      mic: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>`,
+      micOff: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"></line><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>`,
+      hand: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"></path><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"></path><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"></path><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"></path></svg>`,
+      leave: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-4h7"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>`,
+      copy: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`,
+      micIcon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path></svg>`,
+    };
+  }
+
   // ==================== ROOM ====================
   showRoom(roomId: string, hostName: string = 'You'): void {
     this.currentScreen = 'room';
@@ -213,6 +233,7 @@ export class UIManager {
 
     // Get saved name
     const username = localStorage.getItem('username') || hostName;
+    const icons = this.getIcons();
 
     // Add self
     this.users.clear();
@@ -220,17 +241,21 @@ export class UIManager {
       id: this.localUserId!,
       name: username,
       isHost: true,
-      speaking: false
+      speaking: false,
+      handRaised: false
     });
 
     app.innerHTML = `
       <header class="header">
         <div class="header-inner">
           <a href="/" class="logo">
+            <span class="logo-icon">🎙️</span>
             <span class="logo-text">PrinceVChat</span>
           </a>
           <div class="header-right">
-            <span class="live-badge">● LIVE</span>
+            <span class="live-badge">
+              <span class="live-dot"></span> LIVE
+            </span>
             <span class="user-count" id="user-count">1 participant</span>
           </div>
         </div>
@@ -242,7 +267,7 @@ export class UIManager {
             <h1 class="room-title">${this.escapeHtml(username)}'s Room</h1>
             <div class="room-code">
               <input type="text" id="room-link" value="${window.location.origin}/room/${roomId}" readonly />
-              <button class="btn btn-sm btn-secondary" id="copy-btn">Copy</button>
+              <button class="btn btn-sm btn-secondary" id="copy-btn">${icons.copy} Copy</button>
             </div>
           </div>
         </div>
@@ -255,20 +280,20 @@ export class UIManager {
         
         <div class="room-controls">
           <button class="control-btn ${this.isMuted ? 'muted' : ''}" id="mute-btn" title="${this.isMuted ? 'Unmute' : 'Mute'}">
-            ${this.isMuted ? '🔇' : '🎤'}
+            ${this.isMuted ? icons.micOff : icons.mic}
           </button>
           <button class="control-btn ${this.isHandRaised ? 'active' : ''}" id="hand-btn" title="Raise Hand">
-            ✋
+            ${icons.hand}
           </button>
           <button class="control-btn leave" id="leave-btn" title="Leave Room">
-            📴
+            ${icons.leave}
           </button>
         </div>
       </div>
       
       <footer class="footer">
         <div class="footer-inner">
-          <span>PrinceVChat v<span class="version">1.0.16</span></span>
+          <span>PrinceVChat v<span class="version">1.0.17</span></span>
           <span>Free voice chat</span>
         </div>
       </footer>
@@ -283,12 +308,14 @@ export class UIManager {
       this.showToast('Link copied!', 'success');
     });
 
+    const icons = this.getIcons();
+    
     document.getElementById('mute-btn')?.addEventListener('click', () => {
       this.isMuted = !this.isMuted;
       const btn = document.getElementById('mute-btn');
       if (btn) {
         btn.classList.toggle('muted', this.isMuted);
-        btn.innerHTML = this.isMuted ? '🔇' : '🎤';
+        btn.innerHTML = this.isMuted ? icons.micOff : icons.mic;
       }
       this.onMute?.();
     });

@@ -612,8 +612,32 @@ a:hover {
 }
 
 .participant.speaking {
+  animation: speaking-pulse 1.5s infinite;
+}
+
+.participant.speaking .participant-avatar {
   border-color: var(--color-success);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2), 0 0 30px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.3);
+}
+
+/* Hand raised state */
+.participant.hand-up .participant-avatar {
+  border-color: var(--color-warning);
+  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.3);
+}
+
+.participant.hand-up .hand-icon {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  font-size: 1rem;
+  animation: wave-hand 1s infinite;
+}
+
+@keyframes wave-hand {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(20deg); }
+  75% { transform: rotate(-20deg); }
 }
 
 .participant.host {
@@ -902,6 +926,39 @@ a:hover {
   
   .landing-actions {
     flex-direction: column;
+    gap: var(--space-3);
+  }
+  
+  .landing-actions .btn {
+    width: 100%;
+  }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+  .btn, .control-btn, button {
+    min-height: 48px;
+    min-width: 48px;
+  }
+  
+  .control-btn {
+    touch-action: manipulation;
+  }
+}
+
+/* Landscape mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+  .participants {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-2);
+  }
+  
+  .participant {
+    width: 100px;
+  }
+}
     width: 100%;
   }
   
