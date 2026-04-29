@@ -308,14 +308,14 @@ export class UIManager {
       this.showToast('Link copied!', 'success');
     });
 
-    const icons = this.getIcons();
+    const roomIcons = this.getIcons();
     
     document.getElementById('mute-btn')?.addEventListener('click', () => {
       this.isMuted = !this.isMuted;
       const btn = document.getElementById('mute-btn');
       if (btn) {
         btn.classList.toggle('muted', this.isMuted);
-        btn.innerHTML = this.isMuted ? icons.micOff : icons.mic;
+        btn.innerHTML = this.isMuted ? roomIcons.micOff : roomIcons.mic;
       }
       this.onMute?.();
     });
