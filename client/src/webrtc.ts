@@ -60,7 +60,7 @@ export class WebRTCManager {
   onPeerDisconnected(cb: PeerCallback): void { this.onPeerDisconnectedCb = cb; }
   onSpeaking(cb: SpeakingCallback): void { this.onSpeakingCb = cb; }
 
-  private async createPeer(peerId: string, initiator: boolean): Promise<PeerConnection | null> {
+  async createPeer(peerId: string, initiator: boolean): Promise<PeerConnection | null> {
     if (this.peers.has(peerId)) return this.peers.get(peerId)!;
 
     const connection = new RTCPeerConnection({
@@ -122,6 +122,38 @@ export class WebRTCManager {
     }
 
     return peer;
+  }
+
+  // Handle incoming offer from peer
+  async handleOffer(peerId: string, offer: RTCSessionDescriptionInit): Promise<void> {
+    const peer = await this.createPeer(peerId, false); // Not initiator for offer
+    if (peer) {
+      await peer.connection.setRemoteDescription(new RTCSessionDescription(offer));
+      const answer = await peer.connection.createAnswer();
+      await peer.connection.setLocalDescription(answer);
+      this.socketManager.send({ 
+        type: 'answer', 
+        roomId: this.roomId, 
+        targetUserId: peerId, 
+        payload: answer 
+      });
+    }
+  }
+
+  // Handle incoming answer from peer
+  async handleAnswer(peerId: string, answer: RTCSessionDescriptionInit): Promise<void> {
+    const peer = this.peers.get(peerId);
+    if (peer) {
+      await peer.connection.setRemoteDescription(new RTCSessionDescription(answer));
+    }
+  }
+
+  // Handle incoming ICE candidate from peer
+  async handleIceCandidate(peerId: string, candidate: RTCIceCandidateInit): Promise<void> {
+    const peer = this.peers.get(peerId);
+    if (peer) {
+      await peer.connection.addIceCandidate(new RTCIceCandidate(candidate));
+    }
   }
 
   removePeer(peerId: string): void {

@@ -104,21 +104,25 @@ class App {
       // Handle user sync via WebSocket (not WebRTC)
       
       // When we join, we get list of existing users (exclude self)
-      this.socketManager.on('room-users', (msg: any) => {
+      this.socketManager.on('room-users', async (msg: any) => {
         const users = msg.payload as { id: string; username: string }[];
         for (const user of users) {
           if (user.id !== this.userId) {
             this.ui.addUser(user.id, false, user.username);
+            // Create WebRTC peer for each existing user
+            await this.webrtcManager?.createPeer(user.id, true);
           }
         }
       });
 
       // When someone joins (via broadcast)
-      this.socketManager.on('user-joined', (msg: any) => {
+      this.socketManager.on('user-joined', async (msg: any) => {
         console.log('[App] User joined:', msg.userId, msg.username);
         if (msg.userId !== this.userId && msg.username) {
           this.ui.addUser(msg.userId, false, msg.username);
           this.ui.showToast(`${msg.username} joined!`, 'success');
+          // Create WebRTC peer for new user
+          await this.webrtcManager?.createPeer(msg.userId, true);
         }
       });
 
@@ -150,6 +154,22 @@ class App {
       this.webrtcManager.onPeerDisconnected((peerId: string) => {
         console.log('[App] WebRTC peer disconnected:', peerId);
         this.ui.removeUser(peerId);
+      });
+
+      // Handle WebRTC signaling
+      this.socketManager.on('offer', async (msg: any) => {
+        console.log('[App] Received offer from:', msg.userId);
+        await this.webrtcManager?.handleOffer(msg.userId, msg.payload);
+      });
+
+      this.socketManager.on('answer', async (msg: any) => {
+        console.log('[App] Received answer from:', msg.userId);
+        await this.webrtcManager?.handleAnswer(msg.userId, msg.payload);
+      });
+
+      this.socketManager.on('ice-candidate', async (msg: any) => {
+        console.log('[App] Received ICE from:', msg.userId);
+        await this.webrtcManager?.handleIceCandidate(msg.userId, msg.payload);
       });
 
       this.webrtcManager.onSpeaking((peerId: string, speaking: boolean) => {
