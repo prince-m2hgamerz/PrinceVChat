@@ -359,6 +359,9 @@ export class WebRTCManager {
 
   async startScreenShare(): Promise<MediaStream | null> {
     try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+        throw new Error('Screen sharing not supported');
+      }
       const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
       const screenTrack = screenStream.getVideoTracks()[0];
       this.peers.forEach(peer => {
@@ -368,7 +371,7 @@ export class WebRTCManager {
       return screenStream;
     } catch (e) {
       console.error('[WebRTC] startScreenShare error:', e);
-      return null;
+      throw e; // Rethrow to let App handle the message
     }
   }
 

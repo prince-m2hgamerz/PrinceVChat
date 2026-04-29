@@ -268,6 +268,12 @@ class App {
       this.isScreenSharing = false;
       await this.restoreCamera();
     } else {
+      // Check if browser supports getDisplayMedia
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+        this.ui.showToast('Screen sharing is not supported in this browser or requires HTTPS', 'error');
+        return;
+      }
+
       try {
         const stream = await this.webrtcManager.startScreenShare();
         if (stream) {
@@ -280,8 +286,14 @@ class App {
             if (this.isScreenSharing) this.toggleScreenShare();
           };
         }
-      } catch (e) {
-        this.ui.showToast('Screen share cancelled', 'error');
+      } catch (e: any) {
+        console.error('[App] Screen share error:', e);
+        const errMsg = e?.message?.toLowerCase() || '';
+        if (errMsg.includes('permission denied') || errMsg.includes('notallowederror')) {
+          this.ui.showToast('Screen share permission denied', 'error');
+        } else {
+          this.ui.showToast('Screen share failed or not supported', 'error');
+        }
       }
     }
   }
