@@ -223,7 +223,7 @@ export class UIManager {
       <main class="layout-container" style="padding-bottom: 100px;">
         <div class="room-header">
           <div class="room-info">
-            <h1 class="heading-large">${this.escapeHtml(username)}'s Room</h1>
+            <h1 class="heading-large" id="room-title">Room</h1>
             <span class="badge" style="background: var(--ds-gray-50); color: var(--ds-fg);"><span id="user-count">1 participant</span></span>
           </div>
         </div>
@@ -297,7 +297,6 @@ export class UIManager {
       const msg = input.value.trim();
       if (msg) {
         this.onChat?.(msg);
-        this.addChatMessage(this.localUserId!, localStorage.getItem('username') || 'You', msg, true);
         input.value = '';
       }
     });
@@ -350,6 +349,12 @@ export class UIManager {
       speaking: false,
       handRaised: false
     });
+    
+    if (isHost) {
+      const titleEl = document.getElementById('room-title');
+      if (titleEl) titleEl.textContent = `${name || 'User'}'s Room`;
+    }
+
     this.updateParticipants();
   }
 

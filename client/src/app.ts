@@ -108,10 +108,16 @@ class App {
       // We are the NEW user - we DON'T create offers, we wait for existing users to offer us
       this.socketManager.on('room-users', (msg: any) => {
         const users = msg.payload as { id: string; username: string }[];
-        for (const user of users) {
+        const room = rooms.get(this.roomId);
+        
+        for (let i = 0; i < users.length; i++) {
+          const user = users[i];
           if (user.id !== this.userId) {
-            this.ui.addUser(user.id, false, user.username);
-            // Don't create peer here - existing users will send offers to us
+            // First user in list is host (server logic)
+            this.ui.addUser(user.id, i === 0, user.username);
+          } else {
+            // We are joining - if we are first, we are host
+            if (i === 0) this.ui.addUser(this.userId, true, this.username);
           }
         }
       });
@@ -146,9 +152,8 @@ class App {
       // When someone sends a chat message
       this.socketManager.on('chat', (msg: any) => {
         console.log('[App] Chat message:', msg);
-        if (msg.userId !== this.userId) {
-          this.ui.addChatMessage(msg.userId, msg.username || 'User', msg.message, false);
-        }
+        const isSelf = msg.userId === this.userId;
+        this.ui.addChatMessage(msg.userId, msg.username || 'User', msg.message, isSelf);
       });
 
       // Now connect - server will immediately send room-users
@@ -226,6 +231,7 @@ class App {
       raised: this.isHandRaised
     });
     this.ui.setHandRaised(this.isHandRaised);
+    this.ui.setUserHandRaised(this.userId, this.isHandRaised); // Immediate local update
     this.ui.showToast(this.isHandRaised ? 'Hand raised!' : 'Hand lowered', 'success');
   }
 

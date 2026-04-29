@@ -177,6 +177,17 @@ wss.on('connection', (ws: WebSocket) => {
         
         console.log('[Server] Join:', username, clientId, roomId);
         
+        // Create room in Supabase if it doesn't exist
+        if (room.clients.size === 1) {
+          supabaseRequest('rooms', 'POST', {
+            id: roomId,
+            name: `${username}'s Room`,
+            host_id: clientId,
+            is_active: true,
+            created_at: new Date().toISOString()
+          }, 'on_conflict=id');
+        }
+
         // Save to Supabase with upsert (on_conflict)
         supabaseRequest('room_participants', 'POST', {
           room_id: roomId,
@@ -224,7 +235,15 @@ wss.on('connection', (ws: WebSocket) => {
           const room = rooms.get(roomId);
           if (room) {
             const client = room.clients.get(clientId!);
-            broadcast(room, { type: 'chat', roomId, userId: clientId, username: client?.username, message: msg.message, timestamp: Date.now() }, clientId);
+            // Broadcast to EVERYONE including the sender (easier to sync state)
+            broadcast(room, { 
+              type: 'chat', 
+              roomId, 
+              userId: clientId, 
+              username: client?.username, 
+              message: msg.message, 
+              timestamp: Date.now() 
+            });
           }
         }
       }
