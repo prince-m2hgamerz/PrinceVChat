@@ -16,6 +16,8 @@
   --ds-blue: hsla(212, 100%, 48%, 1);
   --ds-red: #ff5b4f;
   --ds-pink: #de1d8d;
+  --ds-success: #10b981;
+  --ds-warning: #f59e0b;
   
   --shadow-border: 0px 0px 0px 1px rgba(0, 0, 0, 0.08);
   --shadow-light-ring: 0px 0px 0px 1px rgb(235, 235, 235);
@@ -97,7 +99,7 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; color: var(--ds-gray-900); }
 .chat-message.self {
   align-self: flex-end;
   background: var(--ds-fg);
-  color: var(--ds-bg);
+  color: #fff;
 }
 
 .chat-message.other {
