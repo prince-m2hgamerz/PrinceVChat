@@ -104,24 +104,24 @@ class App {
       // Handle user sync via WebSocket (not WebRTC)
       
       // When we join, we get list of existing users (exclude self)
-      this.socketManager.on('room-users', async (msg: any) => {
+      // We are the NEW user - we DON'T create offers, we wait for existing users to offer us
+      this.socketManager.on('room-users', (msg: any) => {
         const users = msg.payload as { id: string; username: string }[];
         for (const user of users) {
           if (user.id !== this.userId) {
             this.ui.addUser(user.id, false, user.username);
-            // Create WebRTC peer for each existing user
-            await this.webrtcManager?.createPeer(user.id, true);
+            // Don't create peer here - existing users will send offers to us
           }
         }
       });
 
-      // When someone joins (via broadcast)
+      // When someone joins (via broadcast) - WE are already in room, so WE send offer
       this.socketManager.on('user-joined', async (msg: any) => {
         console.log('[App] User joined:', msg.userId, msg.username);
         if (msg.userId !== this.userId && msg.username) {
           this.ui.addUser(msg.userId, false, msg.username);
           this.ui.showToast(`${msg.username} joined!`, 'success');
-          // Create WebRTC peer for new user
+          // We are already in room - send offer to new user
           await this.webrtcManager?.createPeer(msg.userId, true);
         }
       });
