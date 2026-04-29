@@ -235,5 +235,5 @@ wss.on('connection', (ws: WebSocket) => {
   });
 });
 
-server.listen(PORT, () => console.log('[Server] http://localhost:' + PORT));
+server.listen(PORT, () => console.log('[Server] Ready on port:', PORT));
 process.on('SIGINT', () => wss.close(() => process.exit(0)));
