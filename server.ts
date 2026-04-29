@@ -7,6 +7,19 @@ import { createServer } from 'http';
 import { readFileSync, existsSync, statSync } from 'fs';
 import { join, extname } from 'path';
 
+// Load environment from railway.env if exists
+const envFile = join(process.cwd(), 'railway.env');
+if (existsSync(envFile)) {
+  const envContent = readFileSync(envFile, 'utf-8');
+  envContent.split('\n').forEach(line => {
+    const [key, ...valueParts] = line.split('=');
+    if (key && valueParts.length > 0) {
+      process.env[key.trim()] = valueParts.join('=').trim();
+    }
+  });
+  console.log('[Env] Loaded from railway.env');
+}
+
 // Environment
 const PORT = parseInt(process.env.PORT || '3000', 10);
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nyixcwollfqiojulsznw.supabase.co';
