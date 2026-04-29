@@ -49,6 +49,8 @@ class App {
     this.ui.setOnLeave(() => this.leaveRoom());
     this.ui.setOnRaiseHand(() => this.toggleRaiseHand());
     this.ui.setOnChat((msg) => this.sendChatMessage(msg));
+    this.ui.setOnDeafen(() => this.toggleDeafen());
+    this.ui.setOnReaction((emoji) => this.sendReaction(emoji));
   }
 
   private createRoom(): void {
@@ -169,6 +171,18 @@ class App {
         }
       });
 
+      // When someone sends an emoji reaction
+      this.socketManager.on('reaction', (msg: any) => {
+        if (msg.userId !== this.userId && msg.emoji) {
+          this.ui.showFloatingEmoji(msg.emoji);
+        }
+      });
+
+      // When room is locked/unlocked
+      this.socketManager.on('room-locked', (msg: any) => {
+        this.ui.showToast(msg.locked ? 'Room locked by host' : 'Room unlocked', 'success');
+      });
+
       // Now connect - server will immediately send room-users
       await this.socketManager.connect();
 
@@ -255,6 +269,23 @@ class App {
       type: 'chat',
       roomId: this.roomId,
       message: message
+    });
+  }
+
+  private toggleDeafen(): void {
+    if (!this.webrtcManager) return;
+    // Mute/unmute all remote audio elements
+    document.querySelectorAll('audio').forEach(audio => {
+      audio.muted = this.ui.deafened;
+    });
+  }
+
+  private sendReaction(emoji: string): void {
+    if (!this.socketManager) return;
+    this.socketManager.send({
+      type: 'reaction',
+      roomId: this.roomId,
+      emoji: emoji
     });
   }
 

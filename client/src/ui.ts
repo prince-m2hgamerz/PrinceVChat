@@ -5,6 +5,8 @@ export class UIManager {
   private roomId: string = '';
   private isMuted = false;
   private isHandRaised = false;
+  private isDeafened = false;
+  private isDarkMode = false;
   
   // Callbacks
   private onCreateRoom: (() => void) | null = null;
@@ -13,6 +15,8 @@ export class UIManager {
   private onLeave: (() => void) | null = null;
   private onRaiseHand: (() => void) | null = null;
   private onChat: ((message: string) => void) | null = null;
+  private onDeafen: (() => void) | null = null;
+  private onReaction: ((emoji: string) => void) | null = null;
 
   render(): void {
     this.showLanding();
@@ -25,6 +29,8 @@ export class UIManager {
   setOnLeave(cb: () => void): void { this.onLeave = cb; }
   setOnRaiseHand(cb: () => void): void { this.onRaiseHand = cb; }
   setOnChat(cb: (message: string) => void): void { this.onChat = cb; }
+  setOnDeafen(cb: () => void): void { this.onDeafen = cb; }
+  setOnReaction(cb: (emoji: string) => void): void { this.onReaction = cb; }
   setLocalUserId(id: string): void { this.localUserId = id; }
 
   // ==================== LANDING - VERCEL STYLE ====================
@@ -178,7 +184,12 @@ export class UIManager {
       leave: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-4h7"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>`,
       copy: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`,
       chat: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`,
-      close: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`
+      close: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
+      speaker: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`,
+      speakerOff: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>`,
+      emoji: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>`,
+      moon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`,
+      sun: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`
     };
   }
 
@@ -234,21 +245,41 @@ export class UIManager {
       </main>
 
       <footer class="room-controls">
-        <div class="layout-container" style="display: flex; gap: 16px; justify-content: center; width: 100%;">
-          <button class="btn btn-icon ${this.isMuted ? 'danger' : ''}" id="mute-btn" aria-label="Toggle Mute">
+        <div class="layout-container" style="display: flex; gap: 12px; justify-content: center; width: 100%; flex-wrap: wrap;">
+          <button class="btn btn-icon ${this.isMuted ? 'danger' : ''}" id="mute-btn" aria-label="Toggle Mute" title="Mute">
             ${this.isMuted ? icons.micOff : icons.mic}
           </button>
-          <button class="btn btn-icon ${this.isHandRaised ? 'active' : ''}" id="hand-btn" aria-label="Raise Hand">
+          <button class="btn btn-icon ${this.isDeafened ? 'danger' : ''}" id="deafen-btn" aria-label="Toggle Speaker" title="Speaker">
+            ${this.isDeafened ? icons.speakerOff : icons.speaker}
+          </button>
+          <button class="btn btn-icon ${this.isHandRaised ? 'active' : ''}" id="hand-btn" aria-label="Raise Hand" title="Raise Hand">
             ${icons.hand}
           </button>
-          <button class="btn btn-icon" id="chat-btn" aria-label="Open Chat">
+          <button class="btn btn-icon" id="emoji-btn" aria-label="Send Reaction" title="React">
+            ${icons.emoji}
+          </button>
+          <button class="btn btn-icon" id="chat-btn" aria-label="Open Chat" title="Chat">
             ${icons.chat}
           </button>
-          <button class="btn btn-icon danger" id="leave-btn" aria-label="Leave Room">
+          <button class="btn btn-icon" id="theme-btn" aria-label="Toggle Theme" title="Theme">
+            ${this.isDarkMode ? icons.sun : icons.moon}
+          </button>
+          <button class="btn btn-icon danger" id="leave-btn" aria-label="Leave Room" title="Leave">
             ${icons.leave}
           </button>
         </div>
       </footer>
+
+      <div class="emoji-picker" id="emoji-picker" style="display:none;">
+        <button class="emoji-btn" data-emoji="👍">👍</button>
+        <button class="emoji-btn" data-emoji="👏">👏</button>
+        <button class="emoji-btn" data-emoji="❤️">❤️</button>
+        <button class="emoji-btn" data-emoji="😂">😂</button>
+        <button class="emoji-btn" data-emoji="🎉">🎉</button>
+        <button class="emoji-btn" data-emoji="🔥">🔥</button>
+        <button class="emoji-btn" data-emoji="💯">💯</button>
+        <button class="emoji-btn" data-emoji="😮">😮</button>
+      </div>
 
       <div class="chat-overlay" id="chat-overlay"></div>
       <div class="chat-drawer" id="chat-drawer">
@@ -285,6 +316,43 @@ export class UIManager {
 
     document.getElementById('hand-btn')?.addEventListener('click', () => {
       this.onRaiseHand?.();
+    });
+
+    // Speaker toggle
+    document.getElementById('deafen-btn')?.addEventListener('click', () => {
+      this.isDeafened = !this.isDeafened;
+      const btn = document.getElementById('deafen-btn');
+      if (btn) {
+        btn.classList.toggle('danger', this.isDeafened);
+        btn.innerHTML = this.isDeafened ? roomIcons.speakerOff : roomIcons.speaker;
+      }
+      this.onDeafen?.();
+      this.showToast(this.isDeafened ? 'Speaker off' : 'Speaker on');
+    });
+
+    // Emoji reactions
+    document.getElementById('emoji-btn')?.addEventListener('click', () => {
+      const picker = document.getElementById('emoji-picker');
+      if (picker) picker.style.display = picker.style.display === 'none' ? 'flex' : 'none';
+    });
+    document.querySelectorAll('.emoji-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const emoji = (btn as HTMLElement).dataset.emoji;
+        if (emoji) {
+          this.onReaction?.(emoji);
+          this.showFloatingEmoji(emoji);
+          const picker = document.getElementById('emoji-picker');
+          if (picker) picker.style.display = 'none';
+        }
+      });
+    });
+
+    // Dark mode
+    document.getElementById('theme-btn')?.addEventListener('click', () => {
+      this.isDarkMode = !this.isDarkMode;
+      document.documentElement.classList.toggle('dark', this.isDarkMode);
+      const btn = document.getElementById('theme-btn');
+      if (btn) btn.innerHTML = this.isDarkMode ? roomIcons.sun : roomIcons.moon;
     });
 
     document.getElementById('chat-btn')?.addEventListener('click', () => this.toggleChat(true));
@@ -471,4 +539,19 @@ export class UIManager {
       this.showToast(`New message from ${username}`);
     }
   }
+
+  // ==================== FLOATING EMOJI ====================
+  showFloatingEmoji(emoji: string): void {
+    const container = document.getElementById('app');
+    if (!container) return;
+    const el = document.createElement('div');
+    el.className = 'floating-emoji';
+    el.textContent = emoji;
+    el.style.left = (20 + Math.random() * 60) + '%';
+    container.appendChild(el);
+    setTimeout(() => el.remove(), 2000);
+  }
+
+  // ==================== DEAFEN STATE ====================
+  get deafened(): boolean { return this.isDeafened; }
 }

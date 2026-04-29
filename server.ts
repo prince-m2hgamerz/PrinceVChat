@@ -369,6 +369,21 @@ wss.on('connection', (ws: WebSocket) => {
           }
         }
       }
+      else if (msg.type === 'reaction') {
+        if (roomId && clientId) {
+          const room = rooms.get(roomId);
+          if (room) {
+            console.log('[Server] Reaction:', clientId, msg.emoji);
+            // Broadcast to others (sender already shows it locally)
+            broadcastToOthers(room, {
+              type: 'reaction',
+              roomId,
+              userId: clientId,
+              emoji: msg.emoji
+            }, clientId);
+          }
+        }
+      }
     } catch (e) { console.error('[Server] Error:', e); }
   });
 
