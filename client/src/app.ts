@@ -1,5 +1,5 @@
 /**
- * PrinceVChat - Main Application (Optimized for speed)
+ * PrinceVChat - Main Application (Fixed - WebSocket based user tracking)
  */
 
 import './styles.css';
@@ -20,7 +20,7 @@ class App {
   private username: string = '';
 
   constructor() {
-    // Generate ID or get from storage (persist across refreshes)
+    // Generate or get persisted ID
     let storedId = localStorage.getItem('userId');
     if (!storedId) {
       storedId = 'u-' + Math.random().toString(36).substring(2, 10);
@@ -30,7 +30,6 @@ class App {
     
     this.ui = new UIManager();
     this.ui.setLocalUserId(this.userId);
-    // Set up callbacks BEFORE router runs
     this.setupCallbacks();
     this.setupRouter();
   }
@@ -88,7 +87,7 @@ class App {
     try {
       this.ui.showToast('Connecting...', 'success');
 
-      // Get mic immediately
+      // Get mic
       this.localStream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
@@ -98,28 +97,28 @@ class App {
         video: false,
       });
 
-      // Connect WS immediately
+      // Connect WebSocket
       this.socketManager = new SocketManager(WS_URL, this.userId);
       await this.socketManager.connect();
 
-      // Join room
+      // Join room with name
       this.socketManager.send({
         type: 'join',
         roomId: this.roomId,
         username: this.username
       });
 
-      // Setup WebRTC
+      // Setup WebRTC (for audio only)
       this.webrtcManager = new WebRTCManager(this.socketManager, this.roomId, this.userId);
       this.webrtcManager.setLocalStream(this.localStream);
 
-      // Handle peers
+      // Handle WebRTC events
       this.webrtcManager.onPeerConnected((peerId: string) => {
-        this.ui.addUser(peerId, false);
-        this.ui.showToast('Someone joined', 'success');
+        console.log('[App] WebRTC peer connected:', peerId);
       });
 
       this.webrtcManager.onPeerDisconnected((peerId: string) => {
+        console.log('[App] WebRTC peer disconnected:', peerId);
         this.ui.removeUser(peerId);
       });
 
@@ -127,24 +126,33 @@ class App {
         this.ui.setUserSpeaking(peerId, speaking);
       });
 
-      // Also handle receiving user list directly from server
+      // === CRITICAL: Handle user sync via WebSocket (not WebRTC) ===
+      
+      // When we join, we get list of existing users
       this.socketManager.on('room-users', (msg: any) => {
         const users = msg.payload as { id: string; username: string }[];
-        console.log('[App] Got user list from server:', users);
+        console.log('[App] Got room users:', users);
         for (const user of users) {
           if (user.id !== this.userId) {
+            // Add user to UI directly (not via WebRTC)
             this.ui.addUser(user.id, false, user.username);
           }
         }
       });
 
-      // Handle when someone joins
+      // When someone joins (via broadcast)
       this.socketManager.on('user-joined', (msg: any) => {
         console.log('[App] User joined:', msg.userId, msg.username);
         if (msg.userId !== this.userId && msg.username) {
           this.ui.addUser(msg.userId, false, msg.username);
           this.ui.showToast(`${msg.username} joined!`, 'success');
         }
+      });
+
+      // When someone leaves
+      this.socketManager.on('user-left', (msg: any) => {
+        console.log('[App] User left:', msg.userId);
+        this.ui.removeUser(msg.userId);
       });
 
       // Show room
@@ -160,7 +168,6 @@ class App {
 
   private toggleMute(): void {
     if (!this.webrtcManager) return;
-    
     if (this.webrtcManager.muted) {
       this.webrtcManager.unmute();
     } else {
@@ -175,6 +182,7 @@ class App {
       roomId: this.roomId,
       raised: true
     });
+    this.ui.showToast('Hand raised!', 'success');
   }
 
   private leaveRoom(): void {
@@ -188,23 +196,20 @@ class App {
       this.webrtcManager.cleanup();
       this.webrtcManager = null;
     }
-
     if (this.localStream) {
       this.localStream.getTracks().forEach(track => track.stop());
       this.localStream = null;
     }
-
     if (this.socketManager) {
       this.socketManager.disconnect();
       this.socketManager = null;
     }
-
     this.roomId = '';
   }
 }
 
-// Set version in footer
-const version = '1.0.4';
+// Version
+const version = '1.0.5';
 document.addEventListener('DOMContentLoaded', () => {
   const versionEl = document.getElementById('app-version');
   if (versionEl) versionEl.textContent = version;
