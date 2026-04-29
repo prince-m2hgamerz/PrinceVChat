@@ -1,13 +1,13 @@
 {
   "name": "princevchat",
-  "version": "1.0.6",
+  "version": "1.0.37",
   "description": "Free group voice chat - No signup, no download",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite --port 5173",
     "build": "vite build",
-    "start": "vite build && NODE_ENV=production tsx server.ts"
+    "start": "npm run build && NODE_ENV=production tsx server.ts"
   },
   "dependencies": {
     "tsx": "^4.7.0",

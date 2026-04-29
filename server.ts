@@ -7,10 +7,15 @@ import { createServer } from 'http';
 import { readFileSync, existsSync, statSync } from 'fs';
 import { join, extname } from 'path';
 
-// Environment
+// Environment - Railway env vars take priority
 const PORT = parseInt(process.env.PORT || '3000', 10);
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nyixcwollfqiojulsznw.supabase.co';
+const SUPABASE_URL = process.env.SUPABASE_URL || '';
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || '';
+
+// Debug
+console.log('[Server] PORT:', PORT);
+console.log('[Server] SUPABASE_URL:', SUPABASE_URL ? 'SET' : 'NOT SET');
+console.log('[Server] SUPABASE_KEY:', SUPABASE_KEY ? 'SET' : 'NOT SET');
 
 // MIME Types
 const MIME_TYPES: Record<string, string> = {
@@ -51,15 +56,26 @@ async function supabaseRequest(table: string, method: string, body?: unknown, qu
     let url = `${SUPABASE_URL}/rest/v1/${table}`;
     if (query) url += '?' + query;
 
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+    };
+    
+    // Add Prefer header for upsert operations
+    if (method === 'POST' && query?.includes('on_conflict')) {
+      headers['Prefer'] = 'resolution=merge-duplicates';
+    }
+
     const res = await fetch(url, {
       method,
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-      },
+      headers,
       body: body ? JSON.stringify(body) : undefined,
     });
+    if (!res.ok) {
+      const err = await res.text();
+      console.log('[Supabase] Error:', res.status, err);
+    }
     return await res.json();
   } catch (e) {
     console.error('[Supabase] Error:', e);
@@ -161,12 +177,14 @@ wss.on('connection', (ws: WebSocket) => {
         
         console.log('[Server] Join:', username, clientId, roomId);
         
-        // Save to Supabase (async, don't wait)
+        // Save to Supabase with upsert (on_conflict)
         supabaseRequest('room_participants', 'POST', {
           room_id: roomId,
           user_id: clientId,
+          username: username,
           is_host: room.clients.size === 1,
-        }, `room_id=eq.${roomId}&user_id=eq.${clientId}`);
+          joined_at: new Date().toISOString(),
+        }, 'on_conflict=room_id,user_id');
         
         // Send participant list
         const participants = Array.from(room.clients.values()).map(c => ({
