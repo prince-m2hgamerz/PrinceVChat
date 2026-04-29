@@ -1578,241 +1578,433 @@ a:hover {
   color: #666;
 }
 
-/* ==================== ROOM PAGE ==================== */
-.room-page .vercel-main {
-  padding: 0 32px;
+/* ==================== ROOM PAGE - VERCEL STYLE ==================== */
+
+.room-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
 }
 
-.room-header-bar {
+.room-page .bg-gradient,
+.room-page .bg-grid {
+  position: fixed;
+}
+
+/* Minimal Header */
+.room-header-minimal {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 20px 0;
+  padding: 16px 24px;
   border-bottom: 1px solid #222;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
-.back-button {
-  width: 40px;
-  height: 40px;
+.header-link {
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #111;
-  border: 1px solid #333;
-  border-radius: 8px;
-  color: #888;
-  text-decoration: none;
-  transition: all 0.2s;
+  color: #666;
+  transition: color 0.2s;
 }
 
-.back-button:hover {
-  background: #222;
+.header-link:hover {
   color: #fff;
 }
 
-.room-info-bar {
+.header-room-info {
   flex: 1;
 }
 
-.room-title-text {
-  font-size: 20px;
+.header-room-name {
+  font-size: 16px;
   font-weight: 600;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
-.room-meta-bar {
+.header-status {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
-.live-indicator {
+.status-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
-  color: #ef4444;
+  padding: 4px 10px;
+  background: rgba(239, 68, 68, 0.15);
+  border-radius: 100px;
+  font-size: 11px;
   font-weight: 600;
+  color: #f87171;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.live-dot {
-  width: 8px;
-  height: 8px;
+.status-dot {
+  width: 6px;
+  height: 6px;
   background: #ef4444;
   border-radius: 50%;
   animation: pulse 2s infinite;
 }
 
-.participant-total {
-  font-size: 14px;
+.status-count {
+  font-size: 13px;
   color: #666;
 }
 
-.copy-button {
-  width: 40px;
-  height: 40px;
-  display: flex;
+.header-copy {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
+  gap: 8px;
+  padding: 8px 16px;
   background: #fff;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   color: #000;
+  font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
+  transition: transform 0.2s;
 }
 
-/* Room Content */
-.room-content-area {
-  padding: 40px 0;
+.header-copy:hover {
+  transform: translateY(-1px);
 }
 
-.invite-card {
-  margin-bottom: 40px;
+/* Room Main Content */
+.room-main-content {
+  flex: 1;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 40px 24px 120px;
+  width: 100%;
 }
 
-.invite-label-text {
-  display: block;
-  font-size: 14px;
+/* Invite Section */
+.invite-section-minimal {
+  margin-bottom: 48px;
+}
+
+.invite-label-mini {
+  font-size: 13px;
   font-weight: 500;
   color: #666;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
-.invite-row {
+.invite-box-minimal {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 0;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-.invite-input-text {
+.invite-url {
   flex: 1;
   padding: 14px 16px;
-  background: #111;
-  border: 1px solid #333;
-  border-radius: 8px;
+  font-size: 13px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
   color: #888;
-  font-size: 14px;
-  font-family: 'Fira Code', monospace;
+  background: transparent;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.invite-input-text:focus {
-  outline: none;
-  border-color: #6366f1;
-}
-
-.invite-button {
+.invite-copy-mini {
   padding: 14px 20px;
-  background: #111;
-  border: 1px solid #333;
-  border-radius: 8px;
+  background: transparent;
+  border: none;
+  border-left: 1px solid #333;
   color: #fff;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
+  transition: background 0.2s;
 }
 
-.invite-button:hover {
+.invite-copy-mini:hover {
   background: #222;
 }
 
-.participants-label {
+/* Participants Section */
+.participants-section-minimal {
+  margin-bottom: 48px;
+}
+
+.participants-header-mini {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.participants-title {
   font-size: 14px;
   font-weight: 500;
   color: #666;
-  margin-bottom: 20px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
-.participants-box {
+.participants-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 8px;
+  background: #222;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.participants-grid-mini {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 16px;
 }
 
-.participants-box .participant {
+.participants-grid-mini .participant {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 24px;
-  background: #111;
-  border: 1px solid #333;
+  padding: 32px 24px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
+  transition: all 0.2s;
 }
 
-.participants-box .participant-avatar {
-  width: 64px;
-  height: 64px;
+.participants-grid-mini .participant:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.participants-grid-mini .participant-avatar {
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 600;
   color: #fff;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
 }
 
-.participants-box .participant-name {
+.participants-grid-mini .participant-name {
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 4px;
 }
 
-.participants-box .participant-status {
+.participants-grid-mini .participant-status {
   font-size: 13px;
   color: #666;
 }
 
-/* Controls */
-.room-controls-bar {
+/* Minimal Controls */
+.room-controls-minimal {
   display: flex;
   justify-content: center;
-  gap: 16px;
-  padding: 24px 0;
+  gap: 24px;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.8);
   border-top: 1px solid #222;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
 }
 
-.control-btn-item {
-  width: 64px;
-  height: 64px;
+.control-mini {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  gap: 8px;
+  padding: 16px 32px;
   background: #111;
   border: 1px solid #333;
-  border-radius: 50%;
+  border-radius: 12px;
   color: #888;
   cursor: pointer;
   transition: all 0.2s;
+  min-width: 100px;
 }
 
-.control-btn-item:hover {
-  background: #222;
+.control-mini:hover {
+  background: #1a1a1a;
   color: #fff;
+  border-color: #444;
 }
 
-.control-btn-item.control-off {
+.control-icon-mini {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #222;
+  border-radius: 50%;
+}
+
+.control-mini:hover .control-icon-mini {
+  background: #333;
+}
+
+.control-label-mini {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.control-mini.active-muted {
   background: rgba(239, 68, 68, 0.1);
   border-color: #ef4444;
   color: #ef4444;
 }
 
-.control-btn-item.control-active {
-  background: rgba(168, 85, 247, 0.1);
-  border-color: #a855f7;
-  color: #a855f7;
+.control-mini.active-muted .control-icon-mini {
+  background: rgba(239, 68, 68, 0.2);
 }
 
-.control-btn-item.control-leave {
-  background: rgba(239, 68, 68, 0.1);
+.control-mini.active-hand {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: #8b5cf6;
+  color: #a78bfa;
+}
+
+.control-mini.active-hand .control-icon-mini {
+  background: rgba(139, 92, 246, 0.2);
+}
+
+.control-mini.leave-mini {
+  background: rgba(239, 68, 68, 0.05);
   border-color: #ef4444;
   color: #ef4444;
 }
 
-.control-btn-item.control-leave:hover {
+.control-mini.leave-mini:hover {
   background: #ef4444;
   color: #fff;
+}
+
+/* Mobile Responsive */
+@media (max-width: 640px) {
+  .room-header-minimal {
+    padding: 12px 16px;
+    gap: 12px;
+  }
+  
+  .header-link {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .header-room-name {
+    font-size: 14px;
+  }
+  
+  .status-badge {
+    padding: 3px 8px;
+    font-size: 10px;
+  }
+  
+  .status-count {
+    font-size: 12px;
+  }
+  
+  .header-copy span {
+    display: none;
+  }
+  
+  .header-copy {
+    padding: 8px;
+  }
+  
+  .room-main-content {
+    padding: 24px 16px 140px;
+  }
+  
+  .invite-url {
+    font-size: 12px;
+    padding: 12px;
+  }
+  
+  .invite-copy-mini {
+    padding: 12px 16px;
+    font-size: 12px;
+  }
+  
+  .participants-grid-mini {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  .participants-grid-mini .participant {
+    padding: 20px 16px;
+  }
+  
+  .participants-grid-mini .participant-avatar {
+    width: 56px;
+    height: 56px;
+    font-size: 22px;
+    margin-bottom: 12px;
+  }
+  
+  .participants-grid-mini .participant-name {
+    font-size: 14px;
+  }
+  
+  .participants-grid-mini .participant-status {
+    font-size: 11px;
+  }
+  
+  .room-controls-minimal {
+    gap: 12px;
+    padding: 16px;
+  }
+  
+  .control-mini {
+    padding: 12px 20px;
+    min-width: 80px;
+  }
+  
+  .control-icon-mini {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .control-label-mini {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 400px) {
+  .participants-grid-mini {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Mobile Responsive */

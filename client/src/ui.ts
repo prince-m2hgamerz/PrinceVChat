@@ -297,58 +297,73 @@ export class UIManager {
     });
 
     const backIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>`;
-    const copyIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
+    const copyIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
 
     app.innerHTML = `
       <div class="vercel-page room-page">
-        <!-- Room Header -->
-        <header class="room-header-bar">
-          <a href="/" class="back-button">${backIcon}</a>
-          <div class="room-info-bar">
-            <h1 class="room-title-text">${this.escapeHtml(username)}</h1>
-            <div class="room-meta-bar">
-              <span class="live-indicator">
-                <span class="live-dot"></span>
+        <div class="bg-gradient"></div>
+        <div class="bg-grid"></div>
+        
+        <!-- Minimal Header -->
+        <header class="room-header-minimal">
+          <a href="/" class="header-link">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          </a>
+          <div class="header-room-info">
+            <h1 class="header-room-name">${this.escapeHtml(username)}</h1>
+            <div class="header-status">
+              <span class="status-badge">
+                <span class="status-dot"></span>
                 LIVE
               </span>
-              <span class="participant-total" id="user-count">1</span>
+              <span class="status-count" id="user-count">1 participant</span>
             </div>
           </div>
-          <button class="copy-button" id="copy-btn" title="Copy link">${copyIcon}</button>
+          <button class="header-copy" id="copy-btn" title="Copy invite link">
+            ${copyIcon}
+            <span>Copy</span>
+          </button>
         </header>
 
-        <!-- Room Main -->
-        <main class="room-content-area">
-          <div class="invite-card">
-            <label class="invite-label-text">Room Link</label>
-            <div class="invite-row">
-              <input type="text" id="room-link" class="invite-input-text" value="${window.location.origin}/room/${roomId}" readonly />
-              <button class="invite-button" id="copy-btn-2">Copy</button>
+        <!-- Room Content -->
+        <main class="room-main-content">
+          <!-- Invite Section -->
+          <section class="invite-section-minimal">
+            <div class="invite-label-mini">Invite Link</div>
+            <div class="invite-box-minimal">
+              <code class="invite-url">${window.location.origin}/room/${roomId}</code>
+              <button class="invite-copy-mini" id="copy-btn-2">Copy</button>
             </div>
-          </div>
+          </section>
 
-          <div class="participants-area">
-            <h2 class="participants-label">Participants</h2>
-            <div class="participants-box" id="participants">
+          <!-- Participants -->
+          <section class="participants-section-minimal">
+            <div class="participants-header-mini">
+              <span class="participants-title">Participants</span>
+              <span class="participants-count" id="user-count-2">1</span>
+            </div>
+            <div class="participants-grid-mini" id="participants">
               ${this.renderParticipants()}
             </div>
-          </div>
+          </section>
         </main>
 
         <!-- Controls -->
-        <div class="room-controls-bar">
-          <button class="control-btn-item ${this.isMuted ? 'control-off' : ''}" id="mute-btn">
-            ${this.isMuted ? icons.micOff : icons.mic}
+        <footer class="room-controls-minimal">
+          <button class="control-mini ${this.isMuted ? 'active-muted' : ''}" id="mute-btn">
+            <span class="control-icon-mini">${this.isMuted ? icons.micOff : icons.mic}</span>
+            <span class="control-label-mini">${this.isMuted ? 'Unmute' : 'Mute'}</span>
           </button>
-          <button class="control-btn-item ${this.isHandRaised ? 'control-active' : ''}" id="hand-btn">
-            ${icons.hand}
+          <button class="control-mini ${this.isHandRaised ? 'active-hand' : ''}" id="hand-btn">
+            <span class="control-icon-mini">${icons.hand}</span>
+            <span class="control-label-mini">${this.isHandRaised ? 'Lower' : 'Raise'}</span>
           </button>
-          <button class="control-btn-item control-leave" id="leave-btn">
-            ${icons.leave}
+          <button class="control-mini leave-mini" id="leave-btn">
+            <span class="control-icon-mini">${icons.leave}</span>
+            <span class="control-label-mini">Leave</span>
           </button>
-        </div>
+        </footer>
 
-        <!-- Toast -->
         <div class="toast-container" id="toast-container"></div>
       </div>
     `;
