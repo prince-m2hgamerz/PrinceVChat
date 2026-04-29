@@ -197,7 +197,6 @@ export class UIManager {
       handRaised: false
     });
 
-<<<<<<< HEAD
     app.innerHTML = `
       <nav class="nav">
         <div class="layout-container nav-inner">
@@ -213,39 +212,10 @@ export class UIManager {
           </div>
           <button class="btn btn-secondary" id="copy-btn">
             ${icons.copy} Copy Invite Link
-=======
-    const backIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>`;
-    const copyIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
-
-    app.innerHTML = `
-      <div class="vercel-page room-page">
-        <div class="bg-gradient"></div>
-        <div class="bg-grid"></div>
-        
-        <!-- Glassmorphism Header -->
-        <header class="room-header-glass">
-          <a href="/" class="header-link-glass">
-            ${backIcon}
-          </a>
-          <div class="header-info-glass">
-            <h1 class="header-title-glass">${this.escapeHtml(username)}</h1>
-            <div class="header-meta-glass">
-              <span class="live-badge-glass">
-                <span class="live-dot-glass"></span>
-                LIVE
-              </span>
-              <span class="participant-count-glass" id="user-count">1</span>
-            </div>
-          </div>
-          <button class="copy-btn-glass" id="copy-btn" title="Copy link">
-            ${copyIcon}
-            <span class="copy-text">Copy</span>
->>>>>>> 4d9f367ba5f3e36181a85b3e17fa25768220a8aa
           </button>
         </div>
       </nav>
 
-<<<<<<< HEAD
       <main class="layout-container" style="padding-bottom: 100px;">
         <div class="room-header">
           <div class="room-info">
@@ -272,46 +242,6 @@ export class UIManager {
           </button>
         </div>
       </footer>
-=======
-        <!-- Room Content -->
-        <main class="room-content-glass">
-          <!-- Invite Box -->
-          <div class="invite-glass">
-            <label class="invite-label-glass">Room Link</label>
-            <div class="invite-row-glass">
-              <code class="invite-link-glass">${window.location.origin}/room/${roomId}</code>
-              <button class="invite-btn-glass" id="copy-btn-2">Copy</button>
-            </div>
-          </div>
-
-          <!-- Participants Grid -->
-          <div class="participants-section-glass">
-            <div class="participants-header-glass">
-              <span class="participants-title-glass">Participants</span>
-              <span class="participants-badge-glass" id="user-count-2">1</span>
-            </div>
-            <div class="participants-flex" id="participants">
-              ${this.renderParticipants()}
-            </div>
-          </div>
-        </main>
-
-        <!-- Fixed Controls -->
-        <div class="controls-glass">
-          <button class="control-glass ${this.isMuted ? 'muted-glass' : ''}" id="mute-btn">
-            <span class="control-icon-glass">${this.isMuted ? icons.micOff : icons.mic}</span>
-            <span class="control-text-glass">${this.isMuted ? 'Unmute' : 'Mute'}</span>
-          </button>
-          <button class="control-glass ${this.isHandRaised ? 'hand-raised-glass' : ''}" id="hand-btn">
-            <span class="control-icon-glass">${icons.hand}</span>
-            <span class="control-text-glass">${this.isHandRaised ? 'Lower' : 'Raise'}</span>
-          </button>
-          <button class="control-glass leave-glass" id="leave-btn">
-            <span class="control-icon-glass">${icons.leave}</span>
-            <span class="control-text-glass">Leave</span>
-          </button>
-        </div>
->>>>>>> 4d9f367ba5f3e36181a85b3e17fa25768220a8aa
 
       <div class="toast-container" id="toast-container"></div>
     `;
@@ -327,16 +257,8 @@ export class UIManager {
       this.isMuted = !this.isMuted;
       const btn = document.getElementById('mute-btn');
       if (btn) {
-<<<<<<< HEAD
         btn.classList.toggle('danger', this.isMuted);
         btn.innerHTML = this.isMuted ? roomIcons.micOff : roomIcons.mic;
-=======
-        btn.classList.toggle('muted-glass', this.isMuted);
-        btn.innerHTML = `
-          <span class="control-icon-glass">${this.isMuted ? roomIcons.micOff : roomIcons.mic}</span>
-          <span class="control-text-glass">${this.isMuted ? 'Unmute' : 'Mute'}</span>
-        `;
->>>>>>> 4d9f367ba5f3e36181a85b3e17fa25768220a8aa
       }
       this.onMute?.();
     });
@@ -345,11 +267,7 @@ export class UIManager {
       this.isHandRaised = !this.isHandRaised;
       const btn = document.getElementById('hand-btn');
       if (btn) {
-        btn.classList.toggle('hand-raised-glass', this.isHandRaised);
-        btn.innerHTML = `
-          <span class="control-icon-glass">${roomIcons.hand}</span>
-          <span class="control-text-glass">${this.isHandRaised ? 'Lower' : 'Raise'}</span>
-        `;
+        btn.classList.toggle('active', this.isHandRaised);
       }
       this.onRaiseHand?.();
     });
