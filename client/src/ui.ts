@@ -4,7 +4,7 @@
 
 export class UIManager {
   private currentScreen: 'landing' | 'username' | 'room' = 'landing';
-  private users = new Map<string, { id: string; name: string; isHost: boolean; speaking: boolean }>();
+  private users = new Map<string, { id: string; name: string; isHost: boolean; speaking: boolean; handRaised: boolean }>();
   private localUserId: string | null = null;
   private roomId: string = '';
   private isMuted = false;
@@ -85,7 +85,7 @@ export class UIManager {
       
       <footer class="footer">
         <div class="footer-inner">
-          <span>PrinceVChat v<span class="version">1.0.15</span></span>
+          <span>PrinceVChat v<span class="version">1.0.16</span></span>
           <span>Free group voice chat</span>
         </div>
       </footer>
@@ -268,7 +268,7 @@ export class UIManager {
       
       <footer class="footer">
         <div class="footer-inner">
-          <span>PrinceVChat v<span class="version">1.0.15</span></span>
+          <span>PrinceVChat v<span class="version">1.0.16</span></span>
           <span>Free voice chat</span>
         </div>
       </footer>
@@ -320,15 +320,15 @@ export class UIManager {
 
     return users.map(user => {
       const isSelf = user.id === this.localUserId;
+      const status = user.handRaised ? '✋ Hand raised' : (user.speaking ? 'Speaking...' : (isSelf ? 'You' : 'Connected'));
       return `
-        <div class="participant ${user.isHost ? 'host' : ''} ${user.speaking ? 'speaking' : ''}">
+        <div class="participant ${user.isHost ? 'host' : ''} ${user.speaking ? 'speaking' : ''} ${user.handRaised ? 'hand-up' : ''}">
           ${isSelf ? '<span class="participant-you">You</span>' : ''}
           ${user.isHost && !isSelf ? '<span class="participant-host-badge">Host</span>' : ''}
+          ${user.handRaised ? '<span class="hand-icon">✋</span>' : ''}
           <div class="participant-avatar">${this.getInitials(user.name)}</div>
           <div class="participant-name">${this.escapeHtml(user.name)}</div>
-          <div class="participant-status">
-            ${user.speaking ? 'Speaking...' : isSelf ? 'You' : 'Connected'}
-          </div>
+          <div class="participant-status">${status}</div>
         </div>
       `;
     }).join('');
@@ -340,7 +340,8 @@ export class UIManager {
       id: userId,
       name: name || 'User-' + userId.slice(-4),
       isHost,
-      speaking: false
+      speaking: false,
+      handRaised: false
     });
     this.updateParticipants();
   }
@@ -356,6 +357,29 @@ export class UIManager {
       user.speaking = speaking;
       this.updateParticipants();
     }
+  }
+
+  // Set own hand raised state
+  setHandRaised(raised: boolean): void {
+    this.isHandRaised = raised;
+    const btn = document.getElementById('hand-btn');
+    if (btn) {
+      btn.classList.toggle('active', raised);
+    }
+    this.updateParticipants();
+  }
+
+  // Set another user's hand raised state
+  setUserHandRaised(userId: string, raised: boolean): void {
+    const user = this.users.get(userId);
+    if (user) {
+      user.handRaised = raised;
+      this.updateParticipants();
+    }
+  }
+
+  getUserName(userId: string): string | undefined {
+    return this.users.get(userId)?.name;
   }
 
   private updateParticipants(): void {

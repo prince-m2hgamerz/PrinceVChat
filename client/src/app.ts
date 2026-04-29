@@ -132,6 +132,16 @@ class App {
         this.ui.removeUser(msg.userId);
       });
 
+      // When someone's hand is raised/lowered
+      this.socketManager.on('raise-hand', (msg: any) => {
+        console.log('[App] Hand:', msg.userId, msg.raised);
+        this.ui.setUserHandRaised(msg.userId, msg.raised);
+        if (msg.raised) {
+          const peerName = this.ui.getUserName(msg.userId) || 'Someone';
+          this.ui.showToast(`${peerName} raised hand!`, 'success');
+        }
+      });
+
       // Now connect - server will immediately send room-users
       await this.socketManager.connect();
 
@@ -196,14 +206,18 @@ class App {
     }
   }
 
+  private isHandRaised = false;
+
   private toggleRaiseHand(): void {
     if (!this.socketManager) return;
+    this.isHandRaised = !this.isHandRaised;
     this.socketManager.send({
       type: 'raise-hand',
       roomId: this.roomId,
-      raised: true
+      raised: this.isHandRaised
     });
-    this.ui.showToast('Hand raised!', 'success');
+    this.ui.setHandRaised(this.isHandRaised);
+    this.ui.showToast(this.isHandRaised ? 'Hand raised!' : 'Hand lowered', 'success');
   }
 
   private leaveRoom(): void {
