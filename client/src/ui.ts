@@ -589,7 +589,7 @@ export class UIManager {
           <div class="participant-avatar-overlay" id="avatar-${user.id}">
             <div class="participant-avatar">${this.getInitials(user.name)}</div>
           </div>
-          <video id="video-${user.id}" class="participant-video ${isSelf ? '' : 'remote'}" autoplay playsinline ${isSelf ? 'muted' : ''}></video>
+          <video id="video-${user.id}" class="participant-video ${isSelf ? '' : 'remote'}" autoplay playsinline webkit-playsinline ${isSelf ? 'muted' : ''}></video>
           
           <div class="participant-info-overlay">
             <div class="participant-name">${this.escapeHtml(user.name)} ${user.isHost ? '(Host)' : ''}</div>
@@ -622,22 +622,40 @@ export class UIManager {
     const user = this.users.get(userId);
     if (user) {
       user.stream = stream;
-      // Don't auto-set videoOn here - let setVideoStatus handle it
       this.attachStreamToElement(userId, stream);
     }
   }
 
   private attachStreamToElement(userId: string, stream: MediaStream): void {
     const videoEl = document.getElementById(`video-${userId}`) as HTMLVideoElement;
-    if (videoEl && stream) {
+    if (!videoEl || !stream) return;
+
+    // Only reassign if different stream
+    if (videoEl.srcObject !== stream) {
       videoEl.srcObject = stream;
-      videoEl.onloadedmetadata = () => {
-        videoEl.play().catch(e => console.warn('[UI] Play error for', userId, e));
-      };
-      // Also try to play immediately in case metadata is already loaded
-      if (videoEl.readyState >= 1) {
-        videoEl.play().catch(() => {});
+    }
+
+    // For local user, ensure muted (prevents echo)
+    if (userId === this.localUserId) {
+      videoEl.muted = true;
+      videoEl.volume = 0;
+    }
+
+    // Cross-browser play — handles autoplay policy
+    const tryPlay = () => {
+      const playPromise = videoEl.play();
+      if (playPromise) {
+        playPromise.catch((e: Error) => {
+          console.warn('[UI] Autoplay blocked for', userId, e.message);
+          // Will be unlocked by the click/touch handler
+        });
       }
+    };
+
+    if (videoEl.readyState >= 1) {
+      tryPlay();
+    } else {
+      videoEl.onloadedmetadata = () => tryPlay();
     }
   }
 
@@ -666,7 +684,16 @@ export class UIManager {
     const user = this.users.get(userId);
     if (user) {
       user.speaking = speaking;
-      this.updateParticipants();
+      // Update DOM in-place — do NOT call updateParticipants() 
+      // because that destroys and rebuilds all video elements, killing audio
+      const card = document.getElementById(`p-${userId}`);
+      if (card) {
+        card.classList.toggle('speaking', speaking);
+        const statusEl = card.querySelector('.participant-status-badge');
+        if (statusEl) {
+          statusEl.textContent = user.handRaised ? '✋ Hand raised' : (speaking ? 'Speaking...' : (userId === this.localUserId ? 'You' : ''));
+        }
+      }
     }
   }
 
@@ -680,16 +707,30 @@ export class UIManager {
       const user = this.users.get(this.localUserId);
       if (user) {
         user.handRaised = raised;
+        // Update DOM in-place
+        const card = document.getElementById(`p-${this.localUserId}`);
+        if (card) {
+          card.classList.toggle('hand-up', raised);
+          const statusEl = card.querySelector('.participant-status-badge');
+          if (statusEl) statusEl.textContent = raised ? '✋ Hand raised' : 'You';
+        }
       }
     }
-    this.updateParticipants();
   }
 
   setUserHandRaised(userId: string, raised: boolean): void {
     const user = this.users.get(userId);
     if (user) {
       user.handRaised = raised;
-      this.updateParticipants();
+      // Update DOM in-place instead of full rebuild
+      const card = document.getElementById(`p-${userId}`);
+      if (card) {
+        card.classList.toggle('hand-up', raised);
+        const statusEl = card.querySelector('.participant-status-badge');
+        if (statusEl) {
+          statusEl.textContent = raised ? '✋ Hand raised' : (user.speaking ? 'Speaking...' : '');
+        }
+      }
     }
   }
 

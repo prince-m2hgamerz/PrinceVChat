@@ -1,6 +1,6 @@
 /**
  * PrinceVChat - Main Application
- * Clean rewrite: fixed audio, camera-off-by-default, duplicate methods removed
+ * Fixed: audio, video, screen share, chat, cross-browser support
  */
 
 import './styles.css';
@@ -8,7 +8,9 @@ import { SocketManager } from './socket';
 import { WebRTCManager } from './webrtc';
 import { UIManager } from './ui';
 
-const WS_URL = `wss://${window.location.host}/ws`;
+// Auto-detect ws/wss based on page protocol
+const WS_PROTOCOL = window.location.protocol === 'https:' ? 'wss' : 'ws';
+const WS_URL = `${WS_PROTOCOL}://${window.location.host}/ws`;
 const ROUTE_PREFIX = '/room/';
 
 class App {
@@ -100,10 +102,19 @@ class App {
       this.ui.showToast('Connecting...', 'success');
 
       // 1. Get mic + camera (camera will be disabled immediately)
-      this.localStream = await navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-        video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' },
-      });
+      try {
+        this.localStream = await navigator.mediaDevices.getUserMedia({
+          audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+          video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' },
+        });
+      } catch (mediaErr) {
+        console.warn('[App] Camera failed, trying audio only:', mediaErr);
+        // Fallback: audio only if camera fails
+        this.localStream = await navigator.mediaDevices.getUserMedia({
+          audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+          video: false,
+        });
+      }
 
       // 2. Camera OFF by default - user can turn it on later
       this.localStream.getVideoTracks().forEach(t => { t.enabled = false; });
@@ -195,7 +206,7 @@ class App {
       this.webrtcManager.setLocalStream(this.localStream);
 
       this.webrtcManager.onPeerConnected((peerId: string, stream: MediaStream) => {
-        console.log('[App] Peer connected with stream:', peerId);
+        console.log('[App] Peer connected with stream:', peerId, 'tracks:', stream.getTracks().map(t => t.kind));
         this.ui.setRemoteStream(peerId, stream);
       });
 
@@ -257,16 +268,20 @@ class App {
       this.isScreenSharing = false;
       await this.restoreCamera();
     } else {
-      const stream = await this.webrtcManager.startScreenShare();
-      if (stream) {
-        this.isScreenSharing = true;
-        this.localStream = stream;
-        this.ui.setRemoteStream(this.userId, stream);
-        this.ui.setVideoStatus(this.userId, true);
-        this.ui.showToast('Sharing screen', 'success');
-        stream.getVideoTracks()[0].onended = () => {
-          if (this.isScreenSharing) this.toggleScreenShare();
-        };
+      try {
+        const stream = await this.webrtcManager.startScreenShare();
+        if (stream) {
+          this.isScreenSharing = true;
+          this.localStream = stream;
+          this.ui.setRemoteStream(this.userId, stream);
+          this.ui.setVideoStatus(this.userId, true);
+          this.ui.showToast('Sharing screen', 'success');
+          stream.getVideoTracks()[0].onended = () => {
+            if (this.isScreenSharing) this.toggleScreenShare();
+          };
+        }
+      } catch (e) {
+        this.ui.showToast('Screen share cancelled', 'error');
       }
     }
   }
@@ -279,8 +294,10 @@ class App {
         audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
       });
       this.localStream = stream;
+      stream.getVideoTracks().forEach(t => { t.enabled = false; });
       this.webrtcManager.setLocalStream(stream);
       this.ui.setRemoteStream(this.userId, stream);
+      this.ui.setVideoStatus(this.userId, false);
       this.ui.showToast('Camera restored', 'success');
     } catch (e) {
       console.error('Failed to restore camera', e);
@@ -308,7 +325,6 @@ class App {
   }
 
   private toggleDeafen(): void {
-    // Mute/unmute all remote media elements (not our own local video)
     document.querySelectorAll('video, audio').forEach(el => {
       const mediaEl = el as HTMLMediaElement;
       if (mediaEl.id !== `video-${this.userId}`) {
