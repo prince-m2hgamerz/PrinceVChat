@@ -81,7 +81,7 @@ body {
 .section-hero {
   text-align: center;
   width: 100%;
-  padding: 120px 0 60px;
+  padding: 180px 0 80px !important; /* Ultra-premium gap from header */
 }
 
 .hero-content {
@@ -323,8 +323,9 @@ body {
 
 /* CTA Section */
 .section-cta {
-  padding: 60px 0;
+  padding: 100px 0;
   width: 100%;
+  margin-top: 180px !important; /* Force separation from features */
 }
 
 .cta-card {
