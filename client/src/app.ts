@@ -100,6 +100,16 @@ class App {
     this.ui.setOnToggleLock((locked) => this.toggleRoomLock(locked));
     this.ui.setOnSetPassword((password) => this.setRoomPassword(password));
     this.ui.setOnTogglePrivacy((enabled) => this.togglePrivacy(enabled));
+    this.ui.setOnRecord((recording) => {
+      if (recording) this.ui.startRecording();
+      else this.ui.stopRecording();
+    });
+    this.ui.setOnSendFile((file) => {
+      if (this.webrtcManager) {
+        this.webrtcManager.sendFile(file);
+        this.ui.addChatMessage(this.userId, 'You', `Sent a file: ${file.name}`, true, URL.createObjectURL(file), file.name);
+      }
+    });
   }
 
   private createRoom(): void {
@@ -248,19 +258,27 @@ class App {
 
       // 7. Setup WebRTC
       this.webrtcManager = new WebRTCManager(this.socketManager, this.roomId, this.userId);
-      this.webrtcManager.setLocalStream(this.localStream);
-
-      this.webrtcManager.onPeerConnected((peerId: string, stream: MediaStream) => {
-        console.log('[App] Peer connected with stream:', peerId, 'tracks:', stream.getTracks().map(t => t.kind));
+      this.webrtcManager.onPeerConnected((peerId, stream) => {
         this.ui.setRemoteStream(peerId, stream);
       });
-
-      this.webrtcManager.onPeerDisconnected((peerId: string) => {
+      this.webrtcManager.onPeerDisconnected((peerId) => {
         this.ui.removeUser(peerId);
       });
-
-      this.webrtcManager.onSpeaking((peerId: string, speaking: boolean) => {
+      this.webrtcManager.onSpeaking((peerId, speaking) => {
         this.ui.setUserSpeaking(peerId, speaking);
+      });
+      this.webrtcManager.onFileReceived((peerId, file, fileName) => {
+        const user = this.ui.getUser(peerId);
+        const name = user?.name || 'Someone';
+        this.ui.addChatMessage(peerId, name, `Sent a file: ${fileName}`, false, URL.createObjectURL(file), fileName);
+        this.ui.showToast(`${name} sent a file!`, 'success');
+      });
+      this.webrtcManager.setLocalStream(this.localStream);
+
+      this.webrtcManager.setLocalStream(this.localStream);
+      
+      this.socketManager.on('signal', (msg: any) => {
+        // ... (signaling handled via webrtcManager methods now)
       });
 
       this.ui.showToast('Connected!', 'success');

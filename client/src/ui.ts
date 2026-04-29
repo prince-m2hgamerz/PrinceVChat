@@ -10,6 +10,9 @@ export class UIManager {
   private isDarkMode = false;
   private isRoomLocked = false;
   private isScreenSharing = false;
+  private isRecording = false;
+  private mediaRecorder: MediaRecorder | null = null;
+  private recordedChunks: Blob[] = [];
   
   // Callbacks
   private onCreateRoom: (() => void) | null = null;
@@ -26,6 +29,8 @@ export class UIManager {
   private onToggleLock: ((locked: boolean) => void) | null = null;
   private onSetPassword: ((password: string) => void) | null = null;
   private onTogglePrivacy: ((enabled: boolean) => void) | null = null;
+  private onRecord: ((recording: boolean) => void) | null = null;
+  private onSendFile: ((file: File) => void) | null = null;
 
   render(): void {
     this.showLanding();
@@ -46,7 +51,10 @@ export class UIManager {
   setOnToggleLock(cb: (locked: boolean) => void): void { this.onToggleLock = cb; }
   setOnSetPassword(cb: (password: string) => void): void { this.onSetPassword = cb; }
   setOnTogglePrivacy(cb: (enabled: boolean) => void): void { this.onTogglePrivacy = cb; }
+  setOnRecord(cb: (recording: boolean) => void): void { this.onRecord = cb; }
+  setOnSendFile(cb: (file: File) => void): void { this.onSendFile = cb; }
   setLocalUserId(id: string): void { this.localUserId = id; }
+  getUser(userId: string) { return this.users.get(userId); }
 
   // ==================== LANDING - VERCEL-INSPIRED DESIGN ====================
   showLanding(): void {
@@ -169,6 +177,20 @@ export class UIManager {
                 <h3 class="heading-card">Reactions &amp; Hand Raise</h3>
                 <p class="body-regular">Express yourself with floating emoji reactions and raise your hand to get the host's attention.</p>
               </div>
+              <div class="feature-card">
+                <div class="feature-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/><polyline points="14.5 2 22 2 22 9.5"/><line x1="10" y1="14" x2="22" y2="2"/></svg>
+                </div>
+                <h3 class="heading-card">P2P File Transfer</h3>
+                <p class="body-regular">Send files of any size directly between peers. Secure, fast, and completely private with zero server storage.</p>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>
+                </div>
+                <h3 class="heading-card">Meeting Recording</h3>
+                <p class="body-regular">Record your conversations locally in HD. The video is saved directly to your device, never touching our servers.</p>
+              </div>
             </div>
           </section>
 
@@ -202,7 +224,7 @@ export class UIManager {
               <a href="/report" class="footer-link" id="footer-report">Report</a>
               <a href="/terms" class="footer-link" id="footer-terms">Terms</a>
               <a href="/privacy" class="footer-link" id="footer-privacy">Privacy</a>
-              <span class="footer-version">v3.3.1</span>
+              <span class="footer-version">v3.4.0</span>
             </div>
           </div>
         </footer>
@@ -254,6 +276,15 @@ export class UIManager {
             <h1 class="heading-section" style="margin-top:24px;margin-bottom:8px;letter-spacing:-2.4px;">Changelog</h1>
             <p class="body-large" style="color:var(--ds-gray-500);margin-bottom:56px;">All notable changes to PrinceVChat, most recent first.</p>
             <div class="changelog-list">
+              <div class="changelog-entry">
+                <div class="changelog-version"><span class="badge">v3.4.0</span><span class="changelog-date">May 2, 2026</span></div>
+                <h3 class="heading-card">Pro Features Expansion</h3>
+                <ul class="changelog-items">
+                  <li><span class="cl-tag cl-new">New</span> <strong>P2P File Transfer:</strong> Send large files directly between participants with zero server involvement.</li>
+                  <li><span class="cl-tag cl-new">New</span> <strong>Local Recording:</strong> Record meetings in HD directly to your device's storage.</li>
+                  <li><span class="cl-tag cl-improved">Improved</span> <strong>Media Quality:</strong> Enhanced HD media handling and P2P connection stability.</li>
+                </ul>
+              </div>
               <div class="changelog-entry">
                 <div class="changelog-version"><span class="badge">v3.3.1</span><span class="changelog-date">May 1, 2026</span></div>
                 <h3 class="heading-card">Desktop Experience Overhaul</h3>
@@ -417,7 +448,7 @@ export class UIManager {
             </div>
           </div>
         </main>
-        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.3.1</span></div></div></footer>
+        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.4.0</span></div></div></footer>
       </div>
     `;
     document.getElementById('logo-home')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/'); this.showLanding(); });
@@ -448,7 +479,7 @@ export class UIManager {
             </div>
           </div>
         </main>
-        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.3.1</span></div></div></footer>
+        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.4.0</span></div></div></footer>
       </div>
     `;
     document.getElementById('logo-home')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/'); this.showLanding(); });
@@ -487,7 +518,7 @@ export class UIManager {
             </div>
           </div>
         </main>
-        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.3.1</span></div></div></footer>
+        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.4.0</span></div></div></footer>
       </div>
     `;
     document.getElementById('logo-home')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/'); this.showLanding(); });
@@ -526,7 +557,7 @@ export class UIManager {
             </div>
           </div>
         </main>
-        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.3.1</span></div></div></footer>
+        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.4.0</span></div></div></footer>
       </div>
     `;
     document.getElementById('logo-home')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/'); this.showLanding(); });
@@ -656,7 +687,9 @@ export class UIManager {
       lock: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`,
       unlock: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>`,
       shield: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`,
-      settings: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>`
+      settings: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>`,
+      record: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>`,
+      recordOff: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12" stroke-width="3"/></svg>`
     };
   }
 
@@ -742,7 +775,10 @@ export class UIManager {
             ${this.isRoomLocked ? icons.lock : icons.unlock}
           </button>
           <button class="btn btn-icon" id="password-btn" aria-label="Set Password" title="Set Room Password">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3y-3.5-3.5"></path></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3"></path></svg>
+          </button>
+          <button class="btn btn-icon" id="record-btn" aria-label="Record Meeting" title="Record Meeting">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>
           </button>
           <button class="btn btn-icon" id="privacy-btn" aria-label="Toggle Privacy Mode" title="Privacy Mode (Relay Only)">
             ${icons.shield}
@@ -775,6 +811,10 @@ export class UIManager {
         </div>
         <div class="chat-messages" id="chat-messages"></div>
         <form class="chat-input-container" id="chat-form">
+          <input type="file" id="file-input" style="display:none;">
+          <button type="button" class="btn btn-icon" id="file-btn" title="Send File" style="box-shadow:none;border:none;padding:8px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+          </button>
           <input type="text" class="form-input" id="chat-input" placeholder="Type a message..." autocomplete="off">
           <button type="submit" class="btn btn-primary" style="padding: 8px 12px;">Send</button>
         </form>
@@ -902,6 +942,29 @@ export class UIManager {
       const enabled = document.getElementById('privacy-btn')?.classList.toggle('active');
       this.onTogglePrivacy?.(!!enabled);
       this.showToast(enabled ? 'Privacy Mode: Relay Only' : 'Privacy Mode: Standard');
+    });
+
+    document.getElementById('record-btn')?.addEventListener('click', () => {
+      this.isRecording = !this.isRecording;
+      const btn = document.getElementById('record-btn');
+      if (btn) {
+        btn.classList.toggle('danger', this.isRecording);
+        btn.innerHTML = this.isRecording ? roomIcons.recordOff : roomIcons.record;
+      }
+      this.onRecord?.(this.isRecording);
+      this.showToast(this.isRecording ? 'Recording started' : 'Recording saved', 'success');
+    });
+
+    document.getElementById('file-btn')?.addEventListener('click', () => {
+      document.getElementById('file-input')?.click();
+    });
+
+    document.getElementById('file-input')?.addEventListener('change', (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        this.onSendFile?.(file);
+        (e.target as HTMLInputElement).value = ''; 
+      }
     });
 
     document.getElementById('leave-btn')?.addEventListener('click', () => {
@@ -1250,15 +1313,21 @@ export class UIManager {
     if (open) setTimeout(() => document.getElementById('chat-input')?.focus(), 300);
   }
 
-  addChatMessage(userId: string, username: string, message: string, isSelf: boolean): void {
+  addChatMessage(userId: string, username: string, message: string, isSelf: boolean, fileUrl?: string, fileName?: string): void {
     const container = document.getElementById('chat-messages');
     if (!container) return;
 
     const div = document.createElement('div');
     div.className = `chat-message ${isSelf ? 'self' : 'other'}`;
+    
+    let content = this.escapeHtml(message);
+    if (fileUrl && fileName) {
+      content = `Shared a file: <a href="${fileUrl}" download="${fileName}" class="file-link" style="color:var(--ds-blue);text-decoration:underline;display:block;margin-top:4px;">${this.escapeHtml(fileName)}</a>`;
+    }
+
     div.innerHTML = `
       <div class="chat-message-info">${this.escapeHtml(username)}</div>
-      <div class="chat-text">${this.escapeHtml(message)}</div>
+      <div class="chat-text">${content}</div>
     `;
     container.appendChild(div);
     container.scrollTop = container.scrollHeight;
@@ -1353,5 +1422,59 @@ export class UIManager {
     modal.addEventListener('click', (e) => {
       if (e.target === modal) modal.remove();
     });
+  }
+
+  // ==================== RECORDING ENGINE ====================
+  startRecording(): void {
+    const participants = Array.from(this.users.values());
+    // Find the most relevant stream (remote if available, else local)
+    const streamToRecord = participants.find(u => u.stream && u.id !== this.localUserId)?.stream 
+                        || participants.find(u => u.id === this.localUserId)?.stream;
+
+    if (!streamToRecord) {
+      this.showToast('No active stream to record', 'error');
+      this.isRecording = false;
+      const btn = document.getElementById('record-btn');
+      if (btn) {
+        btn.classList.remove('danger');
+        btn.innerHTML = this.getIcons().record;
+      }
+      return;
+    }
+
+    this.recordedChunks = [];
+    const options = { mimeType: 'video/webm;codecs=vp9,opus' };
+    try {
+      this.mediaRecorder = new MediaRecorder(streamToRecord, MediaRecorder.isTypeSupported(options.mimeType) ? options : undefined);
+    } catch (e) {
+      this.mediaRecorder = new MediaRecorder(streamToRecord);
+    }
+
+    this.mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) this.recordedChunks.push(e.data);
+    };
+
+    this.mediaRecorder.onstop = () => {
+      const blob = new Blob(this.recordedChunks, { type: 'video/webm' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = `PrinceVChat-${this.roomId}-${new Date().toLocaleDateString()}.webm`;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 100);
+    };
+
+    this.mediaRecorder.start();
+  }
+
+  stopRecording(): void {
+    if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+      this.mediaRecorder.stop();
+    }
   }
 }

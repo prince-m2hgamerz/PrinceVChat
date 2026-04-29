@@ -42,6 +42,10 @@ export class WebRTCManager {
   private onPeerConnectedCb: ((peerId: string, stream: MediaStream) => void) | null = null;
   private onPeerDisconnectedCb: ((peerId: string) => void) | null = null;
   private onSpeakingCb: ((peerId: string, speaking: boolean) => void) | null = null;
+  private onFileReceivedCb: ((peerId: string, file: Blob, fileName: string) => void) | null = null;
+
+  private fileChannels = new Map<string, RTCDataChannel>();
+  private fileBuffers: Map<string, { chunks: ArrayBuffer[], fileName: string, totalSize: number, receivedSize: number }> = new Map();
 
   private audioContext: AudioContext | null = null;
   private analysers: Map<string, { analyser: AnalyserNode; dataArray: Uint8Array }> = new Map();
@@ -101,6 +105,7 @@ export class WebRTCManager {
       source.connect(analyser);
       const dataArray = new Uint8Array(analyser.frequencyBinCount);
       this.analysers.set(id, { analyser, dataArray });
+      if (this.analysers.size === 0) this.analysisRunning = false;
       if (!this.analysisRunning) {
         this.analysisRunning = true;
         this.startAnalysisLoop();
@@ -131,6 +136,7 @@ export class WebRTCManager {
   onPeerConnected(cb: (peerId: string, stream: MediaStream) => void): void { this.onPeerConnectedCb = cb; }
   onPeerDisconnected(cb: (peerId: string) => void): void { this.onPeerDisconnectedCb = cb; }
   onSpeaking(cb: (peerId: string, speaking: boolean) => void): void { this.onSpeakingCb = cb; }
+  onFileReceived(cb: (peerId: string, file: Blob, fileName: string) => void): void { this.onFileReceivedCb = cb; }
 
   async createPeer(peerId: string, initiator: boolean): Promise<void> {
     if (this.peers.has(peerId)) return;
@@ -150,6 +156,17 @@ export class WebRTCManager {
       stream: remoteStream,
       pendingCandidates: [],
       hasRemoteDesc: false,
+    };
+
+    if (initiator) {
+      const channel = connection.createDataChannel('fileTransfer');
+      this.setupFileChannel(peerId, channel);
+    }
+
+    connection.ondatachannel = (event) => {
+      if (event.channel.label === 'fileTransfer') {
+        this.setupFileChannel(peerId, event.channel);
+      }
     };
     this.peers.set(peerId, peer);
 
@@ -407,6 +424,42 @@ export class WebRTCManager {
       console.error('[WebRTC] switchDevice error:', err);
       throw err;
     }
+  }
+
+  private setupFileChannel(peerId: string, channel: RTCDataChannel): void {
+    channel.binaryType = 'arraybuffer';
+    channel.onmessage = (event) => {
+      const data = event.data;
+      if (typeof data === 'string') {
+        const [fileName, sizeStr] = data.split(':');
+        this.fileBuffers.set(peerId, { chunks: [], fileName, totalSize: parseInt(sizeStr), receivedSize: 0 });
+      } else {
+        const buffer = this.fileBuffers.get(peerId);
+        if (buffer) {
+          buffer.chunks.push(data);
+          buffer.receivedSize += data.byteLength;
+          if (buffer.receivedSize >= buffer.totalSize) {
+            const blob = new Blob(buffer.chunks);
+            this.onFileReceivedCb?.(peerId, blob, buffer.fileName);
+            this.fileBuffers.delete(peerId);
+          }
+        }
+      }
+    };
+    this.fileChannels.set(peerId, channel);
+  }
+
+  async sendFile(file: File): Promise<void> {
+    const CHUNK_SIZE = 16384;
+    const arrayBuffer = await file.arrayBuffer();
+    this.fileChannels.forEach(channel => {
+      if (channel.readyState === 'open') {
+        channel.send(`${file.name}:${file.size}`);
+        for (let i = 0; i < arrayBuffer.byteLength; i += CHUNK_SIZE) {
+          channel.send(arrayBuffer.slice(i, i + CHUNK_SIZE));
+        }
+      }
+    });
   }
 
   cleanup(): void {
