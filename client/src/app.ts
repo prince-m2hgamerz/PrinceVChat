@@ -88,7 +88,8 @@ class App {
     this.ui.setOnRaiseHand(() => this.toggleRaiseHand());
     this.ui.setOnChat((msg) => this.sendChatMessage(msg));
     this.ui.setOnDeafen(() => this.toggleDeafen());
-    this.ui.setOnReaction((emoji) => this.sendReaction(emoji));
+    this.ui.onReaction = (emoji) => this.webrtcManager?.sendReaction(emoji);
+    this.ui.onSwitchDevice = (kind, deviceId) => this.webrtcManager?.switchDevice(kind, deviceId);
     this.ui.setOnScreenShare(() => this.toggleScreenShare());
     this.ui.setOnToggleLock((locked) => this.toggleRoomLock(locked));
     this.ui.setOnSetPassword((password) => this.setRoomPassword(password));

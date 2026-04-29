@@ -378,6 +378,37 @@ export class WebRTCManager {
     }
   }
 
+  async switchDevice(kind: 'audio' | 'video', deviceId: string): Promise<void> {
+    if (!this.localStream) return;
+
+    const constraints = {
+      [kind]: { deviceId: { exact: deviceId } }
+    };
+
+    try {
+      const newStream = await navigator.mediaDevices.getUserMedia(constraints);
+      const newTrack = newStream.getTracks()[0];
+      const oldTrack = this.localStream.getTracks().find(t => t.kind === kind);
+
+      if (oldTrack) {
+        oldTrack.stop();
+        this.localStream.removeTrack(oldTrack);
+        this.localStream.addTrack(newTrack);
+
+        // Replace track in all peer connections
+        this.peers.forEach(peer => {
+          const sender = peer.connection.getSenders().find(s => s.track?.kind === kind);
+          if (sender) {
+            sender.replaceTrack(newTrack);
+          }
+        });
+      }
+    } catch (err) {
+      console.error('[WebRTC] switchDevice error:', err);
+      throw err;
+    }
+  }
+
   cleanup(): void {
     this.analysisRunning = false;
     this.analysers.clear();

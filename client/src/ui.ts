@@ -203,7 +203,7 @@ export class UIManager {
               <a href="/report" class="footer-link" id="footer-report">Report</a>
               <a href="/terms" class="footer-link" id="footer-terms">Terms</a>
               <a href="/privacy" class="footer-link" id="footer-privacy">Privacy</a>
-              <span class="footer-version">v3.2.0</span>
+              <span class="footer-version">v3.2.1</span>
             </div>
           </div>
         </footer>
@@ -255,6 +255,16 @@ export class UIManager {
             <h1 class="heading-section" style="margin-top:24px;margin-bottom:8px;letter-spacing:-2.4px;">Changelog</h1>
             <p class="body-large" style="color:var(--ds-gray-500);margin-bottom:56px;">All notable changes to PrinceVChat, most recent first.</p>
             <div class="changelog-list">
+              <div class="changelog-entry">
+                <div class="changelog-version"><span class="badge">v3.2.1</span><span class="changelog-date">April 30, 2026</span></div>
+                <h3 class="heading-card">Mobile Navigation & Responsiveness</h3>
+                <ul class="changelog-items">
+                  <li><span class="cl-tag cl-new">New</span> <strong>Mobile Sidebar:</strong> Added a sliding navigation drawer for small screens</li>
+                  <li><span class="cl-tag cl-new">New</span> <strong>Hamburger Menu:</strong> Smooth navigation toggle on mobile</li>
+                  <li><span class="cl-tag cl-improved">Improved</span> <strong>Footer Responsiveness:</strong> Links now wrap and stack properly on all devices</li>
+                  <li><span class="cl-tag cl-improved">Improved</span> Legal and support pages accessibility</li>
+                </ul>
+              </div>
               <div class="changelog-entry">
                 <div class="changelog-version"><span class="badge">v3.2.0</span><span class="changelog-date">April 30, 2026</span></div>
                 <h3 class="heading-card">Security Hardening & Privacy</h3>
@@ -372,7 +382,7 @@ export class UIManager {
             </div>
           </div>
         </main>
-        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.2.0</span></div></div></footer>
+        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.2.1</span></div></div></footer>
       </div>
     `;
     document.getElementById('logo-home')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/'); this.showLanding(); });
@@ -403,7 +413,7 @@ export class UIManager {
             </div>
           </div>
         </main>
-        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.2.0</span></div></div></footer>
+        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.2.1</span></div></div></footer>
       </div>
     `;
     document.getElementById('logo-home')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/'); this.showLanding(); });
@@ -442,7 +452,7 @@ export class UIManager {
             </div>
           </div>
         </main>
-        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.2.0</span></div></div></footer>
+        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.2.1</span></div></div></footer>
       </div>
     `;
     document.getElementById('logo-home')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/'); this.showLanding(); });
@@ -481,7 +491,7 @@ export class UIManager {
             </div>
           </div>
         </main>
-        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.2.0</span></div></div></footer>
+        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.2.1</span></div></div></footer>
       </div>
     `;
     document.getElementById('logo-home')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/'); this.showLanding(); });
@@ -610,7 +620,8 @@ export class UIManager {
       sun: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`,
       lock: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`,
       unlock: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>`,
-      shield: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`
+      shield: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`,
+      settings: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>`
     };
   }
 
@@ -703,6 +714,9 @@ export class UIManager {
           </button>
           <button class="btn btn-icon" id="privacy-btn" aria-label="Toggle Privacy Mode" title="Privacy Mode (Relay Only)">
             ${icons.shield}
+          </button>
+          <button class="btn btn-icon" id="settings-btn" aria-label="Settings" title="Media Settings">
+            ${icons.settings}
           </button>
           <button class="btn btn-icon danger" id="leave-btn" aria-label="Leave Room" title="Leave">
             ${icons.leave}
@@ -818,9 +832,14 @@ export class UIManager {
 
     document.getElementById('theme-btn')?.addEventListener('click', () => {
       this.isDarkMode = !this.isDarkMode;
-      document.documentElement.classList.toggle('dark', this.isDarkMode);
+      document.body.classList.toggle('dark-mode', this.isDarkMode);
       const btn = document.getElementById('theme-btn');
       if (btn) btn.innerHTML = this.isDarkMode ? roomIcons.sun : roomIcons.moon;
+      this.showToast(this.isDarkMode ? 'Dark mode on' : 'Light mode on');
+    });
+
+    document.getElementById('settings-btn')?.addEventListener('click', () => {
+      this.showSettingsModal();
     });
 
     document.getElementById('chat-btn')?.addEventListener('click', () => this.toggleChat(true));
@@ -896,11 +915,35 @@ export class UIManager {
           
           <div class="participant-info-overlay">
             <div class="participant-name">${this.escapeHtml(user.name)} ${user.isHost ? '(Host)' : ''}</div>
-            <div class="participant-status-badge">${status}</div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <button class="pip-btn" id="pip-${user.id}" title="Picture-in-Picture" style="background:none;border:none;color:white;cursor:pointer;padding:2px;display:flex;align-items:center;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 4.5v5M11 4.5v5M16 4.5v5M19 4.5v5M21 4.5v15a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-15a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2zM15 15h4v4h-4v-4z"/></svg>
+              </button>
+              <div class="participant-status-badge">${status}</div>
+            </div>
           </div>
         </div>
       `;
     }).join('');
+
+    // Attach PiP listeners
+    this.users.forEach(user => {
+      document.getElementById(`pip-${user.id}`)?.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const video = document.getElementById(`video-${user.id}`) as HTMLVideoElement;
+        if (!video) return;
+        try {
+          if (document.pictureInPictureElement) {
+            await document.exitPictureInPicture();
+          } else {
+            await video.requestPictureInPicture();
+          }
+        } catch (err) {
+          console.error('[UI] PiP Error:', err);
+          this.showToast('PiP not supported', 'error');
+        }
+      });
+    });
   }
 
   // ==================== USER MANAGEMENT ====================
@@ -1177,11 +1220,6 @@ export class UIManager {
       .slice(0, 2);
   }
 
-  private escapeHtml(text: string): string {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  }
   private toggleChat(open: boolean): void {
     document.getElementById('chat-drawer')?.classList.toggle('open', open);
     document.getElementById('chat-overlay')?.classList.toggle('open', open);
@@ -1225,5 +1263,71 @@ export class UIManager {
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
+  }
+
+  // ==================== SETTINGS MODAL ====================
+  onSwitchDevice?: (kind: 'audio' | 'video', deviceId: string) => Promise<void>;
+
+  async showSettingsModal(): Promise<void> {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const videoDevices = devices.filter(d => d.kind === 'videoinput');
+    const audioDevices = devices.filter(d => d.kind === 'audioinput');
+
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.id = 'settings-overlay';
+    modal.innerHTML = `
+      <div class="modal" style="max-width: 480px;">
+        <div class="modal-header">
+          <h2 class="heading-card">Settings</h2>
+          <p class="body-small">Configure your audio and video devices</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Camera</label>
+          <select id="camera-select" class="form-input">
+            ${videoDevices.map(d => `<option value="${d.deviceId}">${d.label || 'Camera ' + d.deviceId.slice(0, 5)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Microphone</label>
+          <select id="mic-select" class="form-input">
+            ${audioDevices.map(d => `<option value="${d.deviceId}">${d.label || 'Mic ' + d.deviceId.slice(0, 5)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="modal-actions" style="margin-top: 32px;">
+          <button class="btn btn-primary" style="width: 100%;" id="settings-close">Done</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    document.getElementById('camera-select')?.addEventListener('change', async (e) => {
+      const deviceId = (e.target as HTMLSelectElement).value;
+      try {
+        await this.onSwitchDevice?.('video', deviceId);
+        this.showToast('Camera switched', 'success');
+      } catch (err) {
+        this.showToast('Failed to switch camera', 'error');
+      }
+    });
+
+    document.getElementById('mic-select')?.addEventListener('change', async (e) => {
+      const deviceId = (e.target as HTMLSelectElement).value;
+      try {
+        await this.onSwitchDevice?.('audio', deviceId);
+        this.showToast('Microphone switched', 'success');
+      } catch (err) {
+        this.showToast('Failed to switch mic', 'error');
+      }
+    });
+
+    document.getElementById('settings-close')?.addEventListener('click', () => {
+      modal.remove();
+    });
+    
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.remove();
+    });
   }
 }
