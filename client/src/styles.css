@@ -32,17 +32,20 @@
 body.dark-mode {
   --ds-bg: #000000;
   --ds-fg: #ffffff;
-  --ds-gray-50: #111111;
-  --ds-gray-100: #333333;
-  --ds-gray-200: #444444;
-  --ds-gray-400: #888888;
-  --ds-gray-500: #a1a1a1;
+  --ds-gray-50: #0a0a0a;
+  --ds-gray-100: #171717;
+  --ds-gray-200: #333333;
+  --ds-gray-400: #a3a3a3;
+  --ds-gray-500: #737373;
   --ds-gray-600: #ededed;
   --ds-gray-900: #ffffff;
   
-  --shadow-card: rgba(255, 255, 255, 0.1) 0px 0px 0px 1px, rgba(0, 0, 0, 0.4) 0px 2px 2px;
-  --shadow-card-hover: rgba(255,255,255,0.2) 0px 0px 0px 1px, rgba(0,0,0,0.6) 0px 8px 16px;
-  --shadow-border: 0 0 0 1px rgba(255, 255, 255, 0.1);
+  --shadow-card: rgba(255, 255, 255, 0.1) 0px 0px 0px 1px, rgba(0, 0, 0, 0.8) 0px 4px 12px;
+  --shadow-card-hover: rgba(255, 255, 255, 0.15) 0px 0px 0px 1px, rgba(0, 0, 0, 0.9) 0px 12px 24px;
+  --shadow-border: 0 0 0 1px #171717;
+  --shadow-light-ring: 0 0 0 1px #333;
+  
+  --ds-overlay-backdrop-color: rgba(0, 0, 0, 0.8);
 }
 
 *, *::before, *::after {
@@ -53,11 +56,16 @@ body.dark-mode {
 
 body {
   font-family: var(--font-sans);
-  background-color: var(--ds-bg);
+  background: var(--ds-bg);
   color: var(--ds-fg);
   margin: 0;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body.dark-mode {
+  --ds-bg-rgb: 0, 0, 0;
 }
 
 /* ==================== LANDING PAGE ==================== */
@@ -694,11 +702,16 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; color: var(--ds-gray-900); }
 .nav {
   position: sticky;
   top: 0;
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(var(--ds-bg-rgb, 255, 255, 255), 0.8);
   backdrop-filter: saturate(180%) blur(5px);
   z-index: 100;
   padding: 16px 0;
   box-shadow: 0 1px 0 0 var(--ds-gray-100);
+}
+
+body.dark-mode .nav {
+  background: rgba(0, 0, 0, 0.8);
+  box-shadow: 0 1px 0 0 #171717;
 }
 
 .nav-inner {

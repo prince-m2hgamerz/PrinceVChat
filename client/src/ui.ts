@@ -210,7 +210,7 @@ export class UIManager {
               <a href="/report" class="footer-link" id="footer-report">Report</a>
               <a href="/terms" class="footer-link" id="footer-terms">Terms</a>
               <a href="/privacy" class="footer-link" id="footer-privacy">Privacy</a>
-              <span class="footer-version">v3.2.2</span>
+              <span class="footer-version">v3.2.3</span>
             </div>
           </div>
         </footer>
@@ -275,6 +275,15 @@ export class UIManager {
             <h1 class="heading-section" style="margin-top:24px;margin-bottom:8px;letter-spacing:-2.4px;">Changelog</h1>
             <p class="body-large" style="color:var(--ds-gray-500);margin-bottom:56px;">All notable changes to PrinceVChat, most recent first.</p>
             <div class="changelog-list">
+              <div class="changelog-entry">
+                <div class="changelog-version"><span class="badge">v3.2.3</span><span class="changelog-date">April 30, 2026</span></div>
+                <h3 class="heading-card">Refined Geist Dark Mode</h3>
+                <ul class="changelog-items">
+                  <li><span class="cl-tag cl-improved">Improved</span> <strong>Dark Mode UI:</strong> Precision deep-blacks and shadow-borders from <code>DESIGN.md</code></li>
+                  <li><span class="cl-tag cl-new">New</span> <strong>Glassmorphism:</strong> Enhanced blur effects on navigation and control bars</li>
+                  <li><span class="cl-tag cl-improved">Improved</span> Theme toggle button with high-quality icons</li>
+                </ul>
+              </div>
               <div class="changelog-entry">
                 <div class="changelog-version"><span class="badge">v3.2.2</span><span class="changelog-date">April 30, 2026</span></div>
                 <h3 class="heading-card">Theme & Persistence Overhaul</h3>
@@ -411,7 +420,7 @@ export class UIManager {
             </div>
           </div>
         </main>
-        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.2.2</span></div></div></footer>
+        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.2.3</span></div></div></footer>
       </div>
     `;
     document.getElementById('logo-home')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/'); this.showLanding(); });
@@ -442,7 +451,7 @@ export class UIManager {
             </div>
           </div>
         </main>
-        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.2.2</span></div></div></footer>
+        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.2.3</span></div></div></footer>
       </div>
     `;
     document.getElementById('logo-home')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/'); this.showLanding(); });
@@ -481,7 +490,7 @@ export class UIManager {
             </div>
           </div>
         </main>
-        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.2.2</span></div></div></footer>
+        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.2.3</span></div></div></footer>
       </div>
     `;
     document.getElementById('logo-home')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/'); this.showLanding(); });
@@ -520,7 +529,7 @@ export class UIManager {
             </div>
           </div>
         </main>
-        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.2.2</span></div></div></footer>
+        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.2.3</span></div></div></footer>
       </div>
     `;
     document.getElementById('logo-home')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/'); this.showLanding(); });
