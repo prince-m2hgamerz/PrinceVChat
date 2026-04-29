@@ -129,7 +129,7 @@ const server = createServer((req, res) => {
 // ============ WEBSOCKET SERVER ============
 const wss = new WebSocketServer({ server, path: '/ws' });
 
-console.log('[Server] Port:', PORT);
+console.log('[Server] v1.0.8 - Port:', PORT);
 
 function send(ws: WebSocket, msg: any) {
   if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(msg));
