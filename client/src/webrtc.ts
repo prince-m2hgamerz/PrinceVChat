@@ -37,6 +37,7 @@ export class WebRTCManager {
   private userId: string;
   private isMuted = false;
   private isVideoOff = true;
+  private isPrivacyMode = false;
 
   private onPeerConnectedCb: ((peerId: string, stream: MediaStream) => void) | null = null;
   private onPeerDisconnectedCb: ((peerId: string) => void) | null = null;
@@ -69,6 +70,10 @@ export class WebRTCManager {
         }
       });
     });
+  }
+
+  setPrivacyMode(enabled: boolean): void {
+    this.isPrivacyMode = enabled;
   }
 
   private getOrCreateAudioContext(): AudioContext | null {
@@ -127,17 +132,15 @@ export class WebRTCManager {
   onPeerDisconnected(cb: (peerId: string) => void): void { this.onPeerDisconnectedCb = cb; }
   onSpeaking(cb: (peerId: string, speaking: boolean) => void): void { this.onSpeakingCb = cb; }
 
-  async createPeer(peerId: string, initiator: boolean): Promise<PeerData | null> {
-    // Clean up any existing peer
-    if (this.peers.has(peerId)) {
-      const old = this.peers.get(peerId)!;
-      try { old.connection.close(); } catch (e) {}
-      this.peers.delete(peerId);
-    }
+  async createPeer(peerId: string, initiator: boolean): Promise<void> {
+    if (this.peers.has(peerId)) return;
 
     console.log(`[WebRTC] Creating peer ${peerId}, initiator=${initiator}`);
 
-    const connection = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+    const connection = new RTCPeerConnection({
+      iceServers: ICE_SERVERS,
+      iceTransportPolicy: this.isPrivacyMode ? 'relay' : 'all',
+    });
     // One shared MediaStream per peer — accumulate all incoming tracks here
     const remoteStream = new MediaStream();
 

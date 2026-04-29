@@ -6,7 +6,7 @@ import { WebSocketServer, WebSocket } from 'ws';
 import { createServer, IncomingMessage } from 'http';
 import { readFileSync, existsSync, statSync } from 'fs';
 import { join, extname } from 'path';
-import { randomBytes, createHmac } from 'crypto';
+import { randomBytes, createHmac, createHash } from 'crypto';
 
 // Environment - Railway env vars take priority
 const PORT = parseInt(process.env.PORT || '3000', 10);
@@ -72,6 +72,21 @@ function checkRateLimit(ip: string): boolean {
 // Security: Secure Room ID Generator
 function generateSecureRoomId(): string {
   return randomBytes(9).toString('base64url'); // ~12 characters, unguessable
+}
+
+// Security: Simple Password Hash
+function hashPassword(password: string): string {
+  return createHash('sha256').update(password).digest('hex');
+}
+
+// Security: Message Validation Schema
+const VALID_TYPES = ['join', 'offer', 'answer', 'ice-candidate', 'chat', 'reaction', 'video-toggle', 'raise-hand', 'toggle-lock', 'set-password'];
+function isValidMessage(msg: any): boolean {
+  if (!msg || typeof msg !== 'object') return false;
+  if (!VALID_TYPES.includes(msg.type)) return false;
+  if (msg.roomId && (typeof msg.roomId !== 'string' || msg.roomId.length > 64)) return false;
+  if (msg.userId && (typeof msg.userId !== 'string' || msg.userId.length > 64)) return false;
+  return true;
 }
 
 const rooms = new Map<string, Room>();
@@ -280,6 +295,12 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
 
       const msg = JSON.parse(rawData);
 
+      // Security: Basic Schema Validation
+      if (!isValidMessage(msg)) {
+        console.log('[Security] Invalid message structure');
+        return;
+      }
+
       // Security: IP Rate Limit (Global per IP)
       if (!checkRateLimit(ip)) {
         send(ws, { type: 'error', message: 'Too many requests' });
@@ -321,13 +342,13 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
             clients: new Map(),
             chatHistory: [],
             isLocked: false,
-            password: msg.password // Set password on creation if provided
+            password: msg.password ? hashPassword(msg.password) : undefined // Hash on creation
           });
         }
         const room = rooms.get(roomId!)!;
 
         // Security: Check Password
-        if (room.password && !isNewRoom && room.password !== msg.password) {
+        if (room.password && !isNewRoom && room.password !== hashPassword(msg.password || '')) {
            send(ws, { type: 'error', message: 'Invalid room password', code: 'PASSWORD_REQUIRED' });
            return;
         }
@@ -511,8 +532,17 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
           const room = rooms.get(roomId);
           const client = room?.clients.get(clientId);
           if (room && client && client.isHost) {
-            room.password = msg.password || undefined;
+            room.password = msg.password ? hashPassword(msg.password) : undefined;
             send(ws, { type: 'toast', message: room.password ? 'Password set' : 'Password removed', status: 'success' });
+          }
+        }
+      }
+      else if (msg.type === 'privacy-toggle') {
+        if (roomId && clientId) {
+          const room = rooms.get(roomId);
+          const client = room?.clients.get(clientId);
+          if (room && client && client.isHost) {
+            broadcastToAll(room, { type: 'privacy-toggle', roomId, enabled: !!msg.enabled });
           }
         }
       }

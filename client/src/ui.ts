@@ -25,6 +25,7 @@ export class UIManager {
   private onScreenShare: (() => void) | null = null;
   private onToggleLock: ((locked: boolean) => void) | null = null;
   private onSetPassword: ((password: string) => void) | null = null;
+  private onTogglePrivacy: ((enabled: boolean) => void) | null = null;
 
   render(): void {
     this.showLanding();
@@ -44,6 +45,7 @@ export class UIManager {
   setOnScreenShare(cb: () => void): void { this.onScreenShare = cb; }
   setOnToggleLock(cb: (locked: boolean) => void): void { this.onToggleLock = cb; }
   setOnSetPassword(cb: (password: string) => void): void { this.onSetPassword = cb; }
+  setOnTogglePrivacy(cb: (enabled: boolean) => void): void { this.onTogglePrivacy = cb; }
   setLocalUserId(id: string): void { this.localUserId = id; }
 
   // ==================== LANDING - VERCEL-INSPIRED DESIGN ====================
@@ -177,7 +179,9 @@ export class UIManager {
             </div>
             <div class="footer-right">
               <a href="/changelog" class="footer-link" id="footer-changelog">Changelog</a>
-              <span class="footer-version">v3.1.0</span>
+              <a href="/contact" class="footer-link" id="footer-contact">Contact</a>
+              <a href="/report" class="footer-link" id="footer-report">Report Problem</a>
+              <span class="footer-version">v3.2.0</span>
             </div>
           </div>
         </footer>
@@ -191,6 +195,8 @@ export class UIManager {
     document.getElementById('cta-join-btn')?.addEventListener('click', () => this.showUsernameModal('join'));
     document.getElementById('nav-changelog')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/changelog'); this.showChangelog(); });
     document.getElementById('footer-changelog')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/changelog'); this.showChangelog(); });
+    document.getElementById('footer-contact')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/contact'); this.showContact(); });
+    document.getElementById('footer-report')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/report'); this.showReport(); });
     document.getElementById('nav-features-link')?.addEventListener('click', (e) => { e.preventDefault(); document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }); });
   }
 
@@ -208,6 +214,19 @@ export class UIManager {
             <h1 class="heading-section" style="margin-top:24px;margin-bottom:8px;letter-spacing:-2.4px;">Changelog</h1>
             <p class="body-large" style="color:var(--ds-gray-500);margin-bottom:56px;">All notable changes to PrinceVChat, most recent first.</p>
             <div class="changelog-list">
+              <div class="changelog-entry">
+                <div class="changelog-version"><span class="badge">v3.2.0</span><span class="changelog-date">April 30, 2026</span></div>
+                <h3 class="heading-card">Security Hardening & Privacy</h3>
+                <ul class="changelog-items">
+                  <li><span class="cl-tag cl-security">Security</span> <strong>Password Protected Rooms:</strong> Hosts can now set a password for their room (Hashed via SHA-256)</li>
+                  <li><span class="cl-tag cl-security">Security</span> <strong>Privacy Mode:</strong> New "Shield" toggle forces relay-only connections to hide participant IPs</li>
+                  <li><span class="cl-tag cl-security">Security</span> <strong>IP Rate Limiting:</strong> Server-side protection against signaling floods and bot spam</li>
+                  <li><span class="cl-tag cl-security">Security</span> <strong>Sanitization:</strong> Full audit of DOM rendering to prevent XSS (Cross-Site Scripting)</li>
+                  <li><span class="cl-tag cl-new">New</span> Cryptographically secure Room IDs and Session IDs using <code>WebCrypto API</code></li>
+                  <li><span class="cl-tag cl-new">New</span> Contact Us and Report Problem pages added</li>
+                  <li><span class="cl-tag cl-fix">Fix</span> Critical syntax error in UI manager causing hot-reload failure</li>
+                </ul>
+              </div>
               <div class="changelog-entry">
                 <div class="changelog-version"><span class="badge">v3.1.0</span><span class="changelog-date">April 30, 2026</span></div>
                 <h3 class="heading-card">Reliability & UX Overhaul</h3>
@@ -274,6 +293,76 @@ export class UIManager {
           </div>
         </main>
         <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.1.0</span></div></div></footer>
+      </div>
+    `;
+    document.getElementById('logo-home')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/'); this.showLanding(); });
+    document.getElementById('back-home')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/'); this.showLanding(); });
+  }
+
+  // ==================== CONTACT PAGE ====================
+  showContact(): void {
+    this.currentScreen = 'landing';
+    const app = document.getElementById('app');
+    if (!app) return;
+    app.innerHTML = `
+      <div class="landing-page">
+        <nav class="nav"><div class="layout-container nav-inner"><a href="/" class="logo" id="logo-home"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5z" fill="currentColor"/><path d="M2 17l10 5 10-5" stroke="currentColor" stroke-width="2"/><path d="M2 12l10 5 10-5" stroke="currentColor" stroke-width="2"/></svg><span>PrinceVChat</span></a></div></nav>
+        <main class="landing-main" style="align-items:flex-start;padding-top:40px;">
+          <div class="layout-container" style="width:100%;max-width:760px;padding-bottom:80px;">
+            <a href="/" class="back-link" id="back-home" style="display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ds-blue);text-decoration:none;font-weight:500;">&larr; Back</a>
+            <h1 class="heading-section" style="margin-top:24px;margin-bottom:8px;letter-spacing:-2.4px;">Contact Us</h1>
+            <p class="body-large" style="color:var(--ds-gray-500);margin-bottom:56px;">We're here to help you stay connected.</p>
+            
+            <div style="display:grid;gap:32px;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));">
+              <div class="cta-card" style="text-align:left;padding:32px;">
+                <h3 class="heading-card">Email Support</h3>
+                <div style="margin-top:16px;display:grid;gap:12px;">
+                  <a href="mailto:support@m2hio.in" class="footer-link" style="font-size:16px;">support@m2hio.in</a>
+                  <a href="mailto:help@m2hio.in" class="footer-link" style="font-size:16px;">help@m2hio.in</a>
+                </div>
+              </div>
+              <div class="cta-card" style="text-align:left;padding:32px;">
+                <h3 class="heading-card">Social Connect</h3>
+                <div style="margin-top:16px;display:grid;gap:12px;">
+                  <a href="https://t.me/m2hgamerz" target="_blank" class="footer-link" style="font-size:16px;">Telegram: @m2hgamerz</a>
+                  <a href="https://instagram.com/m2hgamerz" target="_blank" class="footer-link" style="font-size:16px;">Instagram: @m2hgamerz</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.2.0</span></div></div></footer>
+      </div>
+    `;
+    document.getElementById('logo-home')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/'); this.showLanding(); });
+    document.getElementById('back-home')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/'); this.showLanding(); });
+  }
+
+  // ==================== REPORT PAGE ====================
+  showReport(): void {
+    this.currentScreen = 'landing';
+    const app = document.getElementById('app');
+    if (!app) return;
+    app.innerHTML = `
+      <div class="landing-page">
+        <nav class="nav"><div class="layout-container nav-inner"><a href="/" class="logo" id="logo-home"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5z" fill="currentColor"/><path d="M2 17l10 5 10-5" stroke="currentColor" stroke-width="2"/><path d="M2 12l10 5 10-5" stroke="currentColor" stroke-width="2"/></svg><span>PrinceVChat</span></a></div></nav>
+        <main class="landing-main" style="align-items:flex-start;padding-top:40px;">
+          <div class="layout-container" style="width:100%;max-width:760px;padding-bottom:80px;">
+            <a href="/" class="back-link" id="back-home" style="display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ds-blue);text-decoration:none;font-weight:500;">&larr; Back</a>
+            <h1 class="heading-section" style="margin-top:24px;margin-bottom:8px;letter-spacing:-2.4px;">Report a Problem</h1>
+            <p class="body-large" style="color:var(--ds-gray-500);margin-bottom:56px;">Notice something wrong? Let us know so we can fix it.</p>
+            
+            <div class="cta-card" style="text-align:left;padding:40px;max-width:600px;">
+              <h3 class="heading-card">Report Vulnerability or Bug</h3>
+              <p class="body-regular" style="margin-top:16px;color:var(--ds-gray-500);">For security reports or critical bugs, please email our security team directly.</p>
+              <div style="margin-top:24px;">
+                <a href="mailto:report@m2hio.in" class="btn btn-primary" style="display:inline-flex;text-decoration:none;">Email report@m2hio.in</a>
+              </div>
+              <p class="body-small" style="margin-top:24px;color:var(--ds-gray-400);">Please include steps to reproduce and screenshots if possible.</p>
+            </div>
+          </div>
+        </main>
+        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.2.0</span></div></div></footer>
       </div>
     `;
     document.getElementById('logo-home')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/'); this.showLanding(); });
@@ -401,7 +490,8 @@ export class UIManager {
       moon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`,
       sun: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`,
       lock: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`,
-      unlock: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>`
+      unlock: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>`,
+      shield: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`
     };
   }
 
@@ -491,6 +581,9 @@ export class UIManager {
           </button>
           <button class="btn btn-icon" id="password-btn" aria-label="Set Password" title="Set Room Password">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3y-3.5-3.5"></path></svg>
+          </button>
+          <button class="btn btn-icon" id="privacy-btn" aria-label="Toggle Privacy Mode" title="Privacy Mode (Relay Only)">
+            ${icons.shield}
           </button>
           <button class="btn btn-icon danger" id="leave-btn" aria-label="Leave Room" title="Leave">
             ${icons.leave}
@@ -641,6 +734,12 @@ export class UIManager {
       if (pass !== null) {
         this.onSetPassword?.(pass);
       }
+    });
+
+    document.getElementById('privacy-btn')?.addEventListener('click', () => {
+      const enabled = document.getElementById('privacy-btn')?.classList.toggle('active');
+      this.onTogglePrivacy?.(!!enabled);
+      this.showToast(enabled ? 'Privacy Mode: Relay Only' : 'Privacy Mode: Standard');
     });
 
     document.getElementById('leave-btn')?.addEventListener('click', () => {

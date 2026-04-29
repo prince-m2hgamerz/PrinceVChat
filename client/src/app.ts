@@ -59,6 +59,14 @@ class App {
       this.ui.showChangelog();
       return;
     }
+    if (path === '/contact') {
+      this.ui.showContact();
+      return;
+    }
+    if (path === '/report') {
+      this.ui.showReport();
+      return;
+    }
     this.ui.render();
   }
 
@@ -76,6 +84,7 @@ class App {
     this.ui.setOnScreenShare(() => this.toggleScreenShare());
     this.ui.setOnToggleLock((locked) => this.toggleRoomLock(locked));
     this.ui.setOnSetPassword((password) => this.setRoomPassword(password));
+    this.ui.setOnTogglePrivacy((enabled) => this.togglePrivacy(enabled));
   }
 
   private createRoom(): void {
@@ -176,6 +185,11 @@ class App {
         this.ui.showToast(msg.locked ? 'Room locked by host' : 'Room unlocked', 'success');
       });
 
+      this.socketManager.on('privacy-toggle', (msg: any) => {
+        this.webrtcManager?.setPrivacyMode(!!msg.enabled);
+        this.ui.showToast(msg.enabled ? 'Privacy Mode active' : 'Standard Mode active', 'success');
+      });
+
       this.socketManager.on('error', (msg: any) => {
         this.ui.showToast(msg.message || 'Error', 'error');
         if (msg.code === 'PASSWORD_REQUIRED') {
@@ -267,6 +281,14 @@ class App {
       type: 'set-password',
       roomId: this.roomId,
       password: password
+    });
+  }
+
+  private togglePrivacy(enabled: boolean): void {
+    this.socketManager?.send({
+      type: 'privacy-toggle',
+      roomId: this.roomId,
+      enabled: enabled
     });
   }
 
