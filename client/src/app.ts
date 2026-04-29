@@ -20,18 +20,14 @@ class App {
   private username: string = '';
 
   constructor() {
-    // Generate or get persisted ID
-    let storedId = localStorage.getItem('userId');
-    if (!storedId) {
-      storedId = 'u-' + Math.random().toString(36).substring(2, 10);
-      localStorage.setItem('userId', storedId);
-    }
-    this.userId = storedId;
-    
     this.ui = new UIManager();
-    this.ui.setLocalUserId(this.userId);
     this.setupCallbacks();
     this.setupRouter();
+  }
+
+  // Generate a new session ID each time (not persisted)
+  private generateSessionId(): string {
+    return 'u-' + Math.random().toString(36).substring(2, 10);
   }
 
   private setupRouter(): void {
@@ -79,10 +75,14 @@ class App {
       return;
     }
 
+    // Generate NEW session ID for this room visit (not persisted!)
+    this.userId = this.generateSessionId();
+    this.ui.setLocalUserId(this.userId);
+    
     this.username = localStorage.getItem('username') || 'User';
     this.setupCallbacks();
 
-    console.log('[App] Joining:', this.roomId, this.username);
+    console.log('[App] Joining:', this.roomId, this.username, 'session:', this.userId);
 
     try {
       this.ui.showToast('Connecting...', 'success');
