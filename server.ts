@@ -7,30 +7,13 @@ import { createServer } from 'http';
 import { readFileSync, existsSync, statSync } from 'fs';
 import { join, extname } from 'path';
 
-// Load environment from railway.env if exists
-try {
-  const envFile = join(process.cwd(), 'railway.env');
-  if (existsSync(envFile)) {
-    const envContent = readFileSync(envFile, 'utf-8');
-    envContent.split('\n').forEach(line => {
-      const trimmed = line.trim();
-      if (trimmed && !trimmed.startsWith('#')) {
-        const [key, ...valueParts] = trimmed.split('=');
-        if (key && valueParts.length > 0) {
-          process.env[key.trim()] = valueParts.join('=').trim();
-        }
-      }
-    });
-    console.log('[Env] Loaded from railway.env');
-  }
-} catch (e) {
-  console.log('[Env] No railway.env or error loading:', e);
-}
-
-// Environment
+// Environment - with fallback values for Railway deployment
 const PORT = parseInt(process.env.PORT || '3000', 10);
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nyixcwollfqiojulsznw.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || '';
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55aXhjd29sbGZxaW9qdWxzem53Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NzM5MjAwMCwiZXhwIjoyMDkyOTY4MDAwfQ.3g--tSFcX3Y4Et9a386pO2DZJmlGFD7JmDXogGbe0wk';
+
+console.log('[Server] Supabase URL:', SUPABASE_URL ? 'configured' : 'missing');
+console.log('[Server] Supabase Key:', SUPABASE_KEY ? 'configured' : 'missing');
 
 // MIME Types
 const MIME_TYPES: Record<string, string> = {

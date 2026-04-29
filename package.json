@@ -1,6 +1,6 @@
 {
   "name": "princevchat",
-  "version": "1.0.33",
+  "version": "1.0.34",
   "description": "Free group voice chat - No signup, no download",
   "private": true,
   "type": "module",
