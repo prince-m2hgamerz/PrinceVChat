@@ -121,13 +121,28 @@ export class WebRTCManager {
     }
 
     connection.ontrack = (event) => {
-      console.log(`[WebRTC] Received remote track from ${peerId}`);
-      const [stream] = event.streams;
+      console.log(`[WebRTC] Received remote track (${event.track.kind}) from ${peerId}`);
+      
+      let stream = event.streams[0];
+      if (!stream) {
+        // Fallback: create stream from track if event.streams is empty
+        stream = new MediaStream([event.track]);
+      }
+
       const peer = this.peers.get(peerId);
       if (peer) {
-        peer.stream = stream;
-        this.setupAudioAnalysis(peerId, stream);
-        this.onPeerConnectedCb?.(peerId, stream);
+        // Only update the peer's stream if it's new or if we're adding a track to it
+        if (!peer.stream) {
+          peer.stream = stream;
+        } else {
+          // If we already have a stream, add the new track to it
+          if (!peer.stream.getTracks().find(t => t.id === event.track.id)) {
+            peer.stream.addTrack(event.track);
+          }
+        }
+        
+        this.setupAudioAnalysis(peerId, peer.stream);
+        this.onPeerConnectedCb?.(peerId, peer.stream);
       }
     };
 

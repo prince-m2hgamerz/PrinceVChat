@@ -266,6 +266,7 @@ export class UIManager {
           <div class="room-info">
             <h1 class="heading-large" id="room-title">${this.escapeHtml(username)}'s Room</h1>
             <span class="badge" style="background: var(--ds-gray-50); color: var(--ds-fg);"><span id="user-count">1 participant</span></span>
+            <button class="btn btn-secondary btn-small" id="fix-audio-btn" style="margin-left: 12px; font-size: 11px; padding: 4px 8px;">Fix Audio</button>
           </div>
         </div>
 
@@ -375,7 +376,6 @@ export class UIManager {
       this.onRaiseHand?.();
     });
 
-    // Speaker toggle
     document.getElementById('deafen-btn')?.addEventListener('click', () => {
       this.isDeafened = !this.isDeafened;
       const btn = document.getElementById('deafen-btn');
@@ -387,17 +387,19 @@ export class UIManager {
       this.showToast(this.isDeafened ? 'Speaker off' : 'Speaker on');
     });
 
-    document.getElementById('lock-btn')?.addEventListener('click', () => {
-      this.isRoomLocked = !this.isRoomLocked;
-      const btn = document.getElementById('lock-btn');
-      if (btn) {
-        btn.classList.toggle('danger', this.isRoomLocked);
-        btn.innerHTML = this.isRoomLocked ? icons.lock : icons.unlock;
-      }
-      this.onToggleLock?.(this.isRoomLocked);
+    document.getElementById('fix-audio-btn')?.addEventListener('click', () => {
+      this.resumeAllMedia();
+      this.showToast('Audio reset requested', 'success');
     });
 
-    // Emoji reactions
+    const unlock = () => {
+      this.resumeAllMedia();
+      window.removeEventListener('click', unlock);
+      window.removeEventListener('touchstart', unlock);
+    };
+    window.addEventListener('click', unlock);
+    window.addEventListener('touchstart', unlock);
+
     document.getElementById('emoji-btn')?.addEventListener('click', () => {
       const picker = document.getElementById('emoji-picker');
       if (picker) picker.style.display = picker.style.display === 'none' ? 'flex' : 'none';
@@ -414,7 +416,6 @@ export class UIManager {
       });
     });
 
-    // Dark mode
     document.getElementById('theme-btn')?.addEventListener('click', () => {
       this.isDarkMode = !this.isDarkMode;
       document.documentElement.classList.toggle('dark', this.isDarkMode);
@@ -547,7 +548,6 @@ export class UIManager {
     if (btn) {
       btn.classList.toggle('active', raised);
     }
-    // Also update the local user's state in the participants map
     if (this.localUserId) {
       const user = this.users.get(this.localUserId);
       if (user) {
@@ -604,7 +604,17 @@ export class UIManager {
   }
 
   // ==================== HELPERS ====================
-  private getInitials(name: string): string {
+  private resumeAllMedia(): void {
+    console.log('[UI] Resuming all media elements...');
+    document.querySelectorAll('video, audio').forEach(el => {
+      const media = el as HTMLMediaElement;
+      if (media.paused) {
+        media.play().catch(err => console.warn('[UI] Failed to play media:', err));
+      }
+    });
+  }
+
+  getInitials(name: string): string {
     return name
       .split(' ')
       .map(n => n[0])
