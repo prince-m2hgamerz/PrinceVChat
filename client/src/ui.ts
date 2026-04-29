@@ -192,9 +192,6 @@ export class UIManager {
     document.getElementById('nav-features-link')?.addEventListener('click', (e) => { e.preventDefault(); document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }); });
   }
 
-
-  }
-
   // ==================== CHANGELOG PAGE ====================
   showChangelog(): void {
     this.currentScreen = 'landing';
