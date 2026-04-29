@@ -304,6 +304,9 @@ export class UIManager {
           <button class="btn btn-icon" id="theme-btn" aria-label="Toggle Theme" title="Theme">
             ${this.isDarkMode ? icons.sun : icons.moon}
           </button>
+          <button class="btn btn-icon ${this.isRoomLocked ? 'active' : ''}" id="lock-btn" aria-label="Lock Room" title="Lock Room">
+            ${this.isRoomLocked ? icons.lock : icons.unlock}
+          </button>
           <button class="btn btn-icon danger" id="leave-btn" aria-label="Leave Room" title="Leave">
             ${icons.leave}
           </button>
@@ -437,6 +440,17 @@ export class UIManager {
       }
     });
 
+    document.getElementById('lock-btn')?.addEventListener('click', () => {
+      this.isRoomLocked = !this.isRoomLocked;
+      const btn = document.getElementById('lock-btn');
+      if (btn) {
+        btn.classList.toggle('active', this.isRoomLocked);
+        btn.innerHTML = this.isRoomLocked ? roomIcons.lock : roomIcons.unlock;
+      }
+      this.onToggleLock?.(this.isRoomLocked);
+      this.showToast(this.isRoomLocked ? 'Room locked' : 'Room unlocked', 'success');
+    });
+
     document.getElementById('leave-btn')?.addEventListener('click', () => {
       this.onLeave?.();
     });
@@ -501,15 +515,22 @@ export class UIManager {
     const user = this.users.get(userId);
     if (user) {
       user.stream = stream;
-      user.videoOn = stream.getVideoTracks().length > 0;
-      
-      const videoEl = document.getElementById(`video-${userId}`) as HTMLVideoElement;
-      if (videoEl) {
-        videoEl.srcObject = stream;
-        videoEl.onloadedmetadata = () => videoEl.play().catch(e => console.error('Video play error', e));
+      // Don't auto-set videoOn here - let setVideoStatus handle it
+      this.attachStreamToElement(userId, stream);
+    }
+  }
+
+  private attachStreamToElement(userId: string, stream: MediaStream): void {
+    const videoEl = document.getElementById(`video-${userId}`) as HTMLVideoElement;
+    if (videoEl && stream) {
+      videoEl.srcObject = stream;
+      videoEl.onloadedmetadata = () => {
+        videoEl.play().catch(e => console.warn('[UI] Play error for', userId, e));
+      };
+      // Also try to play immediately in case metadata is already loaded
+      if (videoEl.readyState >= 1) {
+        videoEl.play().catch(() => {});
       }
-      
-      this.updateVideoUI(userId);
     }
   }
 
@@ -579,7 +600,17 @@ export class UIManager {
     if (container && this.currentScreen === 'room') {
       container.innerHTML = this.renderParticipants();
       this.updateUserCount();
+      // CRITICAL: Re-attach all streams after DOM rebuild
+      this.reattachAllStreams();
     }
+  }
+
+  private reattachAllStreams(): void {
+    this.users.forEach(user => {
+      if (user.stream) {
+        this.attachStreamToElement(user.id, user.stream);
+      }
+    });
   }
 
   private updateUserCount(): void {

@@ -1,5 +1,6 @@
 /**
- * PrinceVChat - Main Application (Fixed - WebSocket based user tracking)
+ * PrinceVChat - Main Application
+ * Clean rewrite: fixed audio, camera-off-by-default, duplicate methods removed
  */
 
 import './styles.css';
@@ -17,10 +18,10 @@ class App {
   private roomId: string = '';
   private localStream: MediaStream | null = null;
   private userId: string = '';
-  private isMuted = false;
-  private isVideoOn = false;
-  private isHandRaised = false;
   private username: string = '';
+  private isHandRaised = false;
+  private isScreenSharing = false;
+  private currentFacingMode: 'user' | 'environment' = 'user';
 
   constructor() {
     this.ui = new UIManager();
@@ -28,9 +29,17 @@ class App {
     this.setupRouter();
   }
 
-  // Generate a new session ID each time (not persisted)
   private generateSessionId(): string {
     return 'u-' + Math.random().toString(36).substring(2, 10);
+  }
+
+  private generateRoomId(): string {
+    const chars = 'abcdefghijkmnpqrstuvwxyz23456789';
+    let result = '';
+    for (let i = 0; i < 6; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
   }
 
   private setupRouter(): void {
@@ -66,80 +75,41 @@ class App {
     this.joinRoom();
   }
 
-  private generateRoomId(): string {
-    const chars = 'abcdefghijkmnpqrstuvwxyz23456789';
-    let result = '';
-    for (let i = 0; i < 6; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
-  }
-
-  private async switchCamera(): Promise<void> {
-    if (!this.webrtcManager) return;
-    this.currentFacingMode = this.currentFacingMode === 'user' ? 'environment' : 'user';
-    try {
-      const stream = await this.webrtcManager.switchCamera(this.currentFacingMode);
-      if (stream) {
-        this.localStream = stream;
-        this.ui.setRemoteStream(this.userId, stream);
-        this.ui.showToast('Switched camera', 'success');
-      }
-    } catch (e) {
-      this.ui.showToast('Failed to switch camera', 'error');
-    }
-  }
-
+  // ==================== JOIN ROOM ====================
   private async joinRoom(): Promise<void> {
     const path = window.location.pathname;
     const match = path.match(/\/room\/([^/]+)/);
     this.roomId = match ? match[1] : '';
-    
+
     if (!this.roomId) {
       this.ui.showToast('Invalid room', 'error');
       return;
     }
 
-    // Unlock audio context for modern browsers
-    const unlockAudio = () => {
-      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-      if (ctx.state === 'suspended') ctx.resume();
-      window.removeEventListener('click', unlockAudio);
-      window.removeEventListener('touchstart', unlockAudio);
-    };
-    window.addEventListener('click', unlockAudio);
-    window.addEventListener('touchstart', unlockAudio);
-
-    // Generate NEW session ID for this room visit
     this.userId = this.generateSessionId();
     this.ui.setLocalUserId(this.userId);
-    
     this.username = localStorage.getItem('username') || 'User';
+
     console.log('[App] Joining:', this.roomId, this.username);
 
     try {
       this.ui.showToast('Connecting...', 'success');
 
-      // Get mic and camera
+      // 1. Get mic + camera (camera will be disabled immediately)
       this.localStream = await navigator.mediaDevices.getUserMedia({
         audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
         video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' },
       });
 
-      // Default: Camera OFF on join
-      this.localStream.getVideoTracks().forEach(track => {
-        track.enabled = false;
-      });
+      // 2. Camera OFF by default - user can turn it on later
+      this.localStream.getVideoTracks().forEach(t => { t.enabled = false; });
 
-      // Connect WebSocket
+      // 3. Connect WebSocket & register ALL handlers before connecting
       this.socketManager = new SocketManager(WS_URL, this.userId);
-      
-      // Register handlers
+
       this.socketManager.on('room-users', (msg: any) => {
         const users = msg.payload as any[];
-        const hostName = msg.hostName;
-        if (hostName) this.ui.setRoomTitle(hostName);
-        
+        if (msg.hostName) this.ui.setRoomTitle(msg.hostName);
         for (const user of users) {
           if (user.id !== this.userId) {
             this.ui.addUser(user.id, user.isHost, user.username);
@@ -157,8 +127,11 @@ class App {
         }
       });
 
-      this.socketManager.on('user-left', (msg: any) => this.ui.removeUser(msg.userId));
-      
+      this.socketManager.on('user-left', (msg: any) => {
+        this.ui.removeUser(msg.userId);
+        this.webrtcManager?.removePeer(msg.userId);
+      });
+
       this.socketManager.on('raise-hand', (msg: any) => {
         if (msg.userId === this.userId) {
           this.isHandRaised = !!msg.raised;
@@ -168,7 +141,9 @@ class App {
       });
 
       this.socketManager.on('chat', (msg: any) => {
-        if (msg.message) this.ui.addChatMessage(msg.userId, msg.username || 'User', msg.message, msg.userId === this.userId);
+        if (msg.message) {
+          this.ui.addChatMessage(msg.userId, msg.username || 'User', msg.message, msg.userId === this.userId);
+        }
       });
 
       this.socketManager.on('reaction', (msg: any) => {
@@ -179,73 +154,65 @@ class App {
         this.ui.setVideoStatus(msg.userId, !!msg.enabled);
       });
 
+      this.socketManager.on('room-locked', (msg: any) => {
+        this.ui.showToast(msg.locked ? 'Room locked by host' : 'Room unlocked', 'success');
+      });
+
+      this.socketManager.on('error', (msg: any) => {
+        this.ui.showToast(msg.message || 'Error', 'error');
+      });
+
+      // WebRTC signaling handlers
+      this.socketManager.on('offer', async (msg: any) => {
+        await this.webrtcManager?.handleOffer(msg.userId, msg.payload);
+      });
+      this.socketManager.on('answer', async (msg: any) => {
+        await this.webrtcManager?.handleAnswer(msg.userId, msg.payload);
+      });
+      this.socketManager.on('ice-candidate', async (msg: any) => {
+        await this.webrtcManager?.handleIceCandidate(msg.userId, msg.payload);
+      });
+
+      // 4. Connect and join
       await this.socketManager.connect();
       this.socketManager.send({ type: 'join', roomId: this.roomId, username: this.username });
 
-      // Show room UI
+      // 5. Show room UI
       this.ui.showRoom(this.roomId, this.username);
-      
+
+      // 6. Attach local stream to local video element
       if (this.localStream) {
         this.ui.setRemoteStream(this.userId, this.localStream);
-        this.ui.setVideoStatus(this.userId, false); // Local camera off initially
+        this.ui.setVideoStatus(this.userId, false); // camera off
       }
 
+      // 7. Setup WebRTC
       this.webrtcManager = new WebRTCManager(this.socketManager, this.roomId, this.userId);
       this.webrtcManager.setLocalStream(this.localStream);
 
       this.webrtcManager.onPeerConnected((peerId: string, stream: MediaStream) => {
+        console.log('[App] Peer connected with stream:', peerId);
         this.ui.setRemoteStream(peerId, stream);
       });
 
-      this.webrtcManager.onPeerDisconnected((peerId: string) => this.ui.removeUser(peerId));
+      this.webrtcManager.onPeerDisconnected((peerId: string) => {
+        this.ui.removeUser(peerId);
+      });
 
-      this.socketManager.on('offer', async (msg: any) => await this.webrtcManager?.handleOffer(msg.userId, msg.payload));
-      this.socketManager.on('answer', async (msg: any) => await this.webrtcManager?.handleAnswer(msg.userId, msg.payload));
-      this.socketManager.on('ice-candidate', async (msg: any) => await this.webrtcManager?.handleIceCandidate(msg.userId, msg.payload));
-      
-      this.webrtcManager.onSpeaking((peerId: string, speaking: boolean) => this.ui.setUserSpeaking(peerId, speaking));
+      this.webrtcManager.onSpeaking((peerId: string, speaking: boolean) => {
+        this.ui.setUserSpeaking(peerId, speaking);
+      });
 
       this.ui.showToast('Connected!', 'success');
 
     } catch (error) {
       console.error('[App] Error:', error);
-      this.ui.showToast('Failed to connect', 'error');
+      this.ui.showToast('Failed to connect. Check mic/camera permissions.', 'error');
       this.cleanup();
     }
   }
 
-  private isHandRaised = false;
-
-  private toggleRaiseHand(): void {
-    if (!this.socketManager) return;
-    this.isHandRaised = !this.isHandRaised;
-    // Send to server - server will broadcast back to ALL including us
-    this.socketManager.send({
-      type: 'raise-hand',
-      roomId: this.roomId,
-      raised: this.isHandRaised
-    });
-    this.ui.showToast(this.isHandRaised ? 'Hand raised!' : 'Hand lowered', 'success');
-  }
-
-  private sendChatMessage(message: string): void {
-    if (!this.socketManager) return;
-    this.socketManager.send({
-      type: 'chat',
-      roomId: this.roomId,
-      message: message
-    });
-  }
-
-  private sendChatMessage(message: string): void {
-    if (!this.socketManager) return;
-    this.socketManager.send({
-      type: 'chat',
-      roomId: this.roomId,
-      message: message
-    });
-  }
-
+  // ==================== CONTROLS ====================
   private toggleMute(): void {
     if (!this.webrtcManager) return;
     const isMuted = this.webrtcManager.toggleAudio();
@@ -264,23 +231,35 @@ class App {
     this.ui.showToast(isOff ? 'Camera off' : 'Camera on', 'success');
   }
 
-  private isScreenSharing = false;
+  private async switchCamera(): Promise<void> {
+    if (!this.webrtcManager) return;
+    this.currentFacingMode = this.currentFacingMode === 'user' ? 'environment' : 'user';
+    try {
+      const stream = await this.webrtcManager.switchCamera(this.currentFacingMode);
+      if (stream) {
+        this.localStream = stream;
+        this.ui.setRemoteStream(this.userId, stream);
+        this.ui.showToast('Switched camera', 'success');
+      }
+    } catch (e) {
+      this.ui.showToast('Failed to switch camera', 'error');
+    }
+  }
+
   private async toggleScreenShare(): Promise<void> {
     if (!this.webrtcManager) return;
-    
+
     if (this.isScreenSharing) {
-      // Revert to camera
       this.isScreenSharing = false;
-      await this.startCamera();
+      await this.restoreCamera();
     } else {
       const stream = await this.webrtcManager.startScreenShare();
       if (stream) {
         this.isScreenSharing = true;
         this.localStream = stream;
         this.ui.setRemoteStream(this.userId, stream);
+        this.ui.setVideoStatus(this.userId, true);
         this.ui.showToast('Sharing screen', 'success');
-        
-        // Handle when user stops sharing via browser bar
         stream.getVideoTracks()[0].onended = () => {
           if (this.isScreenSharing) this.toggleScreenShare();
         };
@@ -288,29 +267,20 @@ class App {
     }
   }
 
-  private async startCamera(): Promise<void> {
+  private async restoreCamera(): Promise<void> {
     if (!this.webrtcManager) return;
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' },
-        audio: true
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
       });
       this.localStream = stream;
       this.webrtcManager.setLocalStream(stream);
       this.ui.setRemoteStream(this.userId, stream);
-      this.ui.showToast('Reverted to camera', 'success');
+      this.ui.showToast('Camera restored', 'success');
     } catch (e) {
-      console.error('Failed to restart camera', e);
+      console.error('Failed to restore camera', e);
     }
-  }
-
-  private toggleRoomLock(locked: boolean): void {
-    if (!this.socketManager) return;
-    this.socketManager.send({
-      type: 'toggle-lock',
-      roomId: this.roomId,
-      locked: locked
-    });
   }
 
   private toggleRaiseHand(): void {
@@ -324,11 +294,21 @@ class App {
     this.ui.showToast(this.isHandRaised ? 'Hand raised!' : 'Hand lowered', 'success');
   }
 
+  private sendChatMessage(message: string): void {
+    if (!this.socketManager) return;
+    this.socketManager.send({
+      type: 'chat',
+      roomId: this.roomId,
+      message: message
+    });
+  }
+
   private toggleDeafen(): void {
-    if (!this.webrtcManager) return;
-    document.querySelectorAll('audio, video').forEach(el => {
-      if (el.id !== `video-${this.userId}`) {
-        (el as HTMLMediaElement).muted = this.ui.deafened;
+    // Mute/unmute all remote media elements (not our own local video)
+    document.querySelectorAll('video, audio').forEach(el => {
+      const mediaEl = el as HTMLMediaElement;
+      if (mediaEl.id !== `video-${this.userId}`) {
+        mediaEl.muted = this.ui.deafened;
       }
     });
   }
@@ -339,6 +319,15 @@ class App {
       type: 'reaction',
       roomId: this.roomId,
       emoji: emoji
+    });
+  }
+
+  private toggleRoomLock(locked: boolean): void {
+    if (!this.socketManager) return;
+    this.socketManager.send({
+      type: 'toggle-lock',
+      roomId: this.roomId,
+      locked: locked
     });
   }
 
@@ -362,10 +351,10 @@ class App {
       this.socketManager = null;
     }
     this.roomId = '';
+    this.isScreenSharing = false;
   }
 }
 
-// Version is now hardcoded in UI
 document.addEventListener('DOMContentLoaded', () => {
   new App();
 });

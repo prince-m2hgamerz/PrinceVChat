@@ -155,7 +155,9 @@ const server = createServer((req, res) => {
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  res.setHeader('Permissions-Policy', 'microphone=(self), camera=(self)');
+  res.setHeader('Permissions-Policy', 'microphone=(self), camera=(self), display-capture=(self)');
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' wss: https:; img-src 'self' data: blob:; media-src 'self' blob:; frame-ancestors 'none';");
   res.removeHeader('X-Powered-By');
 
   if (req.method === 'OPTIONS') {
@@ -189,7 +191,14 @@ const server = createServer((req, res) => {
     if (existsSync(fullPath) && statSync(fullPath).isFile()) {
       const ext = extname(fullPath).toLowerCase();
       const mime = MIME_TYPES[ext] || 'application/octet-stream';
-      res.writeHead(200, { 'Content-Type': mime });
+      const headers: Record<string, string> = { 'Content-Type': mime };
+      // Cache static assets (JS/CSS) for 1 day, HTML never cached
+      if (ext !== '.html') {
+        headers['Cache-Control'] = 'public, max-age=86400, immutable';
+      } else {
+        headers['Cache-Control'] = 'no-cache';
+      }
+      res.writeHead(200, headers);
       res.end(readFileSync(fullPath));
       return;
     }
@@ -381,10 +390,12 @@ wss.on('connection', (ws: WebSocket) => {
           const room = rooms.get(roomId);
           if (room) {
             const client = room.clients.get(clientId);
+            // Security: Sanitize chat message - strip HTML, limit length
+            const rawMsg = (msg.message || '').substring(0, 500).replace(/[<>]/g, '');
             const chatMsg = {
               userId: clientId,
-              username: client?.username || msg.username || 'User',
-              message: msg.message || '',
+              username: client?.username || 'User',
+              message: rawMsg,
               timestamp: Date.now(),
             };
             
