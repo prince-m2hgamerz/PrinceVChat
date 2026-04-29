@@ -174,6 +174,7 @@ wss.on('connection', (ws: WebSocket) => {
           username: c.username,
         }));
         
+        console.log('[Server] Sending room-users:', JSON.stringify({ type: 'room-users', roomId, userId: clientId, payload: participants }));
         send(ws, { type: 'room-users', roomId, userId: clientId, payload: participants });
         
         // Notify others
