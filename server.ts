@@ -8,16 +8,23 @@ import { readFileSync, existsSync, statSync } from 'fs';
 import { join, extname } from 'path';
 
 // Load environment from railway.env if exists
-const envFile = join(process.cwd(), 'railway.env');
-if (existsSync(envFile)) {
-  const envContent = readFileSync(envFile, 'utf-8');
-  envContent.split('\n').forEach(line => {
-    const [key, ...valueParts] = line.split('=');
-    if (key && valueParts.length > 0) {
-      process.env[key.trim()] = valueParts.join('=').trim();
-    }
-  });
-  console.log('[Env] Loaded from railway.env');
+try {
+  const envFile = join(process.cwd(), 'railway.env');
+  if (existsSync(envFile)) {
+    const envContent = readFileSync(envFile, 'utf-8');
+    envContent.split('\n').forEach(line => {
+      const trimmed = line.trim();
+      if (trimmed && !trimmed.startsWith('#')) {
+        const [key, ...valueParts] = trimmed.split('=');
+        if (key && valueParts.length > 0) {
+          process.env[key.trim()] = valueParts.join('=').trim();
+        }
+      }
+    });
+    console.log('[Env] Loaded from railway.env');
+  }
+} catch (e) {
+  console.log('[Env] No railway.env or error loading:', e);
 }
 
 // Environment
