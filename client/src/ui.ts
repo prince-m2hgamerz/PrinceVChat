@@ -35,83 +35,73 @@ export class UIManager {
     const app = document.getElementById('app');
     if (!app) return;
 
-    // SVG Icons
-    const icons = {
-      mic: `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>`,
-      bolt: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`,
-      shield: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`,
-      zap: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`,
-      plus: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>`,
-      join: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>`,
-    };
+    const plusIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`;
+    const joinIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4v4M10 17l5-5-5-5M15 12H3"/></svg>`;
+    const boltIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`;
+    const lockIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`;
+    const micIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line></svg>`;
 
     app.innerHTML = `
-      <div class="landing-page">
-        <header class="header">
-          <div class="header-inner">
-            <a href="/" class="logo">
-              <span class="logo-icon">🎙️</span>
-              <span class="logo-text">PrinceVChat</span>
-            </a>
-          </div>
-        </header>
+      <div class="page">
+        <nav class="navbar">
+          <a href="/" class="nav-brand">
+            <span class="brand-icon">🎙️</span>
+            <span class="brand-text">PrinceVChat</span>
+          </a>
+        </nav>
         
-        <main class="main">
-          <div class="landing-container">
-            <div class="hero-section">
-              <div class="hero-icon">${icons.mic}</div>
-              <h1 class="hero-title">Voice chat for teams</h1>
-              <p class="hero-subtitle">Free, instant group voice chat. No downloads, no signups.</p>
-              
-              <div class="hero-actions">
-                <button class="btn btn-primary btn-lg" id="create-room-btn">
-                  ${icons.plus}
-                  <span>Create Room</span>
-                </button>
-                <button class="btn btn-secondary btn-lg" id="join-room-btn">
-                  ${icons.join}
-                  <span>Join Room</span>
-                </button>
+        <main class="content">
+          <section class="hero">
+            <div class="hero-visual">
+              <div class="mic-circle">
+                ${micIcon}
               </div>
             </div>
+            <h1 class="hero-title">Voice chat for teams</h1>
+            <p class="hero-desc">Free, instant group voice chat. No downloads, no signups.</p>
             
-            <div class="features-grid">
-              <div class="feature-card">
-                <div class="feature-icon">${icons.bolt}</div>
-                <h3>Instant</h3>
-                <p>Create a room and share the link. Anyone can join immediately.</p>
-              </div>
-              <div class="feature-card">
-                <div class="feature-icon">${icons.shield}</div>
-                <h3>Private</h3>
-                <p>Your conversations stay between you and your team.</p>
-              </div>
-              <div class="feature-card">
-                <div class="feature-icon">${icons.zap}</div>
-                <h3>Low Latency</h3>
-                <p>Crystal clear voice with WebRTC. Sounds natural.</p>
-              </div>
+            <div class="action-buttons">
+              <button class="btn btn-primary" id="create-room-btn">
+                ${plusIcon}
+                Create Room
+              </button>
+              <button class="btn btn-outline" id="join-room-btn">
+                ${joinIcon}
+                Join Room
+              </button>
             </div>
-          </div>
+          </section>
+          
+          <section class="features">
+            <div class="feature">
+              <div class="feature-icon">${boltIcon}</div>
+              <h3>Instant</h3>
+              <p>Create a room and share the link</p>
+            </div>
+            <div class="feature">
+              <div class="feature-icon">${lockIcon}</div>
+              <h3>Private</h3>
+              <p>End-to-end encrypted</p>
+            </div>
+            <div class="feature">
+              <div class="feature-icon">${micIcon}</div>
+              <h3>Clear Audio</h3>
+              <p>WebRTC powered</p>
+            </div>
+          </section>
         </main>
         
-        <footer class="footer">
-          <div class="footer-content">
-            <div class="footer-brand">
-              <span class="logo-icon">🎙️</span>
-              <span>PrinceVChat</span>
-            </div>
-            <p class="footer-tagline">Free group voice chat for everyone</p>
-            <div class="footer-links">
-              <a href="#">About</a>
-              <a href="#">Privacy</a>
-              <a href="#">Terms</a>
-              <a href="#">Contact</a>
-            </div>
-            <div class="footer-copy">
-              <span>v<span class="version">1.0.19</span></span>
-              <span>© 2026 PrinceVChat</span>
-            </div>
+        <footer class="site-footer">
+          <div class="footer-main">
+            <div class="footer-brand">🎙️ PrinceVChat</div>
+            <p class="footer-desc">Free group voice chat for everyone</p>
+          </div>
+          <div class="footer-bottom">
+            <span>v<span class="version">1.0.21</span></span>
+            <span>•</span>
+            <a href="#">About</a>
+            <a href="#">Privacy</a>
+            <a href="#">Terms</a>
           </div>
         </footer>
       </div>
@@ -263,58 +253,53 @@ export class UIManager {
       handRaised: false
     });
 
+    const backIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>`;
+    const copyIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+
     app.innerHTML = `
-      <div class="app-container">
-        <header class="room-header">
-          <a href="/" class="back-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-          </a>
-          <div class="header-info">
-            <h1 class="room-name">${this.escapeHtml(username)}'s Room</h1>
-            <div class="header-meta">
-              <span class="live-badge"><span class="dot"></span> LIVE</span>
-              <span class="user-count" id="user-count">1</span>
-            </div>
+      <div class="page room-page">
+        <header class="room-nav">
+          <a href="/" class="nav-back">${backIcon}</a>
+          <div class="room-info">
+            <h1 class="room-title">${this.escapeHtml(username)}'s Room</h1>
+            <span class="room-status">
+              <span class="status-dot"></span>
+              <span class="user-count" id="user-count">1 participant</span>
+            </span>
           </div>
-          <button class="copy-btn" id="copy-btn" title="Copy invite link">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-          </button>
+          <button class="btn-copy" id="copy-btn">${copyIcon}</button>
         </header>
 
-        <main class="room-main">
-          <div class="invite-bar">
-            <input type="text" id="room-link" class="invite-input" value="${window.location.origin}/room/${roomId}" readonly />
+        <main class="room-content">
+          <div class="link-bar">
+            <input type="text" id="room-link" class="link-input" value="${window.location.origin}/room/${roomId}" readonly />
           </div>
           
-          <div class="participants-grid" id="participants">
+          <div class="participants-list" id="participants">
             ${this.renderParticipants()}
           </div>
         </main>
 
-        <div class="control-bar">
-          <button class="control-btn ${this.isMuted ? 'muted' : ''}" id="mute-btn">
+        <div class="room-controls">
+          <button class="ctrl-btn ${this.isMuted ? 'off' : ''}" id="mute-btn">
             ${this.isMuted ? icons.micOff : icons.mic}
           </button>
-          <button class="control-btn ${this.isHandRaised ? 'active' : ''}" id="hand-btn">
+          <button class="ctrl-btn ${this.isHandRaised ? 'on' : ''}" id="hand-btn">
             ${icons.hand}
           </button>
-          <button class="control-btn leave" id="leave-btn">
+          <button class="ctrl-btn danger" id="leave-btn">
             ${icons.leave}
           </button>
         </div>
       </div>
       
-      <footer class="footer">
-        <div class="footer-content">
-          <div class="footer-brand">
-            <span>🎙️ PrinceVChat</span>
-          </div>
-          <div class="footer-links">
-            <a href="#">About</a>
-            <a href="#">Help</a>
-            <a href="#">Privacy</a>
-          </div>
-          <p class="footer-copy">v<span class="version">1.0.20</span> • Free voice chat</p>
+      <footer class="site-footer">
+        <div class="footer-main">
+          <div class="footer-brand">🎙️ PrinceVChat</div>
+          <p class="footer-desc">Free group voice chat</p>
+        </div>
+        <div class="footer-bottom">
+          <span>v<span class="version">1.0.21</span></span>
         </div>
       </footer>
       
