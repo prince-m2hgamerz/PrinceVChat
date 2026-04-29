@@ -71,8 +71,28 @@ export class UIManager {
               <a href="/changelog" class="nav-link" id="nav-changelog">Changelog</a>
               <button class="btn btn-primary nav-cta" id="nav-start-btn">Start a Room</button>
             </div>
+            <button class="hamburger-btn" id="hamburger-btn" aria-label="Menu">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
           </div>
         </nav>
+
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+        <aside class="sidebar" id="sidebar">
+          <div class="sidebar-header">
+            <span class="logo">PrinceVChat</span>
+            <button class="btn btn-icon" id="sidebar-close"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          </div>
+          <div class="sidebar-content">
+            <a href="#features" class="sidebar-link" id="side-features">Features</a>
+            <a href="/changelog" class="sidebar-link" id="side-changelog">Changelog</a>
+            <a href="/contact" class="sidebar-link" id="side-contact">Contact</a>
+            <a href="/report" class="sidebar-link" id="side-report">Report Problem</a>
+            <hr style="border: none; border-top: 1px solid var(--ds-gray-100); margin: 8px 0;">
+            <a href="/terms" class="sidebar-link" id="side-terms">Terms of Service</a>
+            <a href="/privacy" class="sidebar-link" id="side-privacy">Privacy Policy</a>
+          </div>
+        </aside>
 
         <main class="landing-main">
           <div class="hero-glow"></div>
@@ -202,6 +222,23 @@ export class UIManager {
     document.getElementById('footer-terms')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/terms'); this.showTerms(); });
     document.getElementById('footer-privacy')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/privacy'); this.showPrivacy(); });
     document.getElementById('nav-features-link')?.addEventListener('click', (e) => { e.preventDefault(); document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }); });
+
+    // Sidebar
+    document.getElementById('hamburger-btn')?.addEventListener('click', () => this.toggleSidebar(true));
+    document.getElementById('sidebar-close')?.addEventListener('click', () => this.toggleSidebar(false));
+    document.getElementById('sidebar-overlay')?.addEventListener('click', () => this.toggleSidebar(false));
+    
+    document.getElementById('side-features')?.addEventListener('click', (e) => { e.preventDefault(); this.toggleSidebar(false); document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }); });
+    document.getElementById('side-changelog')?.addEventListener('click', (e) => { e.preventDefault(); this.toggleSidebar(false); window.history.pushState(null, '', '/changelog'); this.showChangelog(); });
+    document.getElementById('side-contact')?.addEventListener('click', (e) => { e.preventDefault(); this.toggleSidebar(false); window.history.pushState(null, '', '/contact'); this.showContact(); });
+    document.getElementById('side-report')?.addEventListener('click', (e) => { e.preventDefault(); this.toggleSidebar(false); window.history.pushState(null, '', '/report'); this.showReport(); });
+    document.getElementById('side-terms')?.addEventListener('click', (e) => { e.preventDefault(); this.toggleSidebar(false); window.history.pushState(null, '', '/terms'); this.showTerms(); });
+    document.getElementById('side-privacy')?.addEventListener('click', (e) => { e.preventDefault(); this.toggleSidebar(false); window.history.pushState(null, '', '/privacy'); this.showPrivacy(); });
+  }
+
+  private toggleSidebar(open: boolean): void {
+    document.getElementById('sidebar')?.classList.toggle('open', open);
+    document.getElementById('sidebar-overlay')?.classList.toggle('open', open);
   }
 
   // ==================== CHANGELOG PAGE ====================
