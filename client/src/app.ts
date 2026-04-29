@@ -67,6 +67,14 @@ class App {
       this.ui.showReport();
       return;
     }
+    if (path === '/terms') {
+      this.ui.showTerms();
+      return;
+    }
+    if (path === '/privacy') {
+      this.ui.showPrivacy();
+      return;
+    }
     this.ui.render();
   }
 

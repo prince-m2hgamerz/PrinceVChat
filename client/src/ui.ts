@@ -180,7 +180,9 @@ export class UIManager {
             <div class="footer-right">
               <a href="/changelog" class="footer-link" id="footer-changelog">Changelog</a>
               <a href="/contact" class="footer-link" id="footer-contact">Contact</a>
-              <a href="/report" class="footer-link" id="footer-report">Report Problem</a>
+              <a href="/report" class="footer-link" id="footer-report">Report</a>
+              <a href="/terms" class="footer-link" id="footer-terms">Terms</a>
+              <a href="/privacy" class="footer-link" id="footer-privacy">Privacy</a>
               <span class="footer-version">v3.2.0</span>
             </div>
           </div>
@@ -197,6 +199,8 @@ export class UIManager {
     document.getElementById('footer-changelog')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/changelog'); this.showChangelog(); });
     document.getElementById('footer-contact')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/contact'); this.showContact(); });
     document.getElementById('footer-report')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/report'); this.showReport(); });
+    document.getElementById('footer-terms')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/terms'); this.showTerms(); });
+    document.getElementById('footer-privacy')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/privacy'); this.showPrivacy(); });
     document.getElementById('nav-features-link')?.addEventListener('click', (e) => { e.preventDefault(); document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }); });
   }
 
@@ -359,6 +363,84 @@ export class UIManager {
                 <a href="mailto:report@m2hio.in" class="btn btn-primary" style="display:inline-flex;text-decoration:none;">Email report@m2hio.in</a>
               </div>
               <p class="body-small" style="margin-top:24px;color:var(--ds-gray-400);">Please include steps to reproduce and screenshots if possible.</p>
+            </div>
+          </div>
+        </main>
+        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.2.0</span></div></div></footer>
+      </div>
+    `;
+    document.getElementById('logo-home')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/'); this.showLanding(); });
+    document.getElementById('back-home')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/'); this.showLanding(); });
+  }
+
+  // ==================== TERMS PAGE ====================
+  showTerms(): void {
+    this.currentScreen = 'landing';
+    const app = document.getElementById('app');
+    if (!app) return;
+    app.innerHTML = `
+      <div class="landing-page">
+        <nav class="nav"><div class="layout-container nav-inner"><a href="/" class="logo" id="logo-home"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5z" fill="currentColor"/><path d="M2 17l10 5 10-5" stroke="currentColor" stroke-width="2"/><path d="M2 12l10 5 10-5" stroke="currentColor" stroke-width="2"/></svg><span>PrinceVChat</span></a></div></nav>
+        <main class="landing-main" style="align-items:flex-start;padding-top:40px;">
+          <div class="layout-container" style="width:100%;max-width:760px;padding-bottom:80px;">
+            <a href="/" class="back-link" id="back-home" style="display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ds-blue);text-decoration:none;font-weight:500;">&larr; Back</a>
+            <h1 class="heading-section" style="margin-top:24px;margin-bottom:8px;letter-spacing:-2.4px;">Terms of Service</h1>
+            <div class="legal-content" style="margin-top:40px;display:grid;gap:24px;color:var(--ds-gray-500);">
+              <section>
+                <h3 class="heading-card" style="color:var(--ds-fg);">1. Acceptance of Terms</h3>
+                <p class="body-regular">By using PrinceVChat, you agree to these terms. If you don't agree, please do not use the service.</p>
+              </section>
+              <section>
+                <h3 class="heading-card" style="color:var(--ds-fg);">2. Use of Service</h3>
+                <p class="body-regular">PrinceVChat is provided "as is". You are responsible for your behavior and any content you share during calls. Harassment, illegal activities, or abuse of our servers will lead to immediate termination of access.</p>
+              </section>
+              <section>
+                <h3 class="heading-card" style="color:var(--ds-fg);">3. No Warranties</h3>
+                <p class="body-regular">We do not guarantee that the service will always be available, secure, or bug-free. Use it at your own risk.</p>
+              </section>
+              <section>
+                <h3 class="heading-card" style="color:var(--ds-fg);">4. Changes to Terms</h3>
+                <p class="body-regular">We may update these terms at any time. Continued use of the service means you accept the new terms.</p>
+              </section>
+            </div>
+          </div>
+        </main>
+        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.2.0</span></div></div></footer>
+      </div>
+    `;
+    document.getElementById('logo-home')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/'); this.showLanding(); });
+    document.getElementById('back-home')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/'); this.showLanding(); });
+  }
+
+  // ==================== PRIVACY PAGE ====================
+  showPrivacy(): void {
+    this.currentScreen = 'landing';
+    const app = document.getElementById('app');
+    if (!app) return;
+    app.innerHTML = `
+      <div class="landing-page">
+        <nav class="nav"><div class="layout-container nav-inner"><a href="/" class="logo" id="logo-home"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5z" fill="currentColor"/><path d="M2 17l10 5 10-5" stroke="currentColor" stroke-width="2"/><path d="M2 12l10 5 10-5" stroke="currentColor" stroke-width="2"/></svg><span>PrinceVChat</span></a></div></nav>
+        <main class="landing-main" style="align-items:flex-start;padding-top:40px;">
+          <div class="layout-container" style="width:100%;max-width:760px;padding-bottom:80px;">
+            <a href="/" class="back-link" id="back-home" style="display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ds-blue);text-decoration:none;font-weight:500;">&larr; Back</a>
+            <h1 class="heading-section" style="margin-top:24px;margin-bottom:8px;letter-spacing:-2.4px;">Privacy Policy</h1>
+            <div class="legal-content" style="margin-top:40px;display:grid;gap:24px;color:var(--ds-gray-500);">
+              <section>
+                <h3 class="heading-card" style="color:var(--ds-fg);">1. Data We Don't Collect</h3>
+                <p class="body-regular">PrinceVChat is Peer-to-Peer (P2P). We **do not** record, store, or see your video or audio streams. All communication happens directly between you and other participants.</p>
+              </section>
+              <section>
+                <h3 class="heading-card" style="color:var(--ds-fg);">2. Information We Use</h3>
+                <p class="body-regular">We only use temporary data (like room IDs and temporary usernames) to help you connect. This data is deleted once the room is closed.</p>
+              </section>
+              <section>
+                <h3 class="heading-card" style="color:var(--ds-fg);">3. Cookies</h3>
+                <p class="body-regular">We use local storage only to remember your preferred username and settings. No tracking cookies are used.</p>
+              </section>
+              <section>
+                <h3 class="heading-card" style="color:var(--ds-fg);">4. Security</h3>
+                <p class="body-regular">We use industry-standard encryption for signaling, but remember that P2P security also depends on your local network and device security.</p>
+              </section>
             </div>
           </div>
         </main>
