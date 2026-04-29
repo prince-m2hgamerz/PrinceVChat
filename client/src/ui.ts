@@ -38,54 +38,67 @@ export class UIManager {
   setOnReaction(cb: (emoji: string) => void): void { this.onReaction = cb; }
   setLocalUserId(id: string): void { this.localUserId = id; }
 
-  // ==================== LANDING - VERCEL STYLE ====================
+  // ==================== LANDING - PREMIUM DESIGN ====================
   showLanding(): void {
     this.currentScreen = 'landing';
     const app = document.getElementById('app');
     if (!app) return;
 
     app.innerHTML = `
-      <nav class="nav">
-        <div class="layout-container nav-inner">
-          <a href="/" class="logo">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2L2 7l10 5 10-5-10-5z" fill="#171717"/>
-              <path d="M2 17l10 5 10-5" stroke="#171717" stroke-width="2"/>
-              <path d="M2 12l10 5 10-5" stroke="#171717" stroke-width="2"/>
-            </svg>
-            <span>PrinceVChat</span>
-          </a>
-        </div>
-      </nav>
+      <div class="landing-page">
+        <nav class="nav">
+          <div class="layout-container nav-inner">
+            <a href="/" class="logo">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L2 7l10 5 10-5-10-5z" fill="currentColor"/>
+                <path d="M2 17l10 5 10-5" stroke="currentColor" stroke-width="2"/>
+                <path d="M2 12l10 5 10-5" stroke="currentColor" stroke-width="2"/>
+              </svg>
+              <span>PrinceVChat</span>
+            </a>
+          </div>
+        </nav>
 
-      <main>
-        <section class="layout-container section-hero">
-          <div class="badge" style="margin-bottom: 32px;">Zero-config voice chat</div>
-          <h1 class="display-hero" style="max-width: 800px; margin-bottom: 24px;">Group voice chat for every team</h1>
-          <p class="body-large" style="max-width: 600px;">Start instant voice conversations with your team. No downloads, no sign-up, no friction.</p>
-          <div class="hero-actions">
-            <button class="btn btn-primary" id="create-room-btn">Create Room</button>
-            <button class="btn btn-secondary" id="join-room-btn">Join Room</button>
+        <main class="landing-main">
+          <div class="hero-glow"></div>
+          <section class="layout-container section-hero">
+            <div class="hero-content">
+              <div class="badge-new">Version 2.0 is here</div>
+              <h1 class="hero-title">Experience the Next Level of <span>Real-time</span> Communication</h1>
+              <p class="hero-subtitle">High-quality voice and video calls, instant messaging, and seamless collaboration. No accounts, no hassle.</p>
+              
+              <div class="hero-cta">
+                <button class="btn btn-primary btn-large" id="create-room-btn">
+                  <span>Start a Room</span>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </button>
+                <button class="btn btn-secondary btn-large" id="join-room-btn">Join with Code</button>
+              </div>
+
+              <div class="hero-stats">
+                <div class="stat-item">
+                  <span class="stat-value">HD</span>
+                  <span class="stat-label">Video Calls</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-value">End-to-End</span>
+                  <span class="stat-label">Signaling</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-value">0ms</span>
+                  <span class="stat-label">Latency</span>
+                </div>
+              </div>
+            </div>
+          </section>
+        </main>
+
+        <footer class="landing-footer">
+          <div class="layout-container">
+            <p>© 2026 PrinceVChat. Crafted by m2hgamerz.</p>
           </div>
-        </section>
-        
-        <section class="section-features">
-          <div class="layout-container grid-3">
-            <div class="card">
-              <h3 class="heading-card" style="margin-bottom: 12px;">Instant</h3>
-              <p class="body-regular">Create a room in seconds. Share the link and anyone can join immediately.</p>
-            </div>
-            <div class="card">
-              <h3 class="heading-card" style="margin-bottom: 12px;">Private</h3>
-              <p class="body-regular">Your conversations are yours. No tracking, no recording, no storage.</p>
-            </div>
-            <div class="card">
-              <h3 class="heading-card" style="margin-bottom: 12px;">Crystal Clear</h3>
-              <p class="body-regular">WebRTC-powered audio with echo cancellation and noise suppression.</p>
-            </div>
-          </div>
-        </section>
-      </main>
+        </footer>
+      </div>
     `;
 
     document.getElementById('create-room-btn')?.addEventListener('click', () => this.showUsernameModal('create'));
