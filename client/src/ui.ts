@@ -53,9 +53,6 @@ export class UIManager {
     this.currentScreen = 'landing';
     const app = document.getElementById('app');
     if (!app) return;
-    const isDark = localStorage.getItem('theme') === 'dark';
-    document.body.classList.toggle('dark-mode', isDark);
-    this.isDarkMode = isDark;
 
     app.innerHTML = `
       <div class="landing-page">
@@ -73,9 +70,6 @@ export class UIManager {
             <div class="nav-links">
               <a href="#features" class="nav-link" id="nav-features-link">Features</a>
               <a href="/changelog" class="nav-link" id="nav-changelog">Changelog</a>
-              <button class="btn btn-icon" id="landing-theme-btn" style="margin-right: 8px;">
-                ${this.isDarkMode ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>' : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>'}
-              </button>
               <button class="btn btn-primary nav-cta" id="nav-start-btn">Start a Room</button>
             </div>
             <button class="hamburger-btn" id="hamburger-btn" aria-label="Menu">
@@ -210,7 +204,7 @@ export class UIManager {
               <a href="/report" class="footer-link" id="footer-report">Report</a>
               <a href="/terms" class="footer-link" id="footer-terms">Terms</a>
               <a href="/privacy" class="footer-link" id="footer-privacy">Privacy</a>
-              <span class="footer-version">v3.2.3</span>
+              <span class="footer-version">v3.3.0</span>
             </div>
           </div>
         </footer>
@@ -229,19 +223,6 @@ export class UIManager {
     document.getElementById('footer-terms')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/terms'); this.showTerms(); });
     document.getElementById('footer-privacy')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/privacy'); this.showPrivacy(); });
     document.getElementById('nav-features-link')?.addEventListener('click', (e) => { e.preventDefault(); document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }); });
-
-    const toggleTheme = () => {
-      this.isDarkMode = !this.isDarkMode;
-      document.body.classList.toggle('dark-mode', this.isDarkMode);
-      localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
-      const btn = document.getElementById('landing-theme-btn');
-      if (btn) {
-        btn.innerHTML = this.isDarkMode ? 
-          '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>' : 
-          '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
-      }
-    };
-    document.getElementById('landing-theme-btn')?.addEventListener('click', toggleTheme);
 
     // Sidebar
     document.getElementById('hamburger-btn')?.addEventListener('click', () => this.toggleSidebar(true));
@@ -275,6 +256,14 @@ export class UIManager {
             <h1 class="heading-section" style="margin-top:24px;margin-bottom:8px;letter-spacing:-2.4px;">Changelog</h1>
             <p class="body-large" style="color:var(--ds-gray-500);margin-bottom:56px;">All notable changes to PrinceVChat, most recent first.</p>
             <div class="changelog-list">
+              <div class="changelog-entry">
+                <div class="changelog-version"><span class="badge">v3.3.0</span><span class="changelog-date">May 1, 2026</span></div>
+                <h3 class="heading-card">Design Simplification</h3>
+                <ul class="changelog-items">
+                  <li><span class="cl-tag cl-new">Removed</span> <strong>Dark Mode:</strong> Transitioned back to a pure, focused light theme for maximum clarity</li>
+                  <li><span class="cl-tag cl-improved">Improved</span> UI performance and visual consistency across all pages</li>
+                </ul>
+              </div>
               <div class="changelog-entry">
                 <div class="changelog-version"><span class="badge">v3.2.3</span><span class="changelog-date">April 30, 2026</span></div>
                 <h3 class="heading-card">Refined Geist Dark Mode</h3>
@@ -420,7 +409,7 @@ export class UIManager {
             </div>
           </div>
         </main>
-        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.2.3</span></div></div></footer>
+        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.3.0</span></div></div></footer>
       </div>
     `;
     document.getElementById('logo-home')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/'); this.showLanding(); });
@@ -451,7 +440,7 @@ export class UIManager {
             </div>
           </div>
         </main>
-        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.2.3</span></div></div></footer>
+        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.3.0</span></div></div></footer>
       </div>
     `;
     document.getElementById('logo-home')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/'); this.showLanding(); });
@@ -490,7 +479,7 @@ export class UIManager {
             </div>
           </div>
         </main>
-        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.2.3</span></div></div></footer>
+        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.3.0</span></div></div></footer>
       </div>
     `;
     document.getElementById('logo-home')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/'); this.showLanding(); });
@@ -529,7 +518,7 @@ export class UIManager {
             </div>
           </div>
         </main>
-        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.2.3</span></div></div></footer>
+        <footer class="landing-footer"><div class="layout-container footer-inner"><div class="footer-left"><p class="footer-copy">&copy; 2026 PrinceVChat. Crafted by m2hgamerz.</p></div><div class="footer-right"><span class="footer-version">v3.3.0</span></div></div></footer>
       </div>
     `;
     document.getElementById('logo-home')?.addEventListener('click', (e) => { e.preventDefault(); window.history.pushState(null, '', '/'); this.showLanding(); });
@@ -741,9 +730,6 @@ export class UIManager {
           <button class="btn btn-icon" id="chat-btn" aria-label="Open Chat" title="Chat">
             ${icons.chat}
           </button>
-          <button class="btn btn-icon" id="theme-btn" aria-label="Toggle Theme" title="Theme">
-            ${this.isDarkMode ? icons.sun : icons.moon}
-          </button>
           <button class="btn btn-icon ${this.isRoomLocked ? 'active' : ''}" id="lock-btn" aria-label="Lock Room" title="Lock Room">
             ${this.isRoomLocked ? icons.lock : icons.unlock}
           </button>
@@ -866,14 +852,6 @@ export class UIManager {
           if (picker) picker.style.display = 'none';
         }
       });
-    });
-
-    document.getElementById('theme-btn')?.addEventListener('click', () => {
-      this.isDarkMode = !this.isDarkMode;
-      document.body.classList.toggle('dark-mode', this.isDarkMode);
-      const btn = document.getElementById('theme-btn');
-      if (btn) btn.innerHTML = this.isDarkMode ? roomIcons.sun : roomIcons.moon;
-      this.showToast(this.isDarkMode ? 'Dark mode on' : 'Light mode on');
     });
 
     document.getElementById('settings-btn')?.addEventListener('click', () => {
