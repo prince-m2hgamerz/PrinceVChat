@@ -48,6 +48,7 @@ class App {
     this.ui.setOnMute(() => this.toggleMute());
     this.ui.setOnLeave(() => this.leaveRoom());
     this.ui.setOnRaiseHand(() => this.toggleRaiseHand());
+    this.ui.setOnChat((msg) => this.sendChatMessage(msg));
   }
 
   private createRoom(): void {
@@ -142,6 +143,14 @@ class App {
         }
       });
 
+      // When someone sends a chat message
+      this.socketManager.on('chat', (msg: any) => {
+        console.log('[App] Chat message:', msg);
+        if (msg.userId !== this.userId) {
+          this.ui.addChatMessage(msg.userId, msg.username || 'User', msg.message, false);
+        }
+      });
+
       // Now connect - server will immediately send room-users
       await this.socketManager.connect();
 
@@ -218,6 +227,15 @@ class App {
     });
     this.ui.setHandRaised(this.isHandRaised);
     this.ui.showToast(this.isHandRaised ? 'Hand raised!' : 'Hand lowered', 'success');
+  }
+
+  private sendChatMessage(message: string): void {
+    if (!this.socketManager) return;
+    this.socketManager.send({
+      type: 'chat',
+      roomId: this.roomId,
+      message: message
+    });
   }
 
   private leaveRoom(): void {

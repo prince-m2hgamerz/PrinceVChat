@@ -50,6 +50,89 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; color: var(--ds-gray-900); }
 .body-medium { font-size: 16px; line-height: 1.5; font-weight: 500; }
 .mono-label { font-family: 'Geist Mono', monospace; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
 
+/* Chat Drawer */
+.chat-drawer {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 400px;
+  height: 100vh;
+  background: var(--ds-bg);
+  box-shadow: -4px 0 16px rgba(0,0,0,0.05), var(--shadow-border);
+  z-index: 250;
+  display: flex;
+  flex-direction: column;
+  transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chat-drawer.open {
+  right: 0;
+}
+
+.chat-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--ds-gray-100);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chat-message {
+  max-width: 85%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.chat-message.self {
+  align-self: flex-end;
+  background: var(--ds-fg);
+  color: var(--ds-bg);
+}
+
+.chat-message.other {
+  align-self: flex-start;
+  background: var(--ds-gray-50);
+  box-shadow: var(--shadow-border);
+}
+
+.chat-message-info {
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  opacity: 0.7;
+}
+
+.chat-input-container {
+  padding: 16px;
+  border-top: 1px solid var(--ds-gray-100);
+  display: flex;
+  gap: 8px;
+}
+
+.chat-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(255,255,255,0.5);
+  backdrop-filter: blur(2px);
+  z-index: 240;
+  display: none;
+}
+
+.chat-overlay.open {
+  display: block;
+}
+
 /* Buttons */
 .btn {
   display: inline-flex;
@@ -348,4 +431,17 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; color: var(--ds-gray-900); }
   .grid-3 { grid-template-columns: 1fr; }
   .display-hero { font-size: 32px; letter-spacing: -1.28px; }
   .heading-section { font-size: 28px; }
+  .section-hero { padding: 60px 0; }
+  .layout-container { padding: 0 16px; }
+  .participants-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .participant-avatar { width: 48px; height: 48px; font-size: 18px; }
+  .participant-name { font-size: 14px; }
+  .participant-card { padding: 16px 8px; }
+  .chat-drawer { width: 100%; right: -100%; }
+}
+
+@media (max-width: 480px) {
+  .hero-actions { flex-direction: column; width: 100%; }
+  .hero-actions .btn { width: 100%; }
+  .room-header { flex-direction: column; align-items: flex-start; gap: 12px; }
 }

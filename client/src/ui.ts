@@ -12,6 +12,7 @@ export class UIManager {
   private onMute: (() => void) | null = null;
   private onLeave: (() => void) | null = null;
   private onRaiseHand: (() => void) | null = null;
+  private onChat: ((message: string) => void) | null = null;
 
   render(): void {
     this.showLanding();
@@ -23,6 +24,7 @@ export class UIManager {
   setOnMute(cb: () => void): void { this.onMute = cb; }
   setOnLeave(cb: () => void): void { this.onLeave = cb; }
   setOnRaiseHand(cb: () => void): void { this.onRaiseHand = cb; }
+  setOnChat(cb: (message: string) => void): void { this.onChat = cb; }
   setLocalUserId(id: string): void { this.localUserId = id; }
 
   // ==================== LANDING - VERCEL STYLE ====================
@@ -174,7 +176,9 @@ export class UIManager {
       micOff: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"></line><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>`,
       hand: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"></path><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"></path><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"></path><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"></path></svg>`,
       leave: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-4h7"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>`,
-      copy: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`
+      copy: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`,
+      chat: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`,
+      close: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`
     };
   }
 
@@ -237,11 +241,27 @@ export class UIManager {
           <button class="btn btn-icon ${this.isHandRaised ? 'active' : ''}" id="hand-btn" aria-label="Raise Hand">
             ${icons.hand}
           </button>
+          <button class="btn btn-icon" id="chat-btn" aria-label="Open Chat">
+            ${icons.chat}
+          </button>
           <button class="btn btn-icon danger" id="leave-btn" aria-label="Leave Room">
             ${icons.leave}
           </button>
         </div>
       </footer>
+
+      <div class="chat-overlay" id="chat-overlay"></div>
+      <div class="chat-drawer" id="chat-drawer">
+        <div class="chat-header">
+          <h3 class="body-medium">Chat</h3>
+          <button class="btn btn-icon" id="close-chat" style="box-shadow:none;">${icons.close}</button>
+        </div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <form class="chat-input-container" id="chat-form">
+          <input type="text" class="form-input" id="chat-input" placeholder="Type a message..." autocomplete="off">
+          <button type="submit" class="btn btn-primary" style="padding: 8px 12px;">Send</button>
+        </form>
+      </div>
 
       <div class="toast-container" id="toast-container"></div>
     `;
@@ -264,12 +284,22 @@ export class UIManager {
     });
 
     document.getElementById('hand-btn')?.addEventListener('click', () => {
-      this.isHandRaised = !this.isHandRaised;
-      const btn = document.getElementById('hand-btn');
-      if (btn) {
-        btn.classList.toggle('active', this.isHandRaised);
-      }
       this.onRaiseHand?.();
+    });
+
+    document.getElementById('chat-btn')?.addEventListener('click', () => this.toggleChat(true));
+    document.getElementById('close-chat')?.addEventListener('click', () => this.toggleChat(false));
+    document.getElementById('chat-overlay')?.addEventListener('click', () => this.toggleChat(false));
+
+    document.getElementById('chat-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = document.getElementById('chat-input') as HTMLInputElement;
+      const msg = input.value.trim();
+      if (msg) {
+        this.onChat?.(msg);
+        this.addChatMessage(this.localUserId!, localStorage.getItem('username') || 'You', msg, true);
+        input.value = '';
+      }
     });
 
     document.getElementById('leave-btn')?.addEventListener('click', () => {
@@ -400,5 +430,28 @@ export class UIManager {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+  }
+  private toggleChat(open: boolean): void {
+    document.getElementById('chat-drawer')?.classList.toggle('open', open);
+    document.getElementById('chat-overlay')?.classList.toggle('open', open);
+    if (open) setTimeout(() => document.getElementById('chat-input')?.focus(), 300);
+  }
+
+  addChatMessage(userId: string, username: string, message: string, isSelf: boolean): void {
+    const container = document.getElementById('chat-messages');
+    if (!container) return;
+
+    const div = document.createElement('div');
+    div.className = `chat-message ${isSelf ? 'self' : 'other'}`;
+    div.innerHTML = `
+      <div class="chat-message-info">${this.escapeHtml(username)}</div>
+      <div class="chat-text">${this.escapeHtml(message)}</div>
+    `;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+
+    if (!isSelf && !document.getElementById('chat-drawer')?.classList.contains('open')) {
+      this.showToast(`New message from ${username}`);
+    }
   }
 }
