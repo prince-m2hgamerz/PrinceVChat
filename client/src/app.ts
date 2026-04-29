@@ -127,6 +127,26 @@ class App {
         this.ui.setUserSpeaking(peerId, speaking);
       });
 
+      // Also handle receiving user list directly from server
+      this.socketManager.on('room-users', (msg: any) => {
+        const users = msg.payload as { id: string; username: string }[];
+        console.log('[App] Got user list from server:', users);
+        for (const user of users) {
+          if (user.id !== this.userId) {
+            this.ui.addUser(user.id, false, user.username);
+          }
+        }
+      });
+
+      // Handle when someone joins
+      this.socketManager.on('user-joined', (msg: any) => {
+        console.log('[App] User joined:', msg.userId, msg.username);
+        if (msg.userId !== this.userId && msg.username) {
+          this.ui.addUser(msg.userId, false, msg.username);
+          this.ui.showToast(`${msg.username} joined!`, 'success');
+        }
+      });
+
       // Show room
       this.ui.showRoom(this.roomId, this.username);
       this.ui.showToast('Connected!', 'success');
@@ -184,7 +204,7 @@ class App {
 }
 
 // Set version in footer
-const version = '1.0.3';
+const version = '1.0.4';
 document.addEventListener('DOMContentLoaded', () => {
   const versionEl = document.getElementById('app-version');
   if (versionEl) versionEl.textContent = version;
