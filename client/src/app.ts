@@ -235,11 +235,50 @@ class App {
     });
   }
 
+  private sendChatMessage(message: string): void {
+    if (!this.socketManager) return;
+    this.socketManager.send({
+      type: 'chat',
+      roomId: this.roomId,
+      message: message
+    });
+  }
+
+  private toggleMute(): void {
+    if (!this.webrtcManager) return;
+    const isMuted = this.webrtcManager.toggleAudio();
+    this.ui.showToast(isMuted ? 'Muted' : 'Unmuted', 'success');
+  }
+
+  private toggleVideo(): void {
+    if (!this.webrtcManager) return;
+    const isOff = this.webrtcManager.toggleVideo();
+    this.socketManager?.send({
+      type: 'video-toggle',
+      roomId: this.roomId,
+      enabled: !isOff
+    });
+    this.ui.setVideoStatus(this.userId, !isOff);
+    this.ui.showToast(isOff ? 'Camera off' : 'Camera on', 'success');
+  }
+
+  private toggleRaiseHand(): void {
+    if (!this.socketManager) return;
+    this.isHandRaised = !this.isHandRaised;
+    this.socketManager.send({
+      type: 'raise-hand',
+      roomId: this.roomId,
+      raised: this.isHandRaised
+    });
+    this.ui.showToast(this.isHandRaised ? 'Hand raised!' : 'Hand lowered', 'success');
+  }
+
   private toggleDeafen(): void {
     if (!this.webrtcManager) return;
-    // Mute/unmute all remote audio elements
-    document.querySelectorAll('audio').forEach(audio => {
-      audio.muted = this.ui.deafened;
+    document.querySelectorAll('audio, video').forEach(el => {
+      if (el.id !== `video-${this.userId}`) {
+        (el as HTMLMediaElement).muted = this.ui.deafened;
+      }
     });
   }
 
