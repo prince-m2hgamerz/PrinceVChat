@@ -100,9 +100,9 @@ export class UIManager {
 
           <section class="layout-container section-hero">
             <div class="hero-content">
-              <div class="badge-new"><span class="badge-dot"></span>v3.1 — Fullscreen, ICE fixes &amp; cross-browser audio</div>
+              <div class="badge-new"><span class="badge-dot"></span>v3.3.1 — Premium Desktop UI & HD Media Support</div>
               <h1 class="hero-title">Crystal-clear calls<br>for <span class="hero-accent">every team</span></h1>
-              <p class="hero-subtitle">HD voice &amp; video, screen sharing, live chat, emoji reactions. No accounts, no downloads — just share a link and talk.</p>
+              <p class="hero-subtitle">HD voice & video, screen sharing, live chat, emoji reactions. No accounts, no downloads — just share a link and talk.</p>
               <div class="hero-cta">
                 <button class="btn btn-primary btn-large" id="create-room-btn">
                   Start a Room

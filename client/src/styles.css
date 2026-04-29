@@ -81,7 +81,7 @@ body {
 .section-hero {
   text-align: center;
   width: 100%;
-  padding: 160px 0 80px; /* Increased padding for "Gallery Emptiness" */
+  padding: 120px 0 60px;
 }
 
 .hero-content {
@@ -126,7 +126,7 @@ body {
   font-size: 13px;
   font-weight: 600;
   color: var(--ds-blue);
-  margin-bottom: 24px;
+  margin-bottom: 12px;
   border: 1px solid var(--ds-gray-200);
 }
 
@@ -323,7 +323,7 @@ body {
 
 /* CTA Section */
 .section-cta {
-  padding: 100px 0;
+  padding: 60px 0;
   width: 100%;
 }
 
