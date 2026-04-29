@@ -107,17 +107,20 @@ class App {
       // When we join, we get list of existing users (exclude self)
       // We are the NEW user - we DON'T create offers, we wait for existing users to offer us
       this.socketManager.on('room-users', (msg: any) => {
-        const users = msg.payload as { id: string; username: string }[];
+        const users = msg.payload as { id: string; username: string; isHost: boolean; handRaised: boolean }[];
+        const hostName = msg.hostName;
         
-        for (let i = 0; i < users.length; i++) {
-          const user = users[i];
+        // Update room title with host name
+        if (hostName) {
+          this.ui.setRoomTitle(hostName);
+        }
+        
+        for (const user of users) {
           if (user.id !== this.userId) {
-            // First user in list is host (server logic)
-            this.ui.addUser(user.id, i === 0, user.username);
-          } else {
-            // We are joining - if we are first, we are host
-            if (i === 0) this.ui.addUser(this.userId, true, this.username);
-            else this.ui.addUser(this.userId, false, this.username);
+            this.ui.addUser(user.id, user.isHost, user.username);
+            if (user.handRaised) {
+              this.ui.setUserHandRaised(user.id, true);
+            }
           }
         }
       });
@@ -139,21 +142,31 @@ class App {
         this.ui.removeUser(msg.userId);
       });
 
-      // When someone's hand is raised/lowered
+      // When someone's hand is raised/lowered (server broadcasts to ALL including sender)
       this.socketManager.on('raise-hand', (msg: any) => {
         console.log('[App] Hand:', msg.userId, msg.raised);
-        this.ui.setUserHandRaised(msg.userId, msg.raised);
-        if (msg.raised) {
+        
+        if (msg.userId === this.userId) {
+          // Update our own state from server confirmation
+          this.isHandRaised = !!msg.raised;
+          this.ui.setHandRaised(this.isHandRaised);
+        }
+        
+        this.ui.setUserHandRaised(msg.userId, !!msg.raised);
+        
+        if (msg.raised && msg.userId !== this.userId) {
           const peerName = this.ui.getUserName(msg.userId) || 'Someone';
           this.ui.showToast(`${peerName} raised hand!`, 'success');
         }
       });
 
-      // When someone sends a chat message
+      // When someone sends a chat message (server broadcasts to ALL including sender)
       this.socketManager.on('chat', (msg: any) => {
-        console.log('[App] Chat message:', msg);
-        const isSelf = msg.userId === this.userId;
-        this.ui.addChatMessage(msg.userId, msg.username || 'User', msg.message, isSelf);
+        console.log('[App] Chat:', msg.username, ':', msg.message);
+        if (msg.message) {
+          const isSelf = msg.userId === this.userId;
+          this.ui.addChatMessage(msg.userId, msg.username || 'User', msg.message, isSelf);
+        }
       });
 
       // Now connect - server will immediately send room-users
@@ -166,10 +179,8 @@ class App {
         username: this.username
       });
 
-      // Show room immediately so we have the UI elements ready
+      // Show room UI first so DOM elements exist for handlers
       this.ui.showRoom(this.roomId, this.username);
-      this.ui.setLocalUserId(this.userId); // Ensure local ID is set for UI logic
-      this.ui.addUser(this.userId, false, this.username); // Default as not host, room-users will correct it
 
       // Setup WebRTC (for audio only)
       this.webrtcManager = new WebRTCManager(this.socketManager, this.roomId, this.userId);
@@ -229,12 +240,12 @@ class App {
   private toggleRaiseHand(): void {
     if (!this.socketManager) return;
     this.isHandRaised = !this.isHandRaised;
+    // Send to server - server will broadcast back to ALL including us
     this.socketManager.send({
       type: 'raise-hand',
       roomId: this.roomId,
       raised: this.isHandRaised
     });
-    this.ui.setHandRaised(this.isHandRaised);
     this.ui.showToast(this.isHandRaised ? 'Hand raised!' : 'Hand lowered', 'success');
   }
 

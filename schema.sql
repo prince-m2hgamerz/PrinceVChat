@@ -1,57 +1,39 @@
--- PrinceVChat Supabase Schema (Simplified)
-
--- Enable UUID extension
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
--- Users table
-CREATE TABLE IF NOT EXISTS users (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    username TEXT UNIQUE NOT NULL,
-    display_name TEXT,
-    avatar_url TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    last_seen TIMESTAMP WITH TIME ZONE
-);
+-- PrinceVChat Supabase Schema
+-- Uses TEXT for user IDs since they are session-generated strings (not UUIDs)
 
 -- Rooms table
 CREATE TABLE IF NOT EXISTS rooms (
     id TEXT PRIMARY KEY,
     name TEXT,
-    host_id UUID REFERENCES users(id),
+    host_id TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     is_active BOOLEAN DEFAULT true,
-    max_participants INTEGER DEFAULT 50,
-    settings JSONB DEFAULT '{}'::JSONB
+    max_participants INTEGER DEFAULT 50
 );
 
--- Room participants
+-- Room participants (tracks who joined/left)
 CREATE TABLE IF NOT EXISTS room_participants (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     room_id TEXT REFERENCES rooms(id) ON DELETE CASCADE,
-    user_id UUID REFERENCES users(id),
+    user_id TEXT NOT NULL,
+    username TEXT NOT NULL DEFAULT 'User',
     joined_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     left_at TIMESTAMP WITH TIME ZONE,
     is_host BOOLEAN DEFAULT false,
     is_muted BOOLEAN DEFAULT false,
-    is_hand_raised BOOLEAN DEFAULT false
+    is_hand_raised BOOLEAN DEFAULT false,
+    UNIQUE(room_id, user_id)
 );
 
--- Security indexes
-CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+-- Indexes
 CREATE INDEX IF NOT EXISTS idx_room_participants_room ON room_participants(room_id);
+CREATE INDEX IF NOT EXISTS idx_room_participants_user ON room_participants(user_id);
+CREATE INDEX IF NOT EXISTS idx_rooms_active ON rooms(is_active);
 
 -- Enable RLS
-ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE rooms ENABLE ROW LEVEL SECURITY;
 ALTER TABLE room_participants ENABLE ROW LEVEL SECURITY;
 
--- Public read policies
-CREATE POLICY "Anyone can read users" ON users FOR SELECT USING (true);
-CREATE POLICY "Anyone can read rooms" ON rooms FOR SELECT USING (true);
-
--- Insert policy for service role
-CREATE POLICY "Service can insert users" ON users FOR INSERT WITH CHECK (true);
-CREATE POLICY "Service can insert rooms" ON rooms FOR INSERT WITH CHECK (true);
-CREATE POLICY "Service can insert participants" ON room_participants FOR INSERT WITH CHECK (true);
-CREATE POLICY "Service can update participants" ON room_participants FOR UPDATE USING (true);
+-- Policies - allow service role full access
+CREATE POLICY "Service full access rooms" ON rooms FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service full access participants" ON room_participants FOR ALL USING (true) WITH CHECK (true);

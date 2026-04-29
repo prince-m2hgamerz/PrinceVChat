@@ -15,7 +15,7 @@ const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABA
 // Debug
 console.log('[Server] PORT:', PORT);
 console.log('[Server] SUPABASE_URL:', SUPABASE_URL ? 'SET' : 'NOT SET');
-console.log('[Server] SUPABASE_KEY:', SUPABASE_KEY ? 'SET' : 'NOT SET');
+console.log('[Server] SUPABASE_KEY:', SUPABASE_KEY ? 'SET (' + SUPABASE_KEY.length + ' chars)' : 'NOT SET');
 
 // MIME Types
 const MIME_TYPES: Record<string, string> = {
@@ -37,11 +37,16 @@ interface Client {
   id: string;
   ws: WebSocket;
   username: string;
+  isHost: boolean;
+  handRaised: boolean;
 }
 
 interface Room {
   id: string;
+  hostId: string;
+  hostName: string;
   clients: Map<string, Client>;
+  chatHistory: { userId: string; username: string; message: string; timestamp: number }[];
 }
 
 const rooms = new Map<string, Room>();
@@ -49,8 +54,11 @@ const STATIC_DIR = join(process.cwd(), 'dist');
 const hasStatic = existsSync(STATIC_DIR) && statSync(STATIC_DIR).isDirectory();
 
 // ============ SUPABASE CLIENT ============
-async function supabaseRequest(table: string, method: string, body?: unknown, query?: string) {
-  if (!SUPABASE_KEY) return null;
+async function supabaseRequest(table: string, method: string, body?: unknown, query?: string): Promise<any> {
+  if (!SUPABASE_URL || !SUPABASE_KEY) {
+    console.log('[Supabase] Skipping - no credentials configured');
+    return null;
+  }
   
   try {
     let url = `${SUPABASE_URL}/rest/v1/${table}`;
@@ -60,11 +68,12 @@ async function supabaseRequest(table: string, method: string, body?: unknown, qu
       'Content-Type': 'application/json',
       'apikey': SUPABASE_KEY,
       'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Prefer': 'return=representation',
     };
     
-    // Add Prefer header for upsert operations
+    // Add upsert header for POST with on_conflict
     if (method === 'POST' && query?.includes('on_conflict')) {
-      headers['Prefer'] = 'resolution=merge-duplicates';
+      headers['Prefer'] = 'resolution=merge-duplicates,return=representation';
     }
 
     const res = await fetch(url, {
@@ -72,15 +81,65 @@ async function supabaseRequest(table: string, method: string, body?: unknown, qu
       headers,
       body: body ? JSON.stringify(body) : undefined,
     });
+
+    const text = await res.text();
+    
     if (!res.ok) {
-      const err = await res.text();
-      console.log('[Supabase] Error:', res.status, err);
+      console.log(`[Supabase] Error ${method} ${table}:`, res.status, text);
+      return null;
     }
-    return await res.json();
+    
+    try {
+      return JSON.parse(text);
+    } catch {
+      return text;
+    }
   } catch (e) {
-    console.error('[Supabase] Error:', e);
+    console.error('[Supabase] Request failed:', e);
     return null;
   }
+}
+
+// Save room to Supabase
+async function saveRoom(roomId: string, hostName: string, hostId: string) {
+  const result = await supabaseRequest('rooms', 'POST', {
+    id: roomId,
+    name: `${hostName}'s Room`,
+    is_active: true,
+    created_at: new Date().toISOString()
+  }, 'on_conflict=id');
+  console.log('[Supabase] Room saved:', roomId, result ? 'OK' : 'FAILED');
+}
+
+// Save participant to Supabase
+async function saveParticipant(roomId: string, clientId: string, username: string, isHost: boolean) {
+  const result = await supabaseRequest('room_participants', 'POST', {
+    room_id: roomId,
+    user_id: clientId,
+    username: username,
+    is_host: isHost,
+    joined_at: new Date().toISOString(),
+  }, 'on_conflict=room_id,user_id');
+  console.log('[Supabase] Participant saved:', username, result ? 'OK' : 'FAILED');
+}
+
+// Mark participant as left
+async function markParticipantLeft(roomId: string, clientId: string) {
+  await supabaseRequest('room_participants', 'PATCH', {
+    left_at: new Date().toISOString(),
+  }, `room_id=eq.${roomId}&user_id=eq.${clientId}`);
+}
+
+// Update hand raised status
+async function updateHandRaised(roomId: string, clientId: string, raised: boolean) {
+  await supabaseRequest('room_participants', 'PATCH', {
+    is_hand_raised: raised,
+  }, `room_id=eq.${roomId}&user_id=eq.${clientId}`);
+}
+
+// Deactivate room
+async function deactivateRoom(roomId: string) {
+  await supabaseRequest('rooms', 'PATCH', { is_active: false }, `id=eq.${roomId}`);
 }
 
 // ============ HTTP SERVER ============
@@ -108,7 +167,13 @@ const server = createServer((req, res) => {
   // Health check
   if (url === '/health') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ status: 'ok', rooms: rooms.size, static: hasStatic, dev: 'm2hgamerz' }));
+    res.end(JSON.stringify({ 
+      status: 'ok', 
+      rooms: rooms.size, 
+      static: hasStatic, 
+      supabase: !!SUPABASE_KEY,
+      dev: 'm2hgamerz' 
+    }));
     return;
   }
 
@@ -145,13 +210,17 @@ const server = createServer((req, res) => {
 // ============ WEBSOCKET SERVER ============
 const wss = new WebSocketServer({ server, path: '/ws' });
 
-console.log('[Server] Port:', PORT);
-
 function send(ws: WebSocket, msg: any) {
   if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(msg));
 }
 
-function broadcast(room: Room, msg: any, excludeId?: string) {
+function broadcastToAll(room: Room, msg: any) {
+  room.clients.forEach((client) => {
+    send(client.ws, msg);
+  });
+}
+
+function broadcastToOthers(room: Room, msg: any, excludeId: string) {
   room.clients.forEach((client, id) => {
     if (id !== excludeId) send(client.ws, msg);
   });
@@ -171,42 +240,73 @@ wss.on('connection', (ws: WebSocket) => {
         const username = msg.username || 'User-' + clientId.slice(-4);
         
         // Create/get room
-        if (!rooms.has(roomId)) rooms.set(roomId, { id: roomId, clients: new Map() });
-        const room = rooms.get(roomId)!;
-        room.clients.set(clientId, { id: clientId, ws, username });
-        
-        console.log('[Server] Join:', username, clientId, roomId);
-        
-        // Create room in Supabase if it doesn't exist
-        if (room.clients.size === 1) {
-          supabaseRequest('rooms', 'POST', {
-            id: roomId,
-            name: `${username}'s Room`,
-            host_id: clientId,
-            is_active: true,
-            created_at: new Date().toISOString()
-          }, 'on_conflict=id');
+        const isNewRoom = !rooms.has(roomId!);
+        if (isNewRoom) {
+          rooms.set(roomId!, { 
+            id: roomId!, 
+            hostId: clientId, 
+            hostName: username, 
+            clients: new Map(),
+            chatHistory: []
+          });
         }
-
-        // Save to Supabase with upsert (on_conflict)
-        supabaseRequest('room_participants', 'POST', {
-          room_id: roomId,
-          user_id: clientId,
-          username: username,
-          is_host: room.clients.size === 1,
-          joined_at: new Date().toISOString(),
-        }, 'on_conflict=room_id,user_id');
+        const room = rooms.get(roomId!)!;
+        const isHost = isNewRoom || room.clients.size === 0;
         
-        // Send participant list
+        if (isHost) {
+          room.hostId = clientId;
+          room.hostName = username;
+        }
+        
+        room.clients.set(clientId, { 
+          id: clientId, ws, username, 
+          isHost, 
+          handRaised: false 
+        });
+        
+        console.log('[Server] Join:', username, clientId, roomId, isHost ? '(HOST)' : '');
+        
+        // Save to Supabase
+        if (isHost) {
+          saveRoom(roomId!, username, clientId);
+        }
+        saveParticipant(roomId!, clientId, username, isHost);
+        
+        // Send participant list WITH host info and hand states
         const participants = Array.from(room.clients.values()).map(c => ({
           id: c.id,
           username: c.username,
+          isHost: c.isHost,
+          handRaised: c.handRaised,
         }));
         
-        send(ws, { type: 'room-users', roomId, userId: clientId, payload: participants });
+        send(ws, { 
+          type: 'room-users', 
+          roomId, 
+          userId: clientId, 
+          hostName: room.hostName,
+          payload: participants 
+        });
+        
+        // Send recent chat history to new user
+        if (room.chatHistory.length > 0) {
+          for (const chatMsg of room.chatHistory.slice(-50)) {
+            send(ws, { 
+              type: 'chat', 
+              roomId, 
+              userId: chatMsg.userId, 
+              username: chatMsg.username, 
+              message: chatMsg.message, 
+              timestamp: chatMsg.timestamp 
+            });
+          }
+        }
         
         // Notify others about new user
-        broadcast(room, { type: 'user-joined', roomId, userId: clientId, username }, clientId);
+        broadcastToOthers(room, { 
+          type: 'user-joined', roomId, userId: clientId, username 
+        }, clientId);
+        
         console.log('[Server] Broadcast user-joined to', room.clients.size - 1, 'clients');
       }
       else if (msg.type === 'offer' || msg.type === 'answer' || msg.type === 'ice-candidate') {
@@ -217,32 +317,54 @@ wss.on('connection', (ws: WebSocket) => {
         }
       }
       else if (msg.type === 'raise-hand') {
-        // Broadcast raise hand
-        if (roomId) {
+        if (roomId && clientId) {
           const room = rooms.get(roomId);
           if (room) {
-            broadcast(room, { type: 'raise-hand', roomId, userId: clientId, raised: msg.raised }, clientId);
+            const client = room.clients.get(clientId);
+            if (client) {
+              client.handRaised = !!msg.raised;
+            }
+            
+            console.log('[Server] Hand raise:', clientId, msg.raised);
+            
+            // Broadcast to ALL users including sender
+            broadcastToAll(room, { 
+              type: 'raise-hand', 
+              roomId, 
+              userId: clientId, 
+              raised: !!msg.raised 
+            });
             
             // Update Supabase
-            supabaseRequest('room_participants', 'PATCH', {
-              is_hand_raised: msg.raised,
-            }, `room_id=eq.${roomId}&user_id=eq.${clientId}`);
+            updateHandRaised(roomId, clientId, !!msg.raised);
           }
         }
       }
       else if (msg.type === 'chat') {
-        if (roomId) {
+        if (roomId && clientId) {
           const room = rooms.get(roomId);
           if (room) {
-            const client = room.clients.get(clientId!);
-            // Broadcast to EVERYONE including the sender (easier to sync state)
-            broadcast(room, { 
+            const client = room.clients.get(clientId);
+            const chatMsg = {
+              userId: clientId,
+              username: client?.username || msg.username || 'User',
+              message: msg.message || '',
+              timestamp: Date.now(),
+            };
+            
+            console.log('[Server] Chat:', chatMsg.username, ':', chatMsg.message);
+            
+            // Store in room history
+            room.chatHistory.push(chatMsg);
+            if (room.chatHistory.length > 100) {
+              room.chatHistory = room.chatHistory.slice(-100);
+            }
+            
+            // Broadcast to ALL users including sender
+            broadcastToAll(room, { 
               type: 'chat', 
               roomId, 
-              userId: clientId, 
-              username: client?.username, 
-              message: msg.message, 
-              timestamp: Date.now() 
+              ...chatMsg
             });
           }
         }
@@ -255,16 +377,14 @@ wss.on('connection', (ws: WebSocket) => {
       const room = rooms.get(roomId);
       if (room) {
         room.clients.delete(clientId);
-        broadcast(room, { type: 'user-left', roomId, userId: clientId });
+        broadcastToOthers(room, { type: 'user-left', roomId, userId: clientId }, '');
         
         // Update Supabase
-        supabaseRequest('room_participants', 'PATCH', {
-          left_at: new Date().toISOString(),
-        }, `room_id=eq.${roomId}&user_id=eq.${clientId}`);
+        markParticipantLeft(roomId, clientId);
         
         if (room.clients.size === 0) {
           rooms.delete(roomId);
-          supabaseRequest('rooms', 'PATCH', { is_active: false }, `id=eq.${roomId}`);
+          deactivateRoom(roomId);
         }
         console.log('[Server] Leave:', clientId, roomId);
       }

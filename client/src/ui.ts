@@ -223,7 +223,7 @@ export class UIManager {
       <main class="layout-container" style="padding-bottom: 100px;">
         <div class="room-header">
           <div class="room-info">
-            <h1 class="heading-large" id="room-title">Room</h1>
+            <h1 class="heading-large" id="room-title">${this.escapeHtml(username)}'s Room</h1>
             <span class="badge" style="background: var(--ds-gray-50); color: var(--ds-fg);"><span id="user-count">1 participant</span></span>
           </div>
         </div>
@@ -377,6 +377,13 @@ export class UIManager {
     if (btn) {
       btn.classList.toggle('active', raised);
     }
+    // Also update the local user's state in the participants map
+    if (this.localUserId) {
+      const user = this.users.get(this.localUserId);
+      if (user) {
+        user.handRaised = raised;
+      }
+    }
     this.updateParticipants();
   }
 
@@ -390,6 +397,11 @@ export class UIManager {
 
   getUserName(userId: string): string | undefined {
     return this.users.get(userId)?.name;
+  }
+
+  setRoomTitle(hostName: string): void {
+    const titleEl = document.getElementById('room-title');
+    if (titleEl) titleEl.textContent = `${hostName}'s Room`;
   }
 
   private updateParticipants(): void {

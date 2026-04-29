@@ -435,23 +435,67 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; color: var(--ds-gray-900); }
 }
 
 @media (max-width: 768px) {
-  .grid-3 { grid-template-columns: 1fr; }
+  .grid-3 { grid-template-columns: 1fr; gap: 16px; }
   .display-hero { font-size: 32px; letter-spacing: -1.28px; }
   .heading-section { font-size: 28px; }
-  .section-hero { padding: 60px 0; }
+  .heading-large { font-size: 24px; letter-spacing: -0.96px; }
+  .section-hero { padding: 48px 0; }
+  .section-features { padding: 48px 0; }
   .layout-container { padding: 0 16px; }
+  .card { padding: 24px; }
+  .nav { padding: 12px 0; }
+  .nav-inner { gap: 8px; }
+  
+  /* Participant grid - 2 columns on tablet */
   .participants-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 20px 0; }
   .participant-avatar { width: 48px; height: 48px; font-size: 18px; margin-bottom: 8px; }
   .participant-name { font-size: 14px; }
   .participant-status { font-size: 12px; }
-  .participant-card { padding: 16px 8px; }
+  .participant-card { padding: 16px 8px; aspect-ratio: auto; min-height: 140px; }
+  .participant-badge-container { top: 8px; left: 8px; right: 8px; }
+  
+  /* Chat drawer fullscreen on mobile */
   .chat-drawer { width: 100%; right: -100%; }
-  .room-controls { padding: 12px 16px; gap: 8px; }
-  .room-controls .btn-icon { width: 40px; height: 40px; }
+  
+  /* Control bar - touch friendly */
+  .room-controls { 
+    padding: 12px 16px; 
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  }
+  .room-controls .layout-container { gap: 12px; }
+  .room-controls .btn-icon { 
+    width: 44px; 
+    height: 44px; 
+    min-width: 44px;
+  }
+  
+  /* Room header */
+  .room-header { padding: 16px 0; }
+  .room-info { gap: 8px; flex-wrap: wrap; }
+  
+  /* Modal */
+  .modal { margin: 16px; max-width: calc(100% - 32px); }
+  
+  /* Copy button compact */
+  #copy-btn { font-size: 0; padding: 8px; }
+  #copy-btn svg { font-size: initial; }
+  
+  /* Toast above controls */
+  .toast-container { bottom: 80px; }
 }
 
 @media (max-width: 480px) {
   .hero-actions { flex-direction: column; width: 100%; }
   .hero-actions .btn { width: 100%; }
-  .room-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .room-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .heading-large { font-size: 20px; }
+  .display-hero { font-size: 28px; }
+  .body-large { font-size: 16px; }
+  
+  /* Single column participants on small phones */
+  .participants-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .participant-card { min-height: 120px; padding: 12px 6px; }
+  .participant-avatar { width: 40px; height: 40px; font-size: 16px; margin-bottom: 6px; }
+  .participant-name { font-size: 13px; }
+  .participant-status { font-size: 11px; }
 }

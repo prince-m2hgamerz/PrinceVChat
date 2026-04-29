@@ -79,13 +79,9 @@ export class SocketManager {
       return;
     }
 
-    const fullMessage: SocketMessage = {
-      type: message.type || 'unknown',
-      roomId: message.roomId,
+    const fullMessage = {
+      ...message,
       userId: this.userId,
-      targetUserId: message.targetUserId,
-      payload: message.payload,
-      username: message.username,
     };
 
     this.socket.send(JSON.stringify(fullMessage));
