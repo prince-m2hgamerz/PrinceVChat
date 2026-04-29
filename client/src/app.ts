@@ -208,13 +208,14 @@ class App {
   }
 }
 
-// Version
-const version = '1.0.5';
-document.addEventListener('DOMContentLoaded', () => {
-  const versionEl = document.getElementById('app-version');
-  if (versionEl) versionEl.textContent = version;
-});
+// Version - hardcoded for now
+const APP_VERSION = '1.0.6';
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Update version in footer
+  const versionEl = document.getElementById('app-version');
+  if (versionEl) versionEl.textContent = APP_VERSION;
+  
+  // Initialize app
   new App();
 });

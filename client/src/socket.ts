@@ -8,6 +8,10 @@ export interface SocketMessage {
   userId?: string;
   targetUserId?: string;
   payload?: unknown;
+  username?: string;
+  raised?: boolean;
+  message?: string;
+  timestamp?: number;
 }
 
 export class SocketManager {
