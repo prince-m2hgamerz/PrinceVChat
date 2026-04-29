@@ -1643,19 +1643,26 @@ a:hover {
   min-height: 100vh;
   position: relative;
   z-index: 1;
+  background: 
+    radial-gradient(ellipse 60% 40% at 50% 0%, rgba(10, 114, 239, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse 40% 30% at 100% 0%, rgba(222, 29, 141, 0.04) 0%, transparent 40%),
+    radial-gradient(ellipse 50% 40% at 0% 100%, rgba(255, 91, 79, 0.03) 0%, transparent 40%),
+    #ffffff;
 }
 
-/* Glassmorphism Header - Vercel Style */
+/* Glassmorphism Header - Vercel Style - Transparent */
 .room-header-glass {
   display: flex;
   align-items: center;
   gap: 16px;
   padding: 16px 24px;
-  background: #ffffff;
-  box-shadow: rgba(0,0,0,0.08) 0px 0px 0px 1px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   position: sticky;
   top: 0;
   z-index: 100;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .header-link-glass {
@@ -1751,13 +1758,15 @@ a:hover {
   width: 100%;
 }
 
-/* Invite Box - Vercel Style */
+/* Invite Box - Vercel Style - Semi-transparent */
 .invite-glass {
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border-radius: 8px;
   padding: 20px;
   margin-bottom: 32px;
-  box-shadow: rgba(0,0,0,0.08) 0px 0px 0px 1px, rgba(0,0,0,0.04) 0px 2px 2px, #fafafa 0px 0px 0px 1px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .invite-label-glass {
@@ -1875,20 +1884,22 @@ a:hover {
   box-shadow: rgba(0,0,0,0.08) 0px 0px 0px 1px, rgba(245, 158, 11, 0.15) 0px 0px 0px 2px, rgba(0,0,0,0.04) 0px 2px 2px;
 }
 
-/* Controls - Vercel Style */
+/* Controls - Vercel Style - Transparent */
 .controls-glass {
   display: flex;
   justify-content: center;
   gap: 16px;
   padding: 20px;
-  background: #ffffff;
-  box-shadow: rgba(0,0,0,0.08) 0px 0px 0px 1px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   z-index: 100;
   padding-bottom: max(20px, env(safe-area-inset-bottom));
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .control-glass {
