@@ -32,16 +32,18 @@ class App {
   }
 
   private generateSessionId(): string {
-    return 'u-' + Math.random().toString(36).substring(2, 10);
+    const array = new Uint32Array(2);
+    window.crypto.getRandomValues(array);
+    return 'u-' + array[0].toString(36) + array[1].toString(36);
   }
 
   private generateRoomId(): string {
-    const chars = 'abcdefghijkmnpqrstuvwxyz23456789';
-    let result = '';
-    for (let i = 0; i < 6; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
+    const array = new Uint8Array(12);
+    window.crypto.getRandomValues(array);
+    // Use base64url-like character set for unguessable IDs
+    return Array.from(array)
+      .map(b => 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789'.charAt(b % 56))
+      .join('');
   }
 
   private setupRouter(): void {
@@ -73,6 +75,7 @@ class App {
     this.ui.setOnReaction((emoji) => this.sendReaction(emoji));
     this.ui.setOnScreenShare(() => this.toggleScreenShare());
     this.ui.setOnToggleLock((locked) => this.toggleRoomLock(locked));
+    this.ui.setOnSetPassword((password) => this.setRoomPassword(password));
   }
 
   private createRoom(): void {
@@ -175,6 +178,10 @@ class App {
 
       this.socketManager.on('error', (msg: any) => {
         this.ui.showToast(msg.message || 'Error', 'error');
+        if (msg.code === 'PASSWORD_REQUIRED') {
+          this.cleanup();
+          this.ui.showUsernameModal('join');
+        }
       });
 
       // WebRTC signaling handlers
@@ -190,7 +197,16 @@ class App {
 
       // 4. Connect and join
       await this.socketManager.connect();
-      this.socketManager.send({ type: 'join', roomId: this.roomId, username: this.username });
+      
+      const savedPassword = localStorage.getItem('room_password') || (window as any).nextRoomPassword;
+      this.socketManager.send({ 
+        type: 'join', 
+        roomId: this.roomId, 
+        username: this.username,
+        password: savedPassword
+      });
+      localStorage.removeItem('room_password');
+      (window as any).nextRoomPassword = undefined;
 
       // 5. Show room UI
       this.ui.showRoom(this.roomId, this.username);
@@ -244,6 +260,14 @@ class App {
     });
     this.ui.setVideoStatus(this.userId, !isOff);
     this.ui.showToast(isOff ? 'Camera off' : 'Camera on', 'success');
+  }
+
+  private setRoomPassword(password: string): void {
+    this.socketManager?.send({
+      type: 'set-password',
+      roomId: this.roomId,
+      password: password
+    });
   }
 
   private async switchCamera(): Promise<void> {

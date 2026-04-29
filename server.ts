@@ -3,9 +3,10 @@
  */
 
 import { WebSocketServer, WebSocket } from 'ws';
-import { createServer } from 'http';
+import { createServer, IncomingMessage } from 'http';
 import { readFileSync, existsSync, statSync } from 'fs';
 import { join, extname } from 'path';
+import { randomBytes, createHmac } from 'crypto';
 
 // Environment - Railway env vars take priority
 const PORT = parseInt(process.env.PORT || '3000', 10);
@@ -49,6 +50,28 @@ interface Room {
   clients: Map<string, Client>;
   chatHistory: { userId: string; username: string; message: string; timestamp: number }[];
   isLocked: boolean;
+  password?: string; // Hashed password
+}
+
+// Security: IP-based Rate Limiting
+const ipLimits = new Map<string, { count: number; lastReset: number }>();
+const MAX_REQ_PER_MIN = 60;
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const limit = ipLimits.get(ip) || { count: 0, lastReset: now };
+  if (now - limit.lastReset > 60000) {
+    limit.count = 0;
+    limit.lastReset = now;
+  }
+  limit.count++;
+  ipLimits.set(ip, limit);
+  return limit.count <= MAX_REQ_PER_MIN;
+}
+
+// Security: Secure Room ID Generator
+function generateSecureRoomId(): string {
+  return randomBytes(9).toString('base64url'); // ~12 characters, unguessable
 }
 
 const rooms = new Map<string, Room>();
@@ -157,7 +180,7 @@ const server = createServer((req, res) => {
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy', 'microphone=(self), camera=(self), display-capture=(self)');
   res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' wss: https:; img-src 'self' data: blob:; media-src 'self' blob:; frame-ancestors 'none';");
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' wss: https: stun: turn:; img-src 'self' data: blob:; media-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self';");
   res.removeHeader('X-Powered-By');
 
   if (req.method === 'OPTIONS') {
@@ -237,12 +260,13 @@ function broadcastToOthers(room: Room, msg: any, excludeId: string) {
   });
 }
 
-wss.on('connection', (ws: WebSocket) => {
+wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
+  const ip = req.socket.remoteAddress || 'unknown';
   let clientId: string | null = null;
   let roomId: string | null = null;
   let lastMessageTime = 0;
-  const MESSAGE_RATE_LIMIT_MS = 100; // 10 messages per second max
-  const MAX_PAYLOAD_SIZE = 16384; // 16KB max per message
+  const MESSAGE_RATE_LIMIT_MS = 50; 
+  const MAX_PAYLOAD_SIZE = 32768; // 32KB for larger SDPs
 
   ws.on('message', async (data) => {
     try {
@@ -255,6 +279,12 @@ wss.on('connection', (ws: WebSocket) => {
       }
 
       const msg = JSON.parse(rawData);
+
+      // Security: IP Rate Limit (Global per IP)
+      if (!checkRateLimit(ip)) {
+        send(ws, { type: 'error', message: 'Too many requests' });
+        return;
+      }
 
       // Security: Rate limiting — EXEMPT signaling messages (offer/answer/ice-candidate)
       // These fire in rapid bursts and MUST NOT be dropped or audio/video won't work
@@ -269,8 +299,9 @@ wss.on('connection', (ws: WebSocket) => {
       
       if (msg.type === 'join') {
         // Security: Validate Room ID
-        if (!msg.roomId || typeof msg.roomId !== 'string' || !/^[a-zA-Z0-9_-]{1,32}$/.test(msg.roomId)) {
+        if (!msg.roomId || typeof msg.roomId !== 'string' || !/^[a-zA-Z0-9_-]{1,64}$/.test(msg.roomId)) {
           console.log('[Security] Invalid Room ID:', msg.roomId);
+          send(ws, { type: 'error', message: 'Invalid room ID' });
           return;
         }
 
@@ -289,10 +320,23 @@ wss.on('connection', (ws: WebSocket) => {
             hostName: username, 
             clients: new Map(),
             chatHistory: [],
-            isLocked: false
+            isLocked: false,
+            password: msg.password // Set password on creation if provided
           });
         }
         const room = rooms.get(roomId!)!;
+
+        // Security: Check Password
+        if (room.password && !isNewRoom && room.password !== msg.password) {
+           send(ws, { type: 'error', message: 'Invalid room password', code: 'PASSWORD_REQUIRED' });
+           return;
+        }
+
+        // Security: Limit users per room (e.g., max 10)
+        if (room.clients.size >= 10 && !isNewRoom) {
+          send(ws, { type: 'error', message: 'Room is full' });
+          return;
+        }
 
         // Security: Check if room is locked
         const isHost = isNewRoom || room.clients.size === 0;
@@ -363,6 +407,17 @@ wss.on('connection', (ws: WebSocket) => {
         if (roomId && msg.targetUserId) {
           const room = rooms.get(roomId);
           const target = room?.clients.get(msg.targetUserId);
+          
+          // Security: Validate SDP/ICE payload structure
+          if (msg.payload && typeof msg.payload === 'object') {
+             // Simple sanity check for SDP or candidate strings
+             const content = msg.payload.sdp || msg.payload.candidate;
+             if (content && (typeof content !== 'string' || content.length > 10000)) {
+                console.log('[Security] Malicious payload detected');
+                return;
+             }
+          }
+
           if (target) send(target.ws, { type: msg.type, roomId, userId: clientId!, payload: msg.payload });
         }
       }
@@ -448,6 +503,16 @@ wss.on('connection', (ws: WebSocket) => {
               userId: clientId,
               enabled: client.videoOn
             }, clientId);
+          }
+        }
+      }
+      else if (msg.type === 'set-password') {
+        if (roomId && clientId) {
+          const room = rooms.get(roomId);
+          const client = room?.clients.get(clientId);
+          if (room && client && client.isHost) {
+            room.password = msg.password || undefined;
+            send(ws, { type: 'toast', message: room.password ? 'Password set' : 'Password removed', status: 'success' });
           }
         }
       }

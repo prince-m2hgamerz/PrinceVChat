@@ -24,6 +24,7 @@ export class UIManager {
   private onReaction: ((emoji: string) => void) | null = null;
   private onScreenShare: (() => void) | null = null;
   private onToggleLock: ((locked: boolean) => void) | null = null;
+  private onSetPassword: ((password: string) => void) | null = null;
 
   render(): void {
     this.showLanding();
@@ -42,6 +43,7 @@ export class UIManager {
   setOnReaction(cb: (emoji: string) => void): void { this.onReaction = cb; }
   setOnScreenShare(cb: () => void): void { this.onScreenShare = cb; }
   setOnToggleLock(cb: (locked: boolean) => void): void { this.onToggleLock = cb; }
+  setOnSetPassword(cb: (password: string) => void): void { this.onSetPassword = cb; }
   setLocalUserId(id: string): void { this.localUserId = id; }
 
   // ==================== LANDING - VERCEL-INSPIRED DESIGN ====================
@@ -324,7 +326,16 @@ export class UIManager {
                 <label class="form-label" for="room-input">Room Code</label>
                 <input type="text" id="room-input" class="form-input" placeholder="e.g. abc123" value="${roomId}" autocomplete="off" required />
               </div>
-            ` : ''}
+              <div class="form-group">
+                <label class="form-label" for="password-input">Password (Optional)</label>
+                <input type="password" id="password-input" class="form-input" placeholder="Enter room password" autocomplete="new-password" />
+              </div>
+            ` : `
+              <div class="form-group">
+                <label class="form-label" for="password-input">Set Password (Optional)</label>
+                <input type="password" id="password-input" class="form-input" placeholder="Protect your room" autocomplete="new-password" />
+              </div>
+            `}
             
             <div class="modal-actions">
               <button type="button" class="btn btn-secondary" id="cancel-btn">Cancel</button>
@@ -347,14 +358,18 @@ export class UIManager {
       e.preventDefault();
       const usernameInput = document.getElementById('username-input') as HTMLInputElement;
       const roomInput = document.getElementById('room-input') as HTMLInputElement;
+      const passwordInput = document.getElementById('password-input') as HTMLInputElement;
       
       const name = usernameInput?.value.trim();
       const room = roomInput?.value.trim();
+      const password = passwordInput?.value.trim();
 
       if (name) {
         localStorage.setItem('username', name);
+        if (password) localStorage.setItem('room_password', password); // Temporary storage for join
         
         if (this.modalAction === 'create') {
+          if (password) (window as any).nextRoomPassword = password;
           this.onCreateRoom?.();
         } else if (room) {
           window.history.replaceState(null, '', `/room/${room}`);
@@ -473,6 +488,9 @@ export class UIManager {
           </button>
           <button class="btn btn-icon ${this.isRoomLocked ? 'active' : ''}" id="lock-btn" aria-label="Lock Room" title="Lock Room">
             ${this.isRoomLocked ? icons.lock : icons.unlock}
+          </button>
+          <button class="btn btn-icon" id="password-btn" aria-label="Set Password" title="Set Room Password">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3y-3.5-3.5"></path></svg>
           </button>
           <button class="btn btn-icon danger" id="leave-btn" aria-label="Leave Room" title="Leave">
             ${icons.leave}
@@ -616,6 +634,13 @@ export class UIManager {
       }
       this.onToggleLock?.(this.isRoomLocked);
       this.showToast(this.isRoomLocked ? 'Room locked' : 'Room unlocked', 'success');
+    });
+    
+    document.getElementById('password-btn')?.addEventListener('click', () => {
+      const pass = prompt('Enter new room password (leave empty to remove):');
+      if (pass !== null) {
+        this.onSetPassword?.(pass);
+      }
     });
 
     document.getElementById('leave-btn')?.addEventListener('click', () => {
@@ -977,4 +1002,10 @@ export class UIManager {
 
   // ==================== DEAFEN STATE ====================
   get deafened(): boolean { return this.isDeafened; }
+
+  private escapeHtml(str: string): string {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
 }
