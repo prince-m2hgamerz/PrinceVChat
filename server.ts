@@ -92,7 +92,7 @@ const server = createServer((req, res) => {
   // Health check
   if (url === '/health') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ status: 'ok', rooms: rooms.size, static: hasStatic }));
+    res.end(JSON.stringify({ status: 'ok', rooms: rooms.size, static: hasStatic, dev: 'm2hgamerz' }));
     return;
   }
 

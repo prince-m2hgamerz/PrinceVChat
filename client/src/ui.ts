@@ -1,7 +1,3 @@
-/**
- * PrinceVChat - UI Manager (Vercel Style Enhanced)
- */
-
 export class UIManager {
   private currentScreen: 'landing' | 'username' | 'room' = 'landing';
   private users = new Map<string, { id: string; name: string; isHost: boolean; speaking: boolean; handRaised: boolean }>();
@@ -36,121 +32,49 @@ export class UIManager {
     if (!app) return;
 
     app.innerHTML = `
-      <div class="vercel-page">
-        <!-- Animated Background -->
-        <div class="bg-gradient"></div>
-        <div class="bg-grid"></div>
-        
-        <!-- Navigation -->
-        <nav class="vercel-nav">
-          <a href="/" class="nav-logo">
+      <nav class="nav">
+        <div class="layout-container nav-inner">
+          <a href="/" class="logo">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2L2 7l10 5 10-5-10-5z" fill="#fff"/>
-              <path d="M2 17l10 5 10-5" stroke="#fff" stroke-width="2"/>
-              <path d="M2 12l10 5 10-5" stroke="#fff" stroke-width="2"/>
+              <path d="M12 2L2 7l10 5 10-5-10-5z" fill="#171717"/>
+              <path d="M2 17l10 5 10-5" stroke="#171717" stroke-width="2"/>
+              <path d="M2 12l10 5 10-5" stroke="#171717" stroke-width="2"/>
             </svg>
             <span>PrinceVChat</span>
           </a>
-        </nav>
+        </div>
+      </nav>
 
-        <!-- Hero -->
-        <main class="vercel-main">
-          <section class="hero-section">
-            <div class="hero-content">
-              <div class="hero-badge">Zero-config voice chat</div>
-              <h1 class="hero-title">
-                <span class="title-gradient">Group voice chat</span>
-                <br />for every team
-              </h1>
-              <p class="hero-description">
-                Start instant voice conversations with your team. 
-                No downloads, no sign-up, no friction.
-              </p>
-              <div class="hero-cta">
-                <button class="cta-primary" id="create-room-btn">
-                  <span>Create Room</span>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-                <button class="cta-secondary" id="join-room-btn">
-                  <span>Join Room</span>
-                </button>
-              </div>
+      <main>
+        <section class="layout-container section-hero">
+          <div class="badge" style="margin-bottom: 32px;">Zero-config voice chat</div>
+          <h1 class="display-hero" style="max-width: 800px; margin-bottom: 24px;">Group voice chat for every team</h1>
+          <p class="body-large" style="max-width: 600px;">Start instant voice conversations with your team. No downloads, no sign-up, no friction.</p>
+          <div class="hero-actions">
+            <button class="btn btn-primary" id="create-room-btn">Create Room</button>
+            <button class="btn btn-secondary" id="join-room-btn">Join Room</button>
+          </div>
+        </section>
+        
+        <section class="section-features">
+          <div class="layout-container grid-3">
+            <div class="card">
+              <h3 class="heading-card" style="margin-bottom: 12px;">Instant</h3>
+              <p class="body-regular">Create a room in seconds. Share the link and anyone can join immediately.</p>
             </div>
-            
-            <!-- Feature Cards Grid -->
-            <div class="features-grid">
-              <div class="feature-card">
-                <div class="feature-icon">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                </div>
-                <h3>Instant</h3>
-                <p>Create a room in seconds. Share the link and anyone can join immediately.</p>
-              </div>
-              <div class="feature-card">
-                <div class="feature-icon">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                </div>
-                <h3>Private</h3>
-                <p>Your conversations are yours. No tracking, no recording, no storage.</p>
-              </div>
-              <div class="feature-card">
-                <div class="feature-icon">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
-                </div>
-                <h3>Crystal Clear</h3>
-                <p>WebRTC-powered audio with echo cancellation and noise suppression.</p>
-              </div>
+            <div class="card">
+              <h3 class="heading-card" style="margin-bottom: 12px;">Private</h3>
+              <p class="body-regular">Your conversations are yours. No tracking, no recording, no storage.</p>
             </div>
-          </section>
-          
-          <!-- Code Section -->
-          <section class="code-section">
-            <div class="code-block">
-              <div class="code-header">
-                <div class="code-dots">
-                  <span></span><span></span><span></span>
-                </div>
-                <span class="code-title">How it works</span>
-              </div>
-              <pre class="code-content"><code><span class="code-comment">// 1. Create a room</span>
-<span class="code-purple">const</span> room = <span class="code-keyword">await</span> createRoom(<span class="code-string">'team-standup'</span>);
-
-<span class="code-comment">// 2. Share the invite</span>
-<span class="code-keyword">await</span> shareLink(room.url);
-
-<span class="code-comment">// 3. Start talking!</span>
-<span class="code-purple">const</span> audio = <span class="code-keyword">await</span> getUserAudio();</code></pre>
-            </div>
-          </section>
-        </main>
-
-        <!-- Footer -->
-        <footer class="vercel-footer">
-          <div class="footer-content">
-            <a href="/" class="footer-logo">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2L2 7l10 5 10-5-10-5z" fill="#fff"/>
-                <path d="M2 17l10 5 10-5" stroke="#fff" stroke-width="2"/>
-                <path d="M2 12l10 5 10-5" stroke="#fff" stroke-width="2"/>
-              </svg>
-              <span>PrinceVChat</span>
-            </a>
-            <div class="footer-links">
-              <a href="#">About</a>
-              <a href="#">Careers</a>
-              <a href="#">Blog</a>
-              <a href="#">Legal</a>
-              <a href="#">Privacy</a>
-            </div>
-            <div class="footer-copyright">
-              <span>© 2026 PrinceVChat</span>
+            <div class="card">
+              <h3 class="heading-card" style="margin-bottom: 12px;">Crystal Clear</h3>
+              <p class="body-regular">WebRTC-powered audio with echo cancellation and noise suppression.</p>
             </div>
           </div>
-        </footer>
-      </div>
+        </section>
+      </main>
     `;
 
-    // Events
     document.getElementById('create-room-btn')?.addEventListener('click', () => this.showUsernameModal('create'));
     document.getElementById('join-room-btn')?.addEventListener('click', () => this.showUsernameModal('join'));
   }
@@ -163,7 +87,6 @@ export class UIManager {
     const app = document.getElementById('app');
     if (!app) return;
 
-    // Check for existing room if joining
     let roomId = '';
     if (action === 'join') {
       const match = window.location.pathname.match(/\/room\/([^/]+)/);
@@ -171,66 +94,48 @@ export class UIManager {
     }
 
     app.innerHTML = `
-      <header class="header">
-        <div class="header-inner">
+      <nav class="nav">
+        <div class="layout-container nav-inner">
           <a href="/" class="logo">
-            <span class="logo-mark">🎙️</span>
-            <span class="logo-text">PrinceVChat</span>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2L2 7l10 5 10-5-10-5z" fill="#171717"/>
+              <path d="M2 17l10 5 10-5" stroke="#171717" stroke-width="2"/>
+              <path d="M2 12l10 5 10-5" stroke="#171717" stroke-width="2"/>
+            </svg>
+            <span>PrinceVChat</span>
           </a>
         </div>
-      </header>
+      </nav>
       
-      <main class="main">
-        <div class="modal-overlay" id="modal-overlay">
-          <div class="modal">
-            <div class="modal-header">
-              <h2 class="modal-title">${action === 'create' ? 'Create a room' : 'Join a room'}</h2>
-              <p class="modal-subtitle">Enter your name to get started</p>
+      <div class="modal-overlay" id="modal-overlay">
+        <div class="modal" id="modal-content">
+          <div class="modal-header">
+            <h2 class="heading-large">${action === 'create' ? 'Create a room' : 'Join a room'}</h2>
+            <p class="body-regular" style="margin-top: 8px;">Enter your name to get started</p>
+          </div>
+          
+          <form id="username-form">
+            <div class="form-group">
+              <label class="form-label" for="username-input">Your Name</label>
+              <input type="text" id="username-input" class="form-input" placeholder="Enter your name" autocomplete="off" required maxlength="20" autofocus />
             </div>
             
-            <form id="username-form">
+            ${action === 'join' ? `
               <div class="form-group">
-                <label class="form-label" for="username-input">Your Name</label>
-                <input 
-                  type="text" 
-                  id="username-input" 
-                  class="form-input" 
-                  placeholder="Enter your name"
-                  autocomplete="off"
-                  required
-                  maxlength="20"
-                  autofocus
-                />
+                <label class="form-label" for="room-input">Room Code</label>
+                <input type="text" id="room-input" class="form-input" placeholder="e.g. abc123" value="${roomId}" autocomplete="off" required />
               </div>
-              
-              ${action === 'join' ? `
-                <div class="form-group">
-                  <label class="form-label" for="room-input">Room Code</label>
-                  <input 
-                    type="text" 
-                    id="room-input" 
-                    class="form-input" 
-                    placeholder="e.g. abc123"
-                    value="${roomId}"
-                    autocomplete="off"
-                    required
-                  />
-                </div>
-              ` : ''}
-              
-              <div class="form-actions">
-                <button type="button" class="btn btn-ghost" id="cancel-btn">Cancel</button>
-                <button type="submit" class="btn btn-primary">
-                  ${action === 'create' ? 'Create Room' : 'Join Room'}
-                </button>
-              </div>
-            </form>
-          </div>
+            ` : ''}
+            
+            <div class="modal-actions">
+              <button type="button" class="btn btn-secondary" id="cancel-btn">Cancel</button>
+              <button type="submit" class="btn btn-primary">${action === 'create' ? 'Create Room' : 'Join Room'}</button>
+            </div>
+          </form>
         </div>
-      </main>
+      </div>
     `;
 
-    // Events
     document.getElementById('modal-overlay')?.addEventListener('click', (e) => {
       if (e.target === e.currentTarget) this.showLanding();
     });
@@ -259,19 +164,17 @@ export class UIManager {
       }
     });
 
-    // Focus
     setTimeout(() => document.getElementById('username-input')?.focus(), 100);
   }
 
   // ==================== SVG ICONS ====================
   private getIcons() {
     return {
-      mic: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>`,
-      micOff: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"></line><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>`,
-      hand: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"></path><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"></path><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"></path><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"></path></svg>`,
-      leave: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-4h7"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>`,
-      copy: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`,
-      micIcon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path></svg>`,
+      mic: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>`,
+      micOff: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"></line><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>`,
+      hand: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"></path><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"></path><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"></path><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"></path></svg>`,
+      leave: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-4h7"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>`,
+      copy: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`
     };
   }
 
@@ -282,11 +185,9 @@ export class UIManager {
     const app = document.getElementById('app');
     if (!app) return;
 
-    // Get saved name
     const username = localStorage.getItem('username') || hostName;
     const icons = this.getIcons();
 
-    // Add self
     this.users.clear();
     this.users.set(this.localUserId!, {
       id: this.localUserId!,
@@ -296,83 +197,58 @@ export class UIManager {
       handRaised: false
     });
 
-    const backIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>`;
-    const copyIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
-
     app.innerHTML = `
-      <div class="vercel-page room-page">
-        <div class="bg-gradient"></div>
-        <div class="bg-grid"></div>
-        
-        <!-- Minimal Header -->
-        <header class="room-header-minimal">
-          <a href="/" class="header-link">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-          </a>
-          <div class="header-room-info">
-            <h1 class="header-room-name">${this.escapeHtml(username)}</h1>
-            <div class="header-status">
-              <span class="status-badge">
-                <span class="status-dot"></span>
-                LIVE
-              </span>
-              <span class="status-count" id="user-count">1 participant</span>
-            </div>
+      <nav class="nav">
+        <div class="layout-container nav-inner">
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <a href="/" class="logo">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L2 7l10 5 10-5-10-5z" fill="#171717"/>
+                <path d="M2 17l10 5 10-5" stroke="#171717" stroke-width="2"/>
+                <path d="M2 12l10 5 10-5" stroke="#171717" stroke-width="2"/>
+              </svg>
+            </a>
+            <span class="mono-label" style="color: var(--ds-gray-500); padding-left: 16px; border-left: 1px solid var(--ds-gray-100);">Room: ${roomId}</span>
           </div>
-          <button class="header-copy" id="copy-btn" title="Copy invite link">
-            ${copyIcon}
-            <span>Copy</span>
+          <button class="btn btn-secondary" id="copy-btn">
+            ${icons.copy} Copy Invite Link
           </button>
-        </header>
+        </div>
+      </nav>
 
-        <!-- Room Content -->
-        <main class="room-main-content">
-          <!-- Invite Section -->
-          <section class="invite-section-minimal">
-            <div class="invite-label-mini">Invite Link</div>
-            <div class="invite-box-minimal">
-              <code class="invite-url">${window.location.origin}/room/${roomId}</code>
-              <button class="invite-copy-mini" id="copy-btn-2">Copy</button>
-            </div>
-          </section>
+      <main class="layout-container" style="padding-bottom: 100px;">
+        <div class="room-header">
+          <div class="room-info">
+            <h1 class="heading-large">${this.escapeHtml(username)}'s Room</h1>
+            <span class="badge" style="background: var(--ds-gray-50); color: var(--ds-fg);"><span id="user-count">1 participant</span></span>
+          </div>
+        </div>
 
-          <!-- Participants -->
-          <section class="participants-section-minimal">
-            <div class="participants-header-mini">
-              <span class="participants-title">Participants</span>
-              <span class="participants-count" id="user-count-2">1</span>
-            </div>
-            <div class="participants-grid-mini" id="participants">
-              ${this.renderParticipants()}
-            </div>
-          </section>
-        </main>
+        <div class="participants-grid" id="participants">
+          ${this.renderParticipants()}
+        </div>
+      </main>
 
-        <!-- Controls -->
-        <footer class="room-controls-minimal">
-          <button class="control-mini ${this.isMuted ? 'active-muted' : ''}" id="mute-btn">
-            <span class="control-icon-mini">${this.isMuted ? icons.micOff : icons.mic}</span>
-            <span class="control-label-mini">${this.isMuted ? 'Unmute' : 'Mute'}</span>
+      <footer class="room-controls">
+        <div class="layout-container" style="display: flex; gap: 16px; justify-content: center; width: 100%;">
+          <button class="btn btn-icon ${this.isMuted ? 'danger' : ''}" id="mute-btn" aria-label="Toggle Mute">
+            ${this.isMuted ? icons.micOff : icons.mic}
           </button>
-          <button class="control-mini ${this.isHandRaised ? 'active-hand' : ''}" id="hand-btn">
-            <span class="control-icon-mini">${icons.hand}</span>
-            <span class="control-label-mini">${this.isHandRaised ? 'Lower' : 'Raise'}</span>
+          <button class="btn btn-icon ${this.isHandRaised ? 'active' : ''}" id="hand-btn" aria-label="Raise Hand">
+            ${icons.hand}
           </button>
-          <button class="control-mini leave-mini" id="leave-btn">
-            <span class="control-icon-mini">${icons.leave}</span>
-            <span class="control-label-mini">Leave</span>
+          <button class="btn btn-icon danger" id="leave-btn" aria-label="Leave Room">
+            ${icons.leave}
           </button>
-        </footer>
+        </div>
+      </footer>
 
-        <div class="toast-container" id="toast-container"></div>
-      </div>
+      <div class="toast-container" id="toast-container"></div>
     `;
 
-    // Events
     document.getElementById('copy-btn')?.addEventListener('click', () => {
-      const input = document.getElementById('room-link') as HTMLInputElement;
-      navigator.clipboard.writeText(input.value);
-      this.showToast('Link copied!', 'success');
+      navigator.clipboard.writeText(`${window.location.origin}/room/${roomId}`);
+      this.showToast('Link copied!');
     });
 
     const roomIcons = this.getIcons();
@@ -381,7 +257,7 @@ export class UIManager {
       this.isMuted = !this.isMuted;
       const btn = document.getElementById('mute-btn');
       if (btn) {
-        btn.classList.toggle('muted', this.isMuted);
+        btn.classList.toggle('danger', this.isMuted);
         btn.innerHTML = this.isMuted ? roomIcons.micOff : roomIcons.mic;
       }
       this.onMute?.();
@@ -404,10 +280,8 @@ export class UIManager {
     
     if (users.length === 0) {
       return `
-        <div class="empty-state">
-          <div class="empty-state-icon">👥</div>
-          <h3 class="empty-state-title">Waiting for others...</h3>
-          <p class="empty-state-desc">Share the link to invite people</p>
+        <div style="grid-column: 1 / -1; text-align: center; padding: 64px 0;">
+          <p class="body-large">Waiting for others to join...</p>
         </div>
       `;
     }
@@ -415,11 +289,18 @@ export class UIManager {
     return users.map(user => {
       const isSelf = user.id === this.localUserId;
       const status = user.handRaised ? '✋ Hand raised' : (user.speaking ? 'Speaking...' : (isSelf ? 'You' : 'Connected'));
+      
+      const classes = ['participant-card'];
+      if (user.speaking) classes.push('speaking');
+      if (user.handRaised) classes.push('hand-up');
+      if (user.isHost) classes.push('host');
+
       return `
-        <div class="participant ${user.isHost ? 'host' : ''} ${user.speaking ? 'speaking' : ''} ${user.handRaised ? 'hand-up' : ''}">
-          ${isSelf ? '<span class="participant-you">You</span>' : ''}
-          ${user.isHost && !isSelf ? '<span class="participant-host-badge">Host</span>' : ''}
-          ${user.handRaised ? '<span class="hand-icon">✋</span>' : ''}
+        <div class="${classes.join(' ')}">
+          <div class="participant-badge-container">
+            ${isSelf ? '<span class="badge" style="background: var(--ds-gray-100); color: var(--ds-fg);">You</span>' : '<div></div>'}
+            ${user.isHost && !isSelf ? '<span class="badge" style="background: var(--ds-gray-100); color: var(--ds-fg);">Host</span>' : ''}
+          </div>
           <div class="participant-avatar">${this.getInitials(user.name)}</div>
           <div class="participant-name">${this.escapeHtml(user.name)}</div>
           <div class="participant-status">${status}</div>
@@ -453,7 +334,6 @@ export class UIManager {
     }
   }
 
-  // Set own hand raised state
   setHandRaised(raised: boolean): void {
     this.isHandRaised = raised;
     const btn = document.getElementById('hand-btn');
@@ -463,7 +343,6 @@ export class UIManager {
     this.updateParticipants();
   }
 
-  // Set another user's hand raised state
   setUserHandRaised(userId: string, raised: boolean): void {
     const user = this.users.get(userId);
     if (user) {
