@@ -29,6 +29,22 @@
   --shadow-focus: 0 0 0 2px var(--ds-bg), 0 0 0 4px var(--ds-blue);
 }
 
+body.dark-mode {
+  --ds-bg: #000000;
+  --ds-fg: #ffffff;
+  --ds-gray-50: #111111;
+  --ds-gray-100: #333333;
+  --ds-gray-200: #444444;
+  --ds-gray-400: #888888;
+  --ds-gray-500: #a1a1a1;
+  --ds-gray-600: #ededed;
+  --ds-gray-900: #ffffff;
+  
+  --shadow-card: rgba(255, 255, 255, 0.1) 0px 0px 0px 1px, rgba(0, 0, 0, 0.4) 0px 2px 2px;
+  --shadow-card-hover: rgba(255,255,255,0.2) 0px 0px 0px 1px, rgba(0,0,0,0.6) 0px 8px 16px;
+  --shadow-border: 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;

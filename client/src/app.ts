@@ -51,7 +51,13 @@ class App {
     if (path.startsWith(ROUTE_PREFIX)) {
       const match = path.match(/\/room\/([^/]+)/);
       if (match && match[1]) {
-        this.ui.showUsernameModal('join');
+        const savedUsername = localStorage.getItem('username');
+        if (savedUsername) {
+          // Skip modal if we already have a name
+          this.joinRoom();
+        } else {
+          this.ui.showUsernameModal('join');
+        }
         return;
       }
     }
