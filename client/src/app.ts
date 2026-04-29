@@ -108,7 +108,6 @@ class App {
       // We are the NEW user - we DON'T create offers, we wait for existing users to offer us
       this.socketManager.on('room-users', (msg: any) => {
         const users = msg.payload as { id: string; username: string }[];
-        const room = rooms.get(this.roomId);
         
         for (let i = 0; i < users.length; i++) {
           const user = users[i];
@@ -118,6 +117,7 @@ class App {
           } else {
             // We are joining - if we are first, we are host
             if (i === 0) this.ui.addUser(this.userId, true, this.username);
+            else this.ui.addUser(this.userId, false, this.username);
           }
         }
       });
@@ -166,6 +166,11 @@ class App {
         username: this.username
       });
 
+      // Show room immediately so we have the UI elements ready
+      this.ui.showRoom(this.roomId, this.username);
+      this.ui.setLocalUserId(this.userId); // Ensure local ID is set for UI logic
+      this.ui.addUser(this.userId, false, this.username); // Default as not host, room-users will correct it
+
       // Setup WebRTC (for audio only)
       this.webrtcManager = new WebRTCManager(this.socketManager, this.roomId, this.userId);
       this.webrtcManager.setLocalStream(this.localStream);
@@ -201,7 +206,6 @@ class App {
       });
 
       // Show room
-      this.ui.showRoom(this.roomId, this.username);
       this.ui.showToast('Connected!', 'success');
 
     } catch (error) {
@@ -231,7 +235,6 @@ class App {
       raised: this.isHandRaised
     });
     this.ui.setHandRaised(this.isHandRaised);
-    this.ui.setUserHandRaised(this.userId, this.isHandRaised); // Immediate local update
     this.ui.showToast(this.isHandRaised ? 'Hand raised!' : 'Hand lowered', 'success');
   }
 
