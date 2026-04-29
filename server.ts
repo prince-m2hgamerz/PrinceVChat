@@ -7,13 +7,10 @@ import { createServer } from 'http';
 import { readFileSync, existsSync, statSync } from 'fs';
 import { join, extname } from 'path';
 
-// Environment - with fallback values for Railway deployment
+// Environment - with fallback for Railway
 const PORT = parseInt(process.env.PORT || '3000', 10);
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nyixcwollfqiojulsznw.supabase.co';
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55aXhjd29sbGZxaW9qdWxzem53Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NzM5MjAwMCwiZXhwIjoyMDkyOTY4MDAwfQ.3g--tSFcX3Y4Et9a386pO2DZJmlGFD7JmDXogGbe0wk';
-
-console.log('[Server] Supabase URL:', SUPABASE_URL ? 'configured' : 'missing');
-console.log('[Server] Supabase Key:', SUPABASE_KEY ? 'configured' : 'missing');
 
 // MIME Types
 const MIME_TYPES: Record<string, string> = {
@@ -48,64 +45,38 @@ const hasStatic = existsSync(STATIC_DIR) && statSync(STATIC_DIR).isDirectory();
 
 // ============ SUPABASE CLIENT ============
 async function supabaseRequest(table: string, method: string, body?: unknown, query?: string) {
-  if (!SUPABASE_KEY) {
-    console.log('[Supabase] No key configured, skipping...');
-    return null;
-  }
+  if (!SUPABASE_KEY) return null;
   
   try {
     let url = `${SUPABASE_URL}/rest/v1/${table}`;
     if (query) url += '?' + query;
 
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+    };
+    
+    // Add Prefer header for upsert operations
+    if (method === 'POST' && query?.includes('on_conflict')) {
+      headers['Prefer'] = 'resolution=merge-duplicates';
+    }
+
     const res = await fetch(url, {
       method,
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Prefer': method === 'POST' ? 'return=minimal' : 'return=minimal',
-      },
+      headers,
       body: body ? JSON.stringify(body) : undefined,
     });
-    
     if (!res.ok) {
-      const errorText = await res.text();
-      console.error('[Supabase] Error:', res.status, errorText);
-      return { error: errorText };
+      const err = await res.text();
+      console.log('[Supabase] Error:', res.status, err);
     }
-    
     return await res.json();
   } catch (e) {
-    console.error('[Supabase] Exception:', e);
+    console.error('[Supabase] Error:', e);
     return null;
   }
 }
-
-// ============ INIT SUPABASE TABLES ============
-async function initSupabaseTables() {
-  console.log('[Supabase] Initializing tables...');
-  console.log('[Supabase] URL:', SUPABASE_URL);
-  console.log('[Supabase] Key exists:', !!SUPABASE_KEY);
-  
-  // Create rooms table
-  await supabaseRequest('rooms', 'POST', {
-    id: 'init_check',
-    name: 'init_check',
-    is_active: false,
-  }, 'on_conflict=id');
-  
-  // Create room_participants table  
-  await supabaseRequest('room_participants', 'POST', {
-    room_id: 'init_check',
-    user_id: 'init_check',
-    is_host: false,
-  }, 'on_conflict=room_id,user_id');
-  
-  console.log('[Supabase] Tables initialized');
-}
-
-// Run init
-initSupabaseTables();
 
 // ============ HTTP SERVER ============
 const server = createServer((req, res) => {
@@ -133,19 +104,6 @@ const server = createServer((req, res) => {
   if (url === '/health') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ status: 'ok', rooms: rooms.size, static: hasStatic }));
-    return;
-  }
-  
-  // Debug - check Supabase data
-  if (url === '/debug-supabase') {
-    const rooms = await supabaseRequest('rooms', 'GET', undefined, 'select=*&limit=20');
-    const participants = await supabaseRequest('room_participants', 'GET', undefined, 'select=*&limit=20');
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ 
-      supabaseKeyConfigured: !!SUPABASE_KEY,
-      rooms: rooms, 
-      participants: participants 
-    }));
     return;
   }
 
@@ -214,26 +172,14 @@ wss.on('connection', (ws: WebSocket) => {
         
         console.log('[Server] Join:', username, clientId, roomId);
         
-        // First, ensure room exists in Supabase
-        supabaseRequest('rooms', 'POST', {
-          id: roomId,
-          name: `Room ${roomId}`,
-          is_active: true,
-          created_at: new Date().toISOString(),
-        }, 'on_conflict=id');
-
-        // Save/Update participant in Supabase (upsert)
-        const participantResult = await supabaseRequest('room_participants', 'POST', {
+        // Save to Supabase with upsert (on_conflict)
+        supabaseRequest('room_participants', 'POST', {
           room_id: roomId,
           user_id: clientId,
           username: username,
           is_host: room.clients.size === 1,
           joined_at: new Date().toISOString(),
-          is_hand_raised: false,
-          left_at: null,
         }, 'on_conflict=room_id,user_id');
-        
-        console.log('[Supabase] Participant saved:', participantResult);
         
         // Send participant list
         const participants = Array.from(room.clients.values()).map(c => ({
