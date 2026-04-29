@@ -99,34 +99,9 @@ class App {
 
       // Connect WebSocket
       this.socketManager = new SocketManager(WS_URL, this.userId);
-      await this.socketManager.connect();
-
-      // Join room with name
-      this.socketManager.send({
-        type: 'join',
-        roomId: this.roomId,
-        username: this.username
-      });
-
-      // Setup WebRTC (for audio only)
-      this.webrtcManager = new WebRTCManager(this.socketManager, this.roomId, this.userId);
-      this.webrtcManager.setLocalStream(this.localStream);
-
-      // Handle WebRTC events
-      this.webrtcManager.onPeerConnected((peerId: string) => {
-        console.log('[App] WebRTC peer connected:', peerId);
-      });
-
-      this.webrtcManager.onPeerDisconnected((peerId: string) => {
-        console.log('[App] WebRTC peer disconnected:', peerId);
-        this.ui.removeUser(peerId);
-      });
-
-      this.webrtcManager.onSpeaking((peerId: string, speaking: boolean) => {
-        this.ui.setUserSpeaking(peerId, speaking);
-      });
-
-      // === CRITICAL: Handle user sync via WebSocket (not WebRTC) ===
+      
+      // === CRITICAL: Register handlers BEFORE connecting ===
+      // Handle user sync via WebSocket (not WebRTC)
       
       // When we join, we get list of existing users
       this.socketManager.on('room-users', (msg: any) => {
@@ -153,6 +128,34 @@ class App {
       this.socketManager.on('user-left', (msg: any) => {
         console.log('[App] User left:', msg.userId);
         this.ui.removeUser(msg.userId);
+      });
+
+      // Now connect - server will immediately send room-users
+      await this.socketManager.connect();
+
+      // Join room with name
+      this.socketManager.send({
+        type: 'join',
+        roomId: this.roomId,
+        username: this.username
+      });
+
+      // Setup WebRTC (for audio only)
+      this.webrtcManager = new WebRTCManager(this.socketManager, this.roomId, this.userId);
+      this.webrtcManager.setLocalStream(this.localStream);
+
+      // Handle WebRTC events
+      this.webrtcManager.onPeerConnected((peerId: string) => {
+        console.log('[App] WebRTC peer connected:', peerId);
+      });
+
+      this.webrtcManager.onPeerDisconnected((peerId: string) => {
+        console.log('[App] WebRTC peer disconnected:', peerId);
+        this.ui.removeUser(peerId);
+      });
+
+      this.webrtcManager.onSpeaking((peerId: string, speaking: boolean) => {
+        this.ui.setUserSpeaking(peerId, speaking);
       });
 
       // Show room
