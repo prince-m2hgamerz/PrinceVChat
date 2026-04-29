@@ -103,16 +103,11 @@ class App {
       // === CRITICAL: Register handlers BEFORE connecting ===
       // Handle user sync via WebSocket (not WebRTC)
       
-      // When we join, we get list of existing users
+      // When we join, we get list of existing users (exclude self)
       this.socketManager.on('room-users', (msg: any) => {
         const users = msg.payload as { id: string; username: string }[];
-        console.log('[App] Got room users:', JSON.stringify(users));
-        console.log('[App] My userId:', this.userId);
         for (const user of users) {
-          console.log('[App] Checking user:', user.id, 'matches?', user.id === this.userId);
           if (user.id !== this.userId) {
-            // Add user to UI directly (not via WebRTC)
-            console.log('[App] Adding user:', user.id, user.username);
             this.ui.addUser(user.id, false, user.username);
           }
         }

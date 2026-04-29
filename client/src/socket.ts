@@ -44,7 +44,6 @@ export class SocketManager {
         this.socket.onmessage = (event) => {
           try {
             const message: SocketMessage = JSON.parse(event.data);
-            console.log('[Socket] Raw message:', JSON.stringify(message));
             this.handleMessage(message);
           } catch (e) {
             console.error('[Socket] Parse error:', e);

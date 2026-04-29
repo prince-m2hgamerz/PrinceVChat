@@ -129,7 +129,7 @@ const server = createServer((req, res) => {
 // ============ WEBSOCKET SERVER ============
 const wss = new WebSocketServer({ server, path: '/ws' });
 
-console.log('[Server] v1.0.8 - Port:', PORT);
+console.log('[Server] Port:', PORT);
 
 function send(ws: WebSocket, msg: any) {
   if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(msg));
@@ -174,11 +174,11 @@ wss.on('connection', (ws: WebSocket) => {
           username: c.username,
         }));
         
-        console.log('[Server] Sending room-users:', JSON.stringify({ type: 'room-users', roomId, userId: clientId, payload: participants }));
         send(ws, { type: 'room-users', roomId, userId: clientId, payload: participants });
         
-        // Notify others
+        // Notify others about new user
         broadcast(room, { type: 'user-joined', roomId, userId: clientId, username }, clientId);
+        console.log('[Server] Broadcast user-joined to', room.clients.size - 1, 'clients');
       }
       else if (msg.type === 'offer' || msg.type === 'answer' || msg.type === 'ice-candidate') {
         if (roomId && msg.targetUserId) {
