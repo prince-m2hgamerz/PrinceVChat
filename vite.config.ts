@@ -9,6 +9,13 @@ export default defineConfig({
   server: {
     port: 5173,
     host: true,
+    // Proxy WebSocket and API requests to the backend server
+    proxy: {
+      '/ws': {
+        target: 'ws://localhost:3000',
+        ws: true,
+      },
+    },
   },
   build: {
     outDir: path.join(__dirname, 'dist'),
@@ -16,6 +23,5 @@ export default defineConfig({
     minify: 'esbuild',
     sourcemap: false,
   },
-  // FIXED: Use absolute paths for production - no ambiguity
   base: '/',
 });
