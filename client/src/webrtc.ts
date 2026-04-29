@@ -76,16 +76,20 @@ export class WebRTCManager {
 
     connection.ontrack = async (event) => {
       const [stream] = event.streams;
+      console.log('[WebRTC] 🎵 Received remote audio stream');
       const audio = new Audio();
       audio.srcObject = stream;
       audio.autoplay = true;
       audio.playsInline = true;
       audio.volume = 1.0;
-      try {
-        await audio.play();
-      } catch (e) {
-        // Autoplay blocked
-      }
+      
+      // Try to play, but don't fail on error
+      audio.play().then(() => {
+        console.log('[WebRTC] ▶️ Audio playing');
+      }).catch(e => {
+        console.log('[WebRTC] ⚠️ Audio autoplay blocked - user needs to interact');
+      });
+      
       const peer = this.peers.get(peerId);
       if (peer) peer.audioElement = audio;
       this.onPeerConnectedCb?.(peerId);
@@ -103,7 +107,9 @@ export class WebRTCManager {
     };
 
     connection.onconnectionstatechange = () => {
-      if (connection.connectionState === 'failed' || connection.connectionState === 'disconnected') {
+      console.log('[WebRTC] Connection state:', connection.connectionState);
+      // Only remove peer on closed or failed (not on checking/connected)
+      if (connection.connectionState === 'closed') {
         this.removePeer(peerId);
       }
     };
