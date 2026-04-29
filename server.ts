@@ -7,10 +7,15 @@ import { createServer } from 'http';
 import { readFileSync, existsSync, statSync } from 'fs';
 import { join, extname } from 'path';
 
-// Environment - with fallback for Railway
+// Environment - Railway env vars take priority
 const PORT = parseInt(process.env.PORT || '3000', 10);
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nyixcwollfqiojulsznw.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55aXhjd29sbGZxaW9qdWxzem53Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NzM5MjAwMCwiZXhwIjoyMDkyOTY4MDAwfQ.3g--tSFcX3Y4Et9a386pO2DZJmlGFD7JmDXogGbe0wk';
+const SUPABASE_URL = process.env.SUPABASE_URL || '';
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || '';
+
+// Debug
+console.log('[Server] PORT:', PORT);
+console.log('[Server] SUPABASE_URL:', SUPABASE_URL ? 'SET' : 'NOT SET');
+console.log('[Server] SUPABASE_KEY:', SUPABASE_KEY ? 'SET' : 'NOT SET');
 
 // MIME Types
 const MIME_TYPES: Record<string, string> = {
