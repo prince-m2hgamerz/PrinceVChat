@@ -296,7 +296,7 @@ export class UIManager {
       handRaised: false
     });
 
-    const backIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>`;
+    const backIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>`;
     const copyIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
 
     app.innerHTML = `
@@ -304,65 +304,65 @@ export class UIManager {
         <div class="bg-gradient"></div>
         <div class="bg-grid"></div>
         
-        <!-- Minimal Header -->
-        <header class="room-header-minimal">
-          <a href="/" class="header-link">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <!-- Glassmorphism Header -->
+        <header class="room-header-glass">
+          <a href="/" class="header-link-glass">
+            ${backIcon}
           </a>
-          <div class="header-room-info">
-            <h1 class="header-room-name">${this.escapeHtml(username)}</h1>
-            <div class="header-status">
-              <span class="status-badge">
-                <span class="status-dot"></span>
+          <div class="header-info-glass">
+            <h1 class="header-title-glass">${this.escapeHtml(username)}</h1>
+            <div class="header-meta-glass">
+              <span class="live-badge-glass">
+                <span class="live-dot-glass"></span>
                 LIVE
               </span>
-              <span class="status-count" id="user-count">1 participant</span>
+              <span class="participant-count-glass" id="user-count">1</span>
             </div>
           </div>
-          <button class="header-copy" id="copy-btn" title="Copy invite link">
+          <button class="copy-btn-glass" id="copy-btn" title="Copy link">
             ${copyIcon}
-            <span>Copy</span>
+            <span class="copy-text">Copy</span>
           </button>
         </header>
 
         <!-- Room Content -->
-        <main class="room-main-content">
-          <!-- Invite Section -->
-          <section class="invite-section-minimal">
-            <div class="invite-label-mini">Invite Link</div>
-            <div class="invite-box-minimal">
-              <code class="invite-url">${window.location.origin}/room/${roomId}</code>
-              <button class="invite-copy-mini" id="copy-btn-2">Copy</button>
+        <main class="room-content-glass">
+          <!-- Invite Box -->
+          <div class="invite-glass">
+            <label class="invite-label-glass">Room Link</label>
+            <div class="invite-row-glass">
+              <code class="invite-link-glass">${window.location.origin}/room/${roomId}</code>
+              <button class="invite-btn-glass" id="copy-btn-2">Copy</button>
             </div>
-          </section>
+          </div>
 
-          <!-- Participants -->
-          <section class="participants-section-minimal">
-            <div class="participants-header-mini">
-              <span class="participants-title">Participants</span>
-              <span class="participants-count" id="user-count-2">1</span>
+          <!-- Participants Grid -->
+          <div class="participants-section-glass">
+            <div class="participants-header-glass">
+              <span class="participants-title-glass">Participants</span>
+              <span class="participants-badge-glass" id="user-count-2">1</span>
             </div>
-            <div class="participants-grid-mini" id="participants">
+            <div class="participants-flex" id="participants">
               ${this.renderParticipants()}
             </div>
-          </section>
+          </div>
         </main>
 
-        <!-- Controls -->
-        <footer class="room-controls-minimal">
-          <button class="control-mini ${this.isMuted ? 'active-muted' : ''}" id="mute-btn">
-            <span class="control-icon-mini">${this.isMuted ? icons.micOff : icons.mic}</span>
-            <span class="control-label-mini">${this.isMuted ? 'Unmute' : 'Mute'}</span>
+        <!-- Fixed Controls -->
+        <div class="controls-glass">
+          <button class="control-glass ${this.isMuted ? 'muted-glass' : ''}" id="mute-btn">
+            <span class="control-icon-glass">${this.isMuted ? icons.micOff : icons.mic}</span>
+            <span class="control-text-glass">${this.isMuted ? 'Unmute' : 'Mute'}</span>
           </button>
-          <button class="control-mini ${this.isHandRaised ? 'active-hand' : ''}" id="hand-btn">
-            <span class="control-icon-mini">${icons.hand}</span>
-            <span class="control-label-mini">${this.isHandRaised ? 'Lower' : 'Raise'}</span>
+          <button class="control-glass ${this.isHandRaised ? 'hand-raised-glass' : ''}" id="hand-btn">
+            <span class="control-icon-glass">${icons.hand}</span>
+            <span class="control-text-glass">${this.isHandRaised ? 'Lower' : 'Raise'}</span>
           </button>
-          <button class="control-mini leave-mini" id="leave-btn">
-            <span class="control-icon-mini">${icons.leave}</span>
-            <span class="control-label-mini">Leave</span>
+          <button class="control-glass leave-glass" id="leave-btn">
+            <span class="control-icon-glass">${icons.leave}</span>
+            <span class="control-text-glass">Leave</span>
           </button>
-        </footer>
+        </div>
 
         <div class="toast-container" id="toast-container"></div>
       </div>
@@ -381,8 +381,11 @@ export class UIManager {
       this.isMuted = !this.isMuted;
       const btn = document.getElementById('mute-btn');
       if (btn) {
-        btn.classList.toggle('muted', this.isMuted);
-        btn.innerHTML = this.isMuted ? roomIcons.micOff : roomIcons.mic;
+        btn.classList.toggle('muted-glass', this.isMuted);
+        btn.innerHTML = `
+          <span class="control-icon-glass">${this.isMuted ? roomIcons.micOff : roomIcons.mic}</span>
+          <span class="control-text-glass">${this.isMuted ? 'Unmute' : 'Mute'}</span>
+        `;
       }
       this.onMute?.();
     });
@@ -390,7 +393,13 @@ export class UIManager {
     document.getElementById('hand-btn')?.addEventListener('click', () => {
       this.isHandRaised = !this.isHandRaised;
       const btn = document.getElementById('hand-btn');
-      btn?.classList.toggle('active', this.isHandRaised);
+      if (btn) {
+        btn.classList.toggle('hand-raised-glass', this.isHandRaised);
+        btn.innerHTML = `
+          <span class="control-icon-glass">${roomIcons.hand}</span>
+          <span class="control-text-glass">${this.isHandRaised ? 'Lower' : 'Raise'}</span>
+        `;
+      }
       this.onRaiseHand?.();
     });
 

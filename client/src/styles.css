@@ -723,7 +723,6 @@ a:hover {
 .control-button.leave:hover {
   background: rgba(239, 68, 68, 0.15);
 }
-}
 
 .room-actions {
   display: flex;
@@ -1234,14 +1233,13 @@ a:hover {
     gap: var(--space-2);
   }
   
-  .participant {
+.participant {
     width: 100px;
   }
 }
-  
-  .landing-actions .btn {
-    width: 100%;
-  }
+
+.landing-actions .btn {
+  width: 100%;
 }
 
 /* Safe area for notched phones */
@@ -1578,7 +1576,7 @@ a:hover {
   color: #666;
 }
 
-/* ==================== ROOM PAGE - VERCEL STYLE ==================== */
+/* ==================== ROOM PAGE - GLASSMORPHISM DESIGN ==================== */
 
 .room-page {
   display: flex;
@@ -1586,6 +1584,474 @@ a:hover {
   min-height: 100vh;
   position: relative;
   z-index: 1;
+}
+
+/* Glassmorphism Header */
+.room-header-glass {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+  background: rgba(17, 17, 17, 0.8);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-link-glass {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.header-link-glass:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.header-info-glass {
+  flex: 1;
+}
+
+.header-title-glass {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.header-meta-glass {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.live-badge-glass {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: rgba(239, 68, 68, 0.15);
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #f87171;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.live-dot-glass {
+  width: 6px;
+  height: 6px;
+  background: #ef4444;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.participant-count-glass {
+  font-size: 13px;
+  color: #666;
+}
+
+.copy-btn-glass {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.copy-btn-glass:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.copy-text {
+  display: inline;
+}
+
+/* Room Content - Glassmorphism */
+.room-content-glass {
+  flex: 1;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 24px 140px;
+  width: 100%;
+}
+
+/* Invite Box - Glassmorphism */
+.invite-glass {
+  background: rgba(17, 17, 17, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 32px;
+}
+
+.invite-label-glass {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.invite-row-glass {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: #0a0a0a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.invite-link-glass {
+  flex: 1;
+  padding: 14px 16px;
+  font-size: 13px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  color: #888;
+  background: transparent;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.invite-btn-glass {
+  padding: 14px 20px;
+  background: transparent;
+  border: none;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.invite-btn-glass:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Participants Section - Glassmorphism */
+.participants-section-glass {
+  margin-bottom: 32px;
+}
+
+.participants-header-glass {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.participants-title-glass {
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.participants-badge-glass {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* Participants Flex Grid */
+.participants-flex {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.participants-flex .participant {
+  flex: 1;
+  min-width: 160px;
+  max-width: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 20px;
+  background: rgba(17, 17, 17, 0.5);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  transition: all 0.2s;
+}
+
+.participants-flex .participant:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.participants-flex .participant.speaking {
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+}
+
+.participants-flex .participant.hand-up {
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+/* Controls - Glassmorphism */
+.controls-glass {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  padding: 20px;
+  background: rgba(17, 17, 17, 0.9);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding-bottom: max(20px, env(safe-area-inset-bottom));
+}
+
+.control-glass {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 28px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 90px;
+}
+
+.control-glass:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.control-icon-glass {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.control-glass:hover .control-icon-glass {
+  background: rgba(34, 148, 233, 0.2);
+  color: var(--color-primary);
+}
+
+.control-text-glass {
+  font-size: 12px;
+  font-weight: 500;
+  color: #888;
+}
+
+.control-glass:hover .control-text-glass {
+  color: #fff;
+}
+
+/* Muted state */
+.control-glass.muted-glass {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.control-glass.muted-glass .control-icon-glass {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.control-glass.muted-glass .control-text-glass {
+  color: #ef4444;
+}
+
+/* Hand raised state */
+.control-glass.hand-raised-glass {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+.control-glass.hand-raised-glass .control-icon-glass {
+  background: rgba(139, 92, 246, 0.2);
+  color: #a78bfa;
+}
+
+.control-glass.hand-raised-glass .control-text-glass {
+  color: #a78bfa;
+}
+
+/* Leave button */
+.control-glass.leave-glass {
+  background: rgba(239, 68, 68, 0.05);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.control-glass.leave-glass:hover {
+  background: #ef4444;
+  border-color: #ef4444;
+}
+
+.control-glass.leave-glass:hover .control-text-glass {
+  color: #fff;
+}
+
+/* Mobile Responsive - Glassmorphism Room */
+@media (max-width: 640px) {
+  .room-header-glass {
+    padding: 12px 16px;
+    gap: 12px;
+  }
+
+  .header-link-glass {
+    width: 32px;
+    height: 32px;
+  }
+
+  .header-title-glass {
+    font-size: 14px;
+  }
+
+  .live-badge-glass {
+    padding: 3px 8px;
+    font-size: 10px;
+  }
+
+  .participant-count-glass {
+    font-size: 12px;
+  }
+
+  /* Mobile copy button - smaller */
+  .copy-btn-glass {
+    padding: 8px 12px;
+    gap: 6px;
+  }
+
+  .copy-btn-glass .copy-text {
+    display: none;
+  }
+
+  .copy-btn-glass svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .room-content-glass {
+    padding: 20px 16px 140px;
+  }
+
+  .invite-glass {
+    padding: 16px;
+  }
+
+  .invite-link-glass {
+    font-size: 12px;
+    padding: 12px;
+  }
+
+  .invite-btn-glass {
+    padding: 12px 14px;
+    font-size: 12px;
+  }
+
+  .participants-flex {
+    gap: 12px;
+  }
+
+  .participants-flex .participant {
+    flex: 1 1 calc(50% - 6px);
+    min-width: 120px;
+    max-width: none;
+    padding: 16px 12px;
+  }
+
+  .participants-flex .participant-avatar {
+    width: 48px;
+    height: 48px;
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+
+  .participants-flex .participant-name {
+    font-size: 13px;
+  }
+
+  .participants-flex .participant-status {
+    font-size: 11px;
+    padding: 4px 10px;
+  }
+
+  .controls-glass {
+    gap: 10px;
+    padding: 14px;
+  }
+
+  .control-glass {
+    padding: 10px 16px;
+    min-width: 70px;
+  }
+
+  .control-icon-glass {
+    width: 36px;
+    height: 36px;
+  }
+
+  .control-icon-glass svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .control-text-glass {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 400px) {
+  .participants-flex .participant {
+    flex: 1 1 100%;
+  }
+
+  .controls-glass {
+    gap: 8px;
+  }
+
+  .control-glass {
+    padding: 8px 12px;
+    min-width: 60px;
+  }
 }
 
 .room-page .bg-gradient,
